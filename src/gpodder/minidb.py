@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ except ImportError:
 
 
 import threading
+
 
 class Store(object):
     def __init__(self, filename=':memory:'):
@@ -85,7 +86,7 @@ class Store(object):
                         slot))
             else:
                 self.db.execute('CREATE TABLE %s (%s)' % (table,
-                        ', '.join('%s TEXT'%s for s in slots)))
+                        ', '.join('%s TEXT' % s for s in slots)))
 
     def convert(self, v):
         if isinstance(v, str):
@@ -117,7 +118,7 @@ class Store(object):
                 used = [s for s in slots if getattr(child, s, None) is not None]
                 values = [self.convert(getattr(child, slot)) for slot in used]
                 self.db.execute('INSERT INTO %s (%s) VALUES (%s)' % (table,
-                    ', '.join(used), ', '.join('?'*len(used))), values)
+                    ', '.join(used), ', '.join('?' * len(used))), values)
             return
 
         with self.lock:
@@ -126,7 +127,7 @@ class Store(object):
 
             values = [self.convert(getattr(o, slot)) for slot in slots]
             self.db.execute('INSERT INTO %s (%s) VALUES (%s)' % (table,
-                ', '.join(slots), ', '.join('?'*len(slots))), values)
+                ', '.join(slots), ', '.join('?' * len(slots))), values)
 
     def delete(self, class_, **kwargs):
         with self.lock:
@@ -156,7 +157,7 @@ class Store(object):
 
             values = [self.convert(getattr(o, slot)) for slot in slots]
             self.db.execute('DELETE FROM %s WHERE %s' % (table,
-                ' AND '.join('%s=?'%s for s in slots)), values)
+                ' AND '.join('%s=?' % s for s in slots)), values)
 
     def load(self, class_, **kwargs):
         with self.lock:
@@ -169,6 +170,7 @@ class Store(object):
                 cur = self.db.execute(sql, list(kwargs.values()))
             except Exception as e:
                 raise
+
             def apply(row):
                 o = class_.__new__(class_)
                 for attr, value in zip(slots, row):
@@ -186,6 +188,7 @@ class Store(object):
         else:
             return None
 
+
 if __name__ == '__main__':
     class Person(object):
         __slots__ = {'username': str, 'id': int}
@@ -198,7 +201,7 @@ if __name__ == '__main__':
             return '<Person "%s" (%d)>' % (self.username, self.id)
 
     m = Store()
-    m.save(Person('User %d' % x, x*20) for x in range(50))
+    m.save(Person('User %d' % x, x * 20) for x in range(50))
 
     p = m.get(Person, id=200)
     print(p)
@@ -206,7 +209,7 @@ if __name__ == '__main__':
     p = m.get(Person, id=200)
 
     # Remove some persons again (deletion by value!)
-    m.remove(Person('User %d' % x, x*20) for x in range(40))
+    m.remove(Person('User %d' % x, x * 20) for x in range(40))
 
     class Person(object):
         __slots__ = {'username': str, 'id': int, 'mail': str}
@@ -220,6 +223,5 @@ if __name__ == '__main__':
             return '<Person "%s" (%s)>' % (self.username, self.mail)
 
     # A schema update takes place here
-    m.save(Person('User %d' % x, x*20, 'user@home.com') for x in range(50))
+    m.save(Person('User %d' % x, x * 20, 'user@home.com') for x in range(50))
     print(m.load(Person))
-

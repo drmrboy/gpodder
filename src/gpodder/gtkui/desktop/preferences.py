@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,29 +17,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from gi.repository import Gtk
-from gi.repository import Gdk
-from gi.repository import Pango
 import cgi
+import logging
 import urllib.parse
 
-import logging
-logger = logging.getLogger(__name__)
+from gi.repository import Gdk, Gtk, Pango
 
 import gpodder
+from gpodder import util, vimeo, youtube
+from gpodder.gtkui.desktopfile import PlayerListModel
+from gpodder.gtkui.interface.common import BuilderWidget, TreeViewHelper
+from gpodder.gtkui.interface.configeditor import gPodderConfigEditor
+
+logger = logging.getLogger(__name__)
 
 _ = gpodder.gettext
 N_ = gpodder.ngettext
 
-from gpodder import util
-from gpodder import youtube
-from gpodder import vimeo
-
-from gpodder.gtkui.interface.common import BuilderWidget
-from gpodder.gtkui.interface.common import TreeViewHelper
-from gpodder.gtkui.interface.configeditor import gPodderConfigEditor
-
-from gpodder.gtkui.desktopfile import PlayerListModel
 
 class NewEpisodeActionList(Gtk.ListStore):
     C_CAPTION, C_AUTO_DOWNLOAD = list(range(2))
@@ -59,10 +53,11 @@ class NewEpisodeActionList(Gtk.ListStore):
             if self._config.auto_download == row[self.C_AUTO_DOWNLOAD]:
                 return index
 
-        return 1 # Some sane default
+        return 1  # Some sane default
 
     def set_index(self, index):
         self._config.auto_download = self[index][self.C_AUTO_DOWNLOAD]
+
 
 class DeviceTypeActionList(Gtk.ListStore):
     C_CAPTION, C_DEVICE_TYPE = list(range(2))
@@ -71,14 +66,14 @@ class DeviceTypeActionList(Gtk.ListStore):
         Gtk.ListStore.__init__(self, str, str)
         self._config = config
         self.append((_('None'), 'none'))
-        self.append((_('iPod'), 'ipod'))        
+        self.append((_('iPod'), 'ipod'))
         self.append((_('Filesystem-based'), 'filesystem'))
 
     def get_index(self):
         for index, row in enumerate(self):
             if self._config.device_sync.device_type == row[self.C_DEVICE_TYPE]:
                 return index
-        return 0 # Some sane default
+        return 0  # Some sane default
 
     def set_index(self, index):
         self._config.device_sync.device_type = self[index][self.C_DEVICE_TYPE]
@@ -104,12 +99,11 @@ class OnSyncActionList(Gtk.ListStore):
                     row[self.C_ON_SYNC_MARK_PLAYED] and not
                     self._config.device_sync.after_sync.delete_episodes):
                 return index
-        return 0 # Some sane default
+        return 0  # Some sane default
 
     def set_index(self, index):
         self._config.device_sync.after_sync.delete_episodes = self[index][self.C_ON_SYNC_DELETE]
         self._config.device_sync.after_sync.mark_episodes_played = self[index][self.C_ON_SYNC_MARK_PLAYED]
-
 
 
 class YouTubeVideoFormatListModel(Gtk.ListStore):
@@ -122,7 +116,7 @@ class YouTubeVideoFormatListModel(Gtk.ListStore):
 
         if self._config.youtube.preferred_fmt_ids:
             caption = _('Custom (%(format_ids)s)') % {
-                    'format_ids': ', '.join(str(x) for x in self.custom_fmt_ids),
+                'format_ids': ', '.join(str(x) for x in self.custom_fmt_ids),
             }
             self.append((caption, -1))
 
@@ -216,9 +210,9 @@ class gPodderPreferences(BuilderWidget):
         self._config.connect_gtk_togglebutton('podcast_list_sections',
                                               self.checkbutton_podcast_sections)
 
-        self.update_interval_presets = [0, 10, 30, 60, 2*60, 6*60, 12*60]
+        self.update_interval_presets = [0, 10, 30, 60, 2 * 60, 6 * 60, 12 * 60]
         adjustment_update_interval = self.hscale_update_interval.get_adjustment()
-        adjustment_update_interval.set_upper(len(self.update_interval_presets)-1)
+        adjustment_update_interval.set_upper(len(self.update_interval_presets) - 1)
         if self._config.auto_update_frequency in self.update_interval_presets:
             index = self.update_interval_presets.index(self._config.auto_update_frequency)
             self.hscale_update_interval.set_value(index)
@@ -227,7 +221,7 @@ class gPodderPreferences(BuilderWidget):
             self.update_interval_presets.append(self._config.auto_update_frequency)
             self.update_interval_presets.sort()
 
-            adjustment_update_interval.set_upper(len(self.update_interval_presets)-1)
+            adjustment_update_interval.set_upper(len(self.update_interval_presets) - 1)
             index = self.update_interval_presets.index(self._config.auto_update_frequency)
             self.hscale_update_interval.set_value(index)
 
@@ -341,7 +335,8 @@ class gPodderPreferences(BuilderWidget):
                 yield (container.metadata.category, container)
 
         old_category = None
-        for category, container in sorted(convert(gpodder.user_extensions.get_extensions()), key=key_func):
+        for category, container in sorted(convert(
+                gpodder.user_extensions.get_extensions()), key=key_func):
             if old_category != category:
                 label = '<span weight="bold">%s</span>' % cgi.escape(category)
                 self.extensions_model.append((None, label, None, False))
@@ -396,7 +391,6 @@ class gPodderPreferences(BuilderWidget):
         else:
             menu.popup(None, None, None, None, 3, Gtk.get_current_event_time())
 
-
         return True
 
     def on_extensions_cell_toggled(self, cell, path):
@@ -438,8 +432,8 @@ class gPodderPreferences(BuilderWidget):
         # This is one ugly hack, but it displays the attributes of
         # the metadata object of the container..
         info = '\n'.join('<b>%s:</b> %s' %
-                tuple(map(cgi.escape, list(map(str, (key, value)))))
-                for key, value in container.metadata.get_sorted())
+                         tuple(map(cgi.escape, list(map(str, (key, value)))))
+                         for key, value in container.metadata.get_sorted())
 
         self.show_message(info, _('Extension module info'), important=True)
 
@@ -478,9 +472,9 @@ class gPodderPreferences(BuilderWidget):
         self.preferred_vimeo_format_model.set_index(index)
 
     def on_button_audio_player_clicked(self, widget):
-        result = self.show_text_edit_dialog(_('Configure audio player'), \
-                _('Command:'), \
-                self._config.player)
+        result = self.show_text_edit_dialog(_('Configure audio player'),
+                                            _('Command:'),
+                                            self._config.player)
 
         if result:
             self._config.player = result
@@ -488,9 +482,9 @@ class gPodderPreferences(BuilderWidget):
             self.combo_audio_player_app.set_active(index)
 
     def on_button_video_player_clicked(self, widget):
-        result = self.show_text_edit_dialog(_('Configure video player'), \
-                _('Command:'), \
-                self._config.videoplayer)
+        result = self.show_text_edit_dialog(_('Configure video player'),
+                                            _('Command:'),
+                                            self._config.videoplayer)
 
         if result:
             self._config.videoplayer = result
@@ -503,7 +497,7 @@ class gPodderPreferences(BuilderWidget):
         if value == 0:
             ret = _('manually')
         elif value > 0 and len(self.update_interval_presets) > value:
-            ret = util.format_seconds_to_hour_min_sec(self.update_interval_presets[value]*60)
+            ret = util.format_seconds_to_hour_min_sec(self.update_interval_presets[value] * 60)
         else:
             ret = str(value)
         # bug in gtk3: value representation (pixels) must be smaller than value for highest value.
@@ -527,7 +521,8 @@ class gPodderPreferences(BuilderWidget):
         if value == 0:
             return _('manually')
         else:
-            return N_('after %(count)d day', 'after %(count)d days', value) % {'count':value}
+            return N_('after %(count)d day', 'after %(count)d days',
+                      value) % {'count': value}
 
     def on_expiration_value_changed(self, range):
         value = int(range.get_value())
@@ -579,14 +574,15 @@ class gPodderPreferences(BuilderWidget):
         index = self.combobox_on_sync.get_active()
         self.on_sync_model.set_index(index)
 
-    def on_checkbutton_create_playlists_toggled(self, widget,device_type_changed=False):
+    def on_checkbutton_create_playlists_toggled(
+            self, widget, device_type_changed=False):
         if not widget.get_active():
-            self._config.device_sync.playlists.create=False
+            self._config.device_sync.playlists.create = False
             self.toggle_playlist_interface(False)
-            #need to read value of checkbutton from interface,
-            #rather than value of parameter
+            # need to read value of checkbutton from interface,
+            # rather than value of parameter
         else:
-            self._config.device_sync.playlists.create=True
+            self._config.device_sync.playlists.create = True
             self.toggle_playlist_interface(True)
 
     def toggle_playlist_interface(self, enabled):
@@ -602,7 +598,6 @@ class gPodderPreferences(BuilderWidget):
             self.btn_playlistfolder.set_sensitive(False)
             self.btn_playlistfolder.set_label('')
             self.checkbutton_delete_using_playlists.set_sensitive(False)
-
 
     def on_combobox_device_type_changed(self, widget):
         index = self.combobox_device_type.get_active()

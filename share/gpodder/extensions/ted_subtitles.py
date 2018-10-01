@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 # vi:si:et:sw=4:sts=4:ts=4
-import os
 import json
 import logging
+import os
 import re
-
 from datetime import timedelta
-logger = logging.getLogger(__name__)
 
 import gpodder
 from gpodder import util
+
+logger = logging.getLogger(__name__)
+
 
 _ = gpodder.gettext
 
@@ -92,7 +93,7 @@ class gPodderExtension(object):
             intro = episode_data
             intro = episode_data.split('introDuration":')[1] \
                                 .split(',')[0] or INTRO_DEFAULT
-            intro = int(float(intro)*1000)
+            intro = int(float(intro) * 1000)
         except (ValueError, IndexError) as e:
             logger.info("Couldn't parse introDuration string: %s", intro)
             intro = INTRO_DEFAULT * 1000
@@ -104,10 +105,9 @@ class gPodderExtension(object):
             with open(srt_filename, 'w+') as srtFile:
                 srtFile.write(sub.encode("utf-8"))
         except Exception as e:
-            logger.warn("Can't write srt file: %s",e)
+            logger.warn("Can't write srt file: %s", e)
 
     def on_episode_delete(self, episode, filename):
         srt_filename = self.get_srt_filename(filename)
         if os.path.exists(srt_filename):
             os.remove(srt_filename)
-

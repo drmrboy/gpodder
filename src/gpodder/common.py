@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,14 +21,13 @@
 # Thomas Perl <thp@gpodder.org>; 2012-08-16
 
 
-import gpodder
-
-from gpodder import util
-
 import glob
+import logging
 import os
 
-import logging
+import gpodder
+from gpodder import util
+
 logger = logging.getLogger(__name__)
 
 
@@ -68,14 +67,14 @@ def find_partial_downloads(channels, start_progress_callback, progress_callback,
                 filename = episode.local_filename(create=False, check_only=True)
                 if filename in candidates:
                     found += 1
-                    progress_callback(episode.title, found/count)
+                    progress_callback(episode.title, found / count)
                     candidates.remove(filename)
-                    partial_files.remove(filename+'.partial')
+                    partial_files.remove(filename + '.partial')
 
                     if os.path.exists(filename):
                         # The file has already been downloaded;
                         # remove the leftover partial file
-                        util.delete_file(filename+'.partial')
+                        util.delete_file(filename + '.partial')
                     else:
                         resumable_episodes.append(episode)
 
@@ -92,6 +91,7 @@ def find_partial_downloads(channels, start_progress_callback, progress_callback,
         finish_progress_callback(resumable_episodes)
     else:
         clean_up_downloads(True)
+
 
 def get_expired_episodes(channels, config):
     for channel in channels:
@@ -132,4 +132,3 @@ def get_expired_episodes(channels, config):
                     continue
 
             yield episode
-

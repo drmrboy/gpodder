@@ -4,21 +4,21 @@
 # To use, copy it as a Python script into ~/.config/gpodder/extensions/rockbox_mp4_convert.py
 # See the module "gpodder.extensions" for a description of when each extension
 # gets called and what the parameters of each extension are.
-#Based on Rename files after download based on the episode title
-#And patch in Bug https://bugs.gpodder.org/show_bug.cgi?id=1263
+# Based on Rename files after download based on the episode title
+# And patch in Bug https://bugs.gpodder.org/show_bug.cgi?id=1263
 # Copyright (c) 2011-04-06 Guy Sheffer <guysoft at gmail.com>
 # Copyright (c) 2011-04-04 Thomas Perl <thp.io>
 # Licensed under the same terms as gPodder itself
 
-import kaa.metadata
+import logging
 import os
 import shlex
 import subprocess
 
 import gpodder
+import kaa.metadata
 from gpodder import util
 
-import logging
 logger = logging.getLogger(__name__)
 
 _ = gpodder.gettext
@@ -36,7 +36,7 @@ DefaultConfig = {
 }
 
 ROCKBOX_EXTENSION = "mpg"
-EXTENTIONS_TO_CONVERT = ['.mp4',"." + ROCKBOX_EXTENSION]
+EXTENTIONS_TO_CONVERT = ['.mp4', "." + ROCKBOX_EXTENSION]
 FFMPEG_CMD = 'ffmpeg -y -i "%(from)s" -s %(width)sx%(height)s %(options)s "%(to)s"'
 
 
@@ -83,7 +83,6 @@ class gPodderExtension:
             new_filename = "%s.%s" % (basename, ROCKBOX_EXTENSION)
         return os.path.join(dirname, new_filename)
 
-
     def _calc_resolution(self, video_width, video_height, device_width, device_height):
         if video_height is None:
             return None
@@ -99,7 +98,6 @@ class gPodderExtension:
             dest_height = device_height
 
         return (int(round(dest_width)), round(int(dest_height)))
-
 
     def _convert_mp4(self, episode, from_file):
         """Convert MP4 file to rockbox mpg file"""
@@ -134,9 +132,14 @@ class gPodderExtension:
             'options': self.container.config.ffmpeg_options
         }
 
-        process = subprocess.Popen(shlex.split(convert_command),
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
+        if gpodder.ui.win32:
+            p = util.Popen(shlex.split(convert_command))
+            p.wait()
+            stdout, stderr = ("<unavailable>",) * 2
+        else:
+            process = util.Popen(shlex.split(convert_command),
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
         if process.returncode != 0:
             logger.error(stderr)
             return None

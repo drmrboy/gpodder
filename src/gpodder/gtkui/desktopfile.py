@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,29 +25,29 @@
 #
 
 import glob
-import re
+import logging
 import os
 import os.path
+import re
 import threading
-
 from configparser import RawConfigParser
 
-from gi.repository import GObject
-from gi.repository import GdkPixbuf
-from gi.repository import Gtk
+from gi.repository import GdkPixbuf, GObject, Gtk
 
 import gpodder
 
 _ = gpodder.gettext
 
-import logging
 logger = logging.getLogger(__name__)
 
 # where are the .desktop files located?
-userappsdirs = [ '/usr/share/applications/', '/usr/local/share/applications/', '/usr/share/applications/kde/' ]
+userappsdirs = ['/usr/share/applications/',
+                '/usr/local/share/applications/',
+                '/usr/share/applications/kde/']
 
 # the name of the section in the .desktop files
 sect = 'Desktop Entry'
+
 
 class PlayerListModel(Gtk.ListStore):
     C_ICON, C_NAME, C_COMMAND, C_CUSTOM = list(range(4))
@@ -74,11 +74,12 @@ class PlayerListModel(Gtk.ListStore):
         else:
             self.append((None, name, value, True))
 
-        return len(self)-1
+        return len(self) - 1
 
     @classmethod
     def is_separator(cls, model, iter):
         return model.get_value(iter, cls.C_COMMAND) == ''
+
 
 class UserApplication(object):
     def __init__(self, name, cmd, mime, icon):
@@ -103,7 +104,7 @@ class UserApplication(object):
                 return theme.load_icon(icon_name, 24, 0)
 
     def is_mime(self, mimetype):
-        return self.mime.find(mimetype+'/') != -1
+        return self.mime.find(mimetype + '/') != -1
 
 
 WIN32_APP_REG_KEYS = [
@@ -151,13 +152,18 @@ class UserAppsReader(object):
         self.__has_read = False
         self.__finished = threading.Event()
         self.__has_sep = False
-        self.apps.append(UserApplication(_('Default application'), 'default', ';'.join((mime+'/*' for mime in self.mimetypes)), Gtk.STOCK_OPEN))
+        self.apps.append(UserApplication(
+            _('Default application'), 'default',
+            ';'.join((mime + '/*' for mime in self.mimetypes)),
+            Gtk.STOCK_OPEN))
 
     def add_separator(self):
-        self.apps.append(UserApplication('', '', ';'.join((mime+'/*' for mime in self.mimetypes)), ''))
+        self.apps.append(UserApplication(
+            '', '',
+            ';'.join((mime + '/*' for mime in self.mimetypes)), ''))
         self.__has_sep = True
 
-    def read( self):
+    def read(self):
         if self.__has_read:
             return
 
@@ -167,17 +173,19 @@ class UserAppsReader(object):
             for caption, types, hkey in WIN32_APP_REG_KEYS:
                 try:
                     cmdline = win32_read_registry_key(hkey)
-                    self.apps.append(UserApplication(caption, cmdline, ';'.join(typ + '/*' for typ in types), None))
+                    self.apps.append(UserApplication(
+                        caption, cmdline,
+                        ';'.join(typ + '/*' for typ in types), None))
                 except Exception as e:
                     logger.warn('Parse HKEY error: %s (%s)', hkey, e)
 
         for dir in userappsdirs:
-            if os.path.exists( dir):
+            if os.path.exists(dir):
                 for file in glob.glob(os.path.join(dir, '*.desktop')):
-                    self.parse_and_append( file)
+                    self.parse_and_append(file)
         self.__finished.set()
 
-    def parse_and_append( self, filename):
+    def parse_and_append(self, filename):
         try:
             parser = RawConfigParser()
             parser.read([filename])
@@ -195,7 +203,7 @@ class UserAppsReader(object):
             # Find out if we need it by comparing mime types
             app_mime = parser.get(sect, 'MimeType')
             for needed_type in self.mimetypes:
-                if app_mime.find(needed_type+'/') != -1:
+                if app_mime.find(needed_type + '/') != -1:
                     app_name = parser.get(sect, 'Name')
                     app_cmd = parser.get(sect, 'Exec')
                     app_icon = parser.get(sect, 'Icon')
@@ -214,4 +222,3 @@ class UserAppsReader(object):
             if app.is_mime(mimetype):
                 model.insert_app(app.get_icon(), app.name, app.cmd)
         return model
-

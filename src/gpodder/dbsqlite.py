@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,23 +24,19 @@
 # 2010-04-24 Thomas Perl <thp@gpodder.org>
 #
 
-
-
-import gpodder
-_ = gpodder.gettext
-
+import logging
+import re
 import sys
-
+import threading
 from sqlite3 import dbapi2 as sqlite
 
-import logging
+import gpodder
+from gpodder import schema, util
+
+_ = gpodder.gettext
+
 logger = logging.getLogger(__name__)
 
-from gpodder import schema
-from gpodder import util
-
-import threading
-import re
 
 class Database(object):
     TABLE_PODCAST = 'podcast'
@@ -132,9 +128,12 @@ class Database(object):
         with self.lock:
             cur = self.cursor()
             if podcast_id is not None:
-                cur.execute('SELECT COUNT(*), state, is_new FROM %s WHERE podcast_id = ? GROUP BY state, is_new' % self.TABLE_EPISODE, (podcast_id,))
+                cur.execute('SELECT COUNT(*), state, is_new FROM %s '
+                            'WHERE podcast_id = ? GROUP BY state, is_new'
+                            % self.TABLE_EPISODE, (podcast_id,))
             else:
-                cur.execute('SELECT COUNT(*), state, is_new FROM %s GROUP BY state, is_new' % self.TABLE_EPISODE)
+                cur.execute('SELECT COUNT(*), state, is_new FROM %s '
+                            'GROUP BY state, is_new' % self.TABLE_EPISODE)
             for count, state, is_new in cur:
                 total += count
                 if state == gpodder.STATE_DELETED:
@@ -210,7 +209,7 @@ class Database(object):
                         for name in columns]
 
                 if o.id is None:
-                    qmarks = ', '.join('?'*len(columns))
+                    qmarks = ', '.join('?' * len(columns))
                     sql = 'INSERT INTO %s (%s) VALUES (%s)' % (table, ', '.join(columns), qmarks)
                     cur.execute(sql, values)
                     o.id = cur.lastrowid
@@ -282,4 +281,3 @@ class Database(object):
             cur = self.cursor()
             cur.execute('DELETE FROM %s WHERE podcast_id = ? AND guid = ?' %
                     self.TABLE_EPISODE, (podcast_id, guid))
-

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,15 +20,15 @@
 # gpodder.schema - Database schema update and migration facility
 # Thomas Perl <thp@gpodder.org>; 2011-02-01
 
+import logging
+import shutil
+import time
 from sqlite3 import dbapi2 as sqlite
 
-import time
-import shutil
+from gpodder import util
 
-import logging
 logger = logging.getLogger(__name__)
 
-from gpodder import util
 
 EpisodeColumns = (
     'podcast_id',
@@ -115,6 +115,7 @@ UPGRADE_SQL = [
         UPDATE podcast SET http_last_modified=NULL, http_etag=NULL
         """),
 ]
+
 
 def initialize_database(db):
     # Create table for podcasts
@@ -269,7 +270,7 @@ def convert_gpodder2_db(old_db, new_db):
         )
         new_db.execute("""
         INSERT INTO podcast VALUES (%s)
-        """ % ', '.join('?'*len(values)), values)
+        """ % ', '.join('?' * len(values)), values)
     old_cur.close()
 
     # Copy data for episodes
@@ -301,7 +302,7 @@ def convert_gpodder2_db(old_db, new_db):
         )
         new_db.execute("""
         INSERT INTO episode VALUES (%s)
-        """ % ', '.join('?'*len(values)), values)
+        """ % ', '.join('?' * len(values)), values)
         # do 6 -> 7 upgrade (description_html)
         new_db.create_function('is_html', 1, util.is_html)
         new_db.create_function('remove_html_tags', 1, util.remove_html_tags)
@@ -315,10 +316,10 @@ def convert_gpodder2_db(old_db, new_db):
     new_db.commit()
     new_db.close()
 
+
 def check_data(db):
     # All episodes must be assigned to a podcast
     orphan_episodes = db.get('SELECT COUNT(id) FROM episode '
             'WHERE podcast_id NOT IN (SELECT id FROM podcast)')
     if orphan_episodes > 0:
         logger.error('Orphaned episodes found in database')
-

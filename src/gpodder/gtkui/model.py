@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,27 +23,22 @@
 #  Based on code from libpodcasts.py (thp, 2005-10-29)
 #
 
+import cgi
+import logging
+import os
+import re
+import time
+
+from gi.repository import GdkPixbuf, GObject, Gtk
+
 import gpodder
+from gpodder import coverart, model, query, util
+from gpodder.gtkui import draw
 
 _ = gpodder.gettext
 
-from gpodder import util
-from gpodder import model
-from gpodder import query
-from gpodder import coverart
-
-import logging
 logger = logging.getLogger(__name__)
 
-from gpodder.gtkui import draw
-
-import os
-from gi.repository import Gtk
-from gi.repository import GObject
-from gi.repository import GdkPixbuf
-import cgi
-import re
-import time
 
 try:
     from gi.repository import Gio
@@ -52,6 +47,7 @@ except ImportError:
     have_gio = False
 
 # ----------------------------------------------------------
+
 
 class GEpisode(model.PodcastEpisode):
     __slots__ = ()
@@ -67,11 +63,11 @@ class GEpisode(model.PodcastEpisode):
             length_str = '%s; ' % util.format_filesize(self.file_size)
         else:
             length_str = ''
-        return ('<b>%s</b>\n<small>%s'+_('released %s')+ \
-                '; '+_('from %s')+'</small>') % (\
-                cgi.escape(re.sub('\s+', ' ', self.title)), \
-                cgi.escape(length_str), \
-                cgi.escape(self.pubdate_prop), \
+        return ('<b>%s</b>\n<small>%s' + _('released %s') +
+                '; ' + _('from %s') + '</small>') % (
+                cgi.escape(re.sub('\s+', ' ', self.title)),
+                cgi.escape(length_str),
+                cgi.escape(self.pubdate_prop),
                 cgi.escape(re.sub('\s+', ' ', self.channel.title)))
 
     @property
@@ -85,26 +81,31 @@ class GEpisode(model.PodcastEpisode):
         downloaded_string = self.get_age_string()
         if not downloaded_string:
             downloaded_string = _('today')
-        return ('<b>%s</b>\n<small>%s; %s; '+_('downloaded %s')+ \
-                '; '+_('from %s')+'</small>') % (\
-                cgi.escape(self.title), \
-                cgi.escape(util.format_filesize(self.file_size)), \
-                cgi.escape(played_string), \
-                cgi.escape(downloaded_string), \
+        return ('<b>%s</b>\n<small>%s; %s; ' + _('downloaded %s') +
+                '; ' + _('from %s') + '</small>') % (
+                cgi.escape(self.title),
+                cgi.escape(util.format_filesize(self.file_size)),
+                cgi.escape(played_string),
+                cgi.escape(downloaded_string),
                 cgi.escape(self.channel.title))
+
 
 class GPodcast(model.PodcastChannel):
     __slots__ = ()
 
     EpisodeClass = GEpisode
 
+
 class Model(model.Model):
     PodcastClass = GPodcast
 
 # ----------------------------------------------------------
 
+
 # Singleton indicator if a row is a section
 class SeparatorMarker(object): pass
+
+
 class SectionMarker(object): pass
 
 
@@ -143,11 +144,11 @@ class BackgroundUpdate(object):
 
 class EpisodeListModel(Gtk.ListStore):
     C_URL, C_TITLE, C_FILESIZE_TEXT, C_EPISODE, C_STATUS_ICON, \
-            C_PUBLISHED_TEXT, C_DESCRIPTION, C_TOOLTIP, \
-            C_VIEW_SHOW_UNDELETED, C_VIEW_SHOW_DOWNLOADED, \
-            C_VIEW_SHOW_UNPLAYED, C_FILESIZE, C_PUBLISHED, \
-            C_TIME, C_TIME_VISIBLE, C_TOTAL_TIME, \
-            C_LOCKED = list(range(17))
+        C_PUBLISHED_TEXT, C_DESCRIPTION, C_TOOLTIP, \
+        C_VIEW_SHOW_UNDELETED, C_VIEW_SHOW_DOWNLOADED, \
+        C_VIEW_SHOW_UNPLAYED, C_FILESIZE, C_PUBLISHED, \
+        C_TIME, C_TIME_VISIBLE, C_TOTAL_TIME, \
+        C_LOCKED = list(range(17))
 
     VIEW_ALL, VIEW_UNDELETED, VIEW_DOWNLOADED, VIEW_UNPLAYED = list(range(4))
 
@@ -160,9 +161,10 @@ class EpisodeListModel(Gtk.ListStore):
     PROGRESS_STEPS = 20
 
     def __init__(self, config, on_filter_changed=lambda has_episodes: None):
-        Gtk.ListStore.__init__(self, str, str, str, object, \
-                str, str, str, str, bool, bool, bool, \
-                GObject.TYPE_INT64, GObject.TYPE_INT64, str, bool, GObject.TYPE_INT64, bool)
+        Gtk.ListStore.__init__(self, str, str, str, object, str, str, str,
+                               str, bool, bool, bool, GObject.TYPE_INT64,
+                               GObject.TYPE_INT64, str, bool,
+                               GObject.TYPE_INT64, bool)
 
         self._config = config
 
@@ -196,7 +198,6 @@ class EpisodeListModel(Gtk.ListStore):
             # See https://bugs.kde.org/show_bug.cgi?id=233505 and
             #     http://gpodder.org/bug/553
             self.ICON_DELETED = 'archive-remove'
-
 
     def _format_filesize(self, episode):
         if episode.file_size > 0:
@@ -369,9 +370,9 @@ class EpisodeListModel(Gtk.ListStore):
 
         if episode.downloading:
             tooltip.append('%s %d%%' % (_('Downloading'),
-                int(episode.download_task.progress*100)))
+                int(episode.download_task.progress * 100)))
 
-            index = int(self.PROGRESS_STEPS*episode.download_task.progress)
+            index = int(self.PROGRESS_STEPS * episode.download_task.progress)
             status_icon = 'gpodder-progress-%d' % index
 
             view_show_downloaded = True
@@ -410,7 +411,8 @@ class EpisodeListModel(Gtk.ListStore):
                     status_icon = self.ICON_GENERIC_FILE
 
                 # Try to find a themed icon for this file
-                if filename is not None and have_gio:
+                # doesn't work on win32 (opus files are showed as text)
+                if filename is not None and have_gio and not gpodder.ui.win32:
                     file = Gio.File.new_for_path(filename)
                     if file.query_exists():
                         file_info = file.query_info('*', Gio.FileQueryInfoFlags.NONE, None)
@@ -441,7 +443,8 @@ class EpisodeListModel(Gtk.ListStore):
                         tooltip.append(_('deletion prevented'))
 
                 if episode.total_time > 0 and episode.current_position:
-                    tooltip.append('%d%%' % (100.*float(episode.current_position)/float(episode.total_time),))
+                    tooltip.append('%d%%' % (100. * float(episode.current_position) /
+                                             float(episode.total_time),))
 
         if episode.total_time:
             total_time = util.format_time(episode.total_time)
@@ -479,9 +482,9 @@ class PodcastChannelProxy(object):
         self._db = db
         self._config = config
         self.channels = channels
-        self.title =  _('All episodes')
+        self.title = _('All episodes')
         self.description = _('from all podcasts')
-        #self.parse_error = ''
+        # self.parse_error = ''
         self.url = ''
         self.section = ''
         self.id = None
@@ -509,10 +512,10 @@ class PodcastChannelProxy(object):
 
 class PodcastListModel(Gtk.ListStore):
     C_URL, C_TITLE, C_DESCRIPTION, C_PILL, C_CHANNEL, \
-            C_COVER, C_ERROR, C_PILL_VISIBLE, \
-            C_VIEW_SHOW_UNDELETED, C_VIEW_SHOW_DOWNLOADED, \
-            C_VIEW_SHOW_UNPLAYED, C_HAS_EPISODES, C_SEPARATOR, \
-            C_DOWNLOADS, C_COVER_VISIBLE, C_SECTION = list(range(16))
+        C_COVER, C_ERROR, C_PILL_VISIBLE, \
+        C_VIEW_SHOW_UNDELETED, C_VIEW_SHOW_DOWNLOADED, \
+        C_VIEW_SHOW_UNPLAYED, C_HAS_EPISODES, C_SEPARATOR, \
+        C_DOWNLOADS, C_COVER_VISIBLE, C_SECTION = list(range(16))
 
     SEARCH_COLUMNS = (C_TITLE, C_DESCRIPTION, C_SECTION)
 
@@ -521,8 +524,8 @@ class PodcastListModel(Gtk.ListStore):
         return model.get_value(iter, cls.C_SEPARATOR)
 
     def __init__(self, cover_downloader):
-        Gtk.ListStore.__init__(self, str, str, str, GdkPixbuf.Pixbuf, \
-                object, GdkPixbuf.Pixbuf, str, bool, bool, bool, bool, \
+        Gtk.ListStore.__init__(self, str, str, str, GdkPixbuf.Pixbuf,
+                object, GdkPixbuf.Pixbuf, str, bool, bool, bool, bool,
                 bool, bool, int, bool, str)
 
         # Filter to allow hiding some episodes
@@ -609,15 +612,15 @@ class PodcastListModel(Gtk.ListStore):
 
         # Resize if too wide
         if pixbuf.get_width() > self._max_image_side:
-            f = float(self._max_image_side)/pixbuf.get_width()
-            (width, height) = (int(pixbuf.get_width()*f), int(pixbuf.get_height()*f))
+            f = float(self._max_image_side) / pixbuf.get_width()
+            (width, height) = (int(pixbuf.get_width() * f), int(pixbuf.get_height() * f))
             pixbuf = pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
             changed = True
 
         # Resize if too high
         if pixbuf.get_height() > self._max_image_side:
-            f = float(self._max_image_side)/pixbuf.get_height()
-            (width, height) = (int(pixbuf.get_width()*f), int(pixbuf.get_height()*f))
+            f = float(self._max_image_side) / pixbuf.get_height()
+            (width, height) = (int(pixbuf.get_width() * f), int(pixbuf.get_height() * f))
             pixbuf = pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
             changed = True
 
@@ -636,7 +639,7 @@ class PodcastListModel(Gtk.ListStore):
     def _overlay_pixbuf(self, pixbuf, icon):
         try:
             icon_theme = Gtk.IconTheme.get_default()
-            emblem = icon_theme.load_icon(icon, self._max_image_side/2, 0)
+            emblem = icon_theme.load_icon(icon, self._max_image_side / 2, 0)
             (width, height) = (emblem.get_width(), emblem.get_height())
             xpos = pixbuf.get_width() - width
             ypos = pixbuf.get_height() - height
@@ -669,6 +672,7 @@ class PodcastListModel(Gtk.ListStore):
 
     def _save_cached_thumb(self, channel, pixbuf):
         bufs = []
+
         def save_callback(buf, length, user_data):
             user_data.append(buf)
             return True
@@ -699,7 +703,7 @@ class PodcastListModel(Gtk.ListStore):
         else:
             return None
 
-    def _format_description(self, channel, total, deleted, \
+    def _format_description(self, channel, total, deleted,
             new, downloaded, unplayed):
         title_markup = cgi.escape(channel.title)
         if not channel.pause_subscription:
@@ -714,15 +718,15 @@ class PodcastListModel(Gtk.ListStore):
             d.append('</span>')
 
         if description_markup.strip():
-            return ''.join(d+['\n', '<small>', description_markup, '</small>'])
+            return ''.join(d + ['\n', '<small>', description_markup, '</small>'])
         else:
             return ''.join(d)
 
     def _format_error(self, channel):
-        #if channel.parse_error:
-        #    return str(channel.parse_error)
-        #else:
-        #    return None
+        # if channel.parse_error:
+        #     return str(channel.parse_error)
+        # else:
+        #     return None
         return None
 
     def set_channels(self, db, config, channels):
@@ -845,7 +849,8 @@ class PodcastListModel(Gtk.ListStore):
             description = '<span size="16000"> </span><b>%s</b>' % (
                     cgi.escape(section))
 
-            self.set(iter,
+            self.set(
+                iter,
                 self.C_DESCRIPTION, description,
                 self.C_SECTION, section,
                 self.C_VIEW_SHOW_UNDELETED, total - deleted > 0,
@@ -853,26 +858,26 @@ class PodcastListModel(Gtk.ListStore):
                 self.C_VIEW_SHOW_UNPLAYED, unplayed + new > 0)
 
         if (not isinstance(channel, GPodcast) and
-            not isinstance(channel, PodcastChannelProxy)):
+                not isinstance(channel, PodcastChannelProxy)):
             return
 
         total, deleted, new, downloaded, unplayed = channel.get_statistics()
-        description = self._format_description(channel, total, deleted, new, \
+        description = self._format_description(channel, total, deleted, new,
                 downloaded, unplayed)
 
         pill_image = self._get_pill_image(channel, downloaded, unplayed)
 
-        self.set(iter, \
-                self.C_TITLE, channel.title, \
-                self.C_DESCRIPTION, description, \
-                self.C_SECTION, channel.section, \
-                self.C_ERROR, self._format_error(channel), \
-                self.C_PILL, pill_image, \
-                self.C_PILL_VISIBLE, pill_image != None, \
-                self.C_VIEW_SHOW_UNDELETED, total - deleted > 0, \
-                self.C_VIEW_SHOW_DOWNLOADED, downloaded + new > 0, \
-                self.C_VIEW_SHOW_UNPLAYED, unplayed + new > 0, \
-                self.C_HAS_EPISODES, total > 0, \
+        self.set(iter,
+                self.C_TITLE, channel.title,
+                self.C_DESCRIPTION, description,
+                self.C_SECTION, channel.section,
+                self.C_ERROR, self._format_error(channel),
+                self.C_PILL, pill_image,
+                self.C_PILL_VISIBLE, pill_image is not None,
+                self.C_VIEW_SHOW_UNDELETED, total - deleted > 0,
+                self.C_VIEW_SHOW_DOWNLOADED, downloaded + new > 0,
+                self.C_VIEW_SHOW_UNPLAYED, unplayed + new > 0,
+                self.C_HAS_EPISODES, total > 0,
                 self.C_DOWNLOADS, downloaded)
 
     def clear_cover_cache(self, podcast_url):
@@ -898,4 +903,3 @@ class PodcastListModel(Gtk.ListStore):
             if row[self.C_URL] == channel.url:
                 row[self.C_COVER] = pixbuf
                 break
-

@@ -21,12 +21,12 @@ Based on SimpleGladeApp.py Copyright (C) 2004 Sandino Flores Moreno
 # USA
 
 import os
-import sys
 import re
-
+import sys
 import tokenize
 
 from gi.repository import Gtk
+
 
 class GtkBuilderWidget(object):
     def __init__(self, ui_folders, textdomain, parent, **kwargs):
@@ -54,7 +54,7 @@ class GtkBuilderWidget(object):
             for (key, value) in list(self._builder_expose.items()):
                 self.builder.expose_object(key, value)
 
-        #print >>sys.stderr, 'Creating new from file', self.__class__.__name__
+        # print >>sys.stderr, 'Creating new from file', self.__class__.__name__
 
         ui_file = '%s.ui' % self.__class__.__name__.lower()
 
@@ -87,7 +87,9 @@ class GtkBuilderWidget(object):
 
             widget_api_name = '_'.join(re.findall(tokenize.Name, widget_name))
             if hasattr(self, widget_api_name):
-                raise AttributeError("instance %s already has an attribute %s" % (self,widget_api_name))
+                raise AttributeError(
+                    "instance %s already has an attribute %s" % (
+                        self, widget_api_name))
             else:
                 setattr(self, widget_api_name, widget)
 
@@ -121,7 +123,7 @@ class GtkBuilderWidget(object):
         """
         Quit processing events.
         The default implementation calls Gtk.main_quit()
-        
+
         Useful for applications that needs a non gtk main loop.
         For example, applications based on gstreamer needs to override
         this method with Gst.main_quit()
@@ -148,4 +150,3 @@ class GtkBuilderWidget(object):
         after a program is finished by pressing Control-C.
         """
         pass
-

@@ -3,16 +3,16 @@
 # 2014-05-03 Thomas Perl <thp.io/about>
 # Released under the same license terms as gPodder itself.
 
+import logging
+import os
 import subprocess
+
+from gi.repository import Gtk
 
 import gpodder
 from gpodder import util
-
-from gi.repository import Gtk
 from gpodder.gtkui.interface.progress import ProgressIndicator
-import os
 
-import logging
 logger = logging.getLogger(__name__)
 
 _ = gpodder.gettext
@@ -22,6 +22,7 @@ __description__ = _('Add a context menu item for concatenating multiple videos')
 __authors__ = 'Thomas Perl <thp@gpodder.org>'
 __category__ = 'interface'
 __only_for__ = 'gtk'
+
 
 class gPodderExtension:
     def __init__(self, container):
@@ -64,13 +65,14 @@ class gPodderExtension:
                 for episode in episodes))
 
         indicator = ProgressIndicator(_('Concatenating video files'),
-                _('Writing %(filename)s') % {
-                    'filename': os.path.basename(out_filename)
-                }, False, self.gpodder.get_dialog_parent())
+                                      _('Writing %(filename)s') % {
+                                          'filename': os.path.basename(out_filename)},
+                                      False, self.gpodder.get_dialog_parent())
 
         def convert():
-            ffmpeg = subprocess.Popen(['ffmpeg', '-f', 'concat', '-nostdin', '-y',
-                '-i', list_filename, '-c', 'copy', out_filename])
+            ffmpeg = util.Popen(['ffmpeg', '-f', 'concat', '-nostdin', '-y',
+                                 '-i', list_filename, '-c', 'copy', out_filename],
+                                close_fds=True)
             result = ffmpeg.wait()
             util.delete_file(list_filename)
             util.idle_add(lambda: indicator.on_finished())
@@ -98,4 +100,3 @@ class gPodderExtension:
             return None
 
         return [(_('Concatenate videos'), self._concatenate_videos)]
-

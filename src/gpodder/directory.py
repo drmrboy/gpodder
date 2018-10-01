@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,16 +23,17 @@
 # Thomas Perl <thp@gpodder.org>; 2014-10-22
 #
 
+import json
+import os
+import urllib.error
+import urllib.parse
+import urllib.request
+
 import gpodder
+from gpodder import opml, util
 
 _ = gpodder.gettext
 
-import urllib.request, urllib.parse, urllib.error
-import json
-import os
-
-from gpodder import opml
-from gpodder import util
 
 class DirectoryEntry(object):
     def __init__(self, title, url, image=None, subscribers=-1, description=None):
@@ -41,6 +42,7 @@ class DirectoryEntry(object):
         self.image = image
         self.subscribers = subscribers
         self.description = description
+
 
 class DirectoryTag(object):
     def __init__(self, tag, weight):
@@ -81,9 +83,9 @@ class Provider(object):
         raise NotImplemented()
 
 
-
 def directory_entry_from_opml(url):
     return [DirectoryEntry(d['title'], d['url'], description=d['description']) for d in opml.Importer(url).items]
+
 
 def directory_entry_from_mygpo_json(url):
     return [DirectoryEntry(d['title'], d['url'], d['logo_url'], d['subscribers'], d['description'])
@@ -99,6 +101,7 @@ class GPodderNetSearchProvider(Provider):
     def on_search(self, query):
         return directory_entry_from_mygpo_json('http://gpodder.net/search.json?q=' + urllib.parse.quote(query))
 
+
 class OpmlWebImportProvider(Provider):
     def __init__(self):
         self.name = _('OPML from web')
@@ -107,6 +110,7 @@ class OpmlWebImportProvider(Provider):
 
     def on_url(self, url):
         return directory_entry_from_opml(url)
+
 
 class OpmlFileImportProvider(Provider):
     def __init__(self):
@@ -117,6 +121,7 @@ class OpmlFileImportProvider(Provider):
     def on_file(self, filename):
         return directory_entry_from_opml(filename)
 
+
 class GPodderRecommendationsProvider(Provider):
     def __init__(self):
         self.name = _('Getting started')
@@ -126,6 +131,7 @@ class GPodderRecommendationsProvider(Provider):
     def on_static(self):
         return directory_entry_from_opml('http://gpodder.org/directory.opml')
 
+
 class GPodderNetToplistProvider(Provider):
     def __init__(self):
         self.name = _('gpodder.net Top 50')
@@ -134,6 +140,7 @@ class GPodderNetToplistProvider(Provider):
 
     def on_static(self):
         return directory_entry_from_mygpo_json('http://gpodder.net/toplist/50.json')
+
 
 class GPodderNetTagsProvider(Provider):
     def __init__(self):
@@ -146,6 +153,7 @@ class GPodderNetTagsProvider(Provider):
 
     def get_tags(self):
         return [DirectoryTag(d['tag'], d['usage']) for d in json.load(util.urlopen('http://gpodder.net/api/2/tags/40.json'))]
+
 
 class SoundcloudSearchProvider(Provider):
     def __init__(self):
@@ -160,6 +168,7 @@ class SoundcloudSearchProvider(Provider):
 
         return [DirectoryEntry(entry['username'], entry['permalink_url']) for entry in search_for_user(query)]
 
+
 class FixedOpmlFileProvider(Provider):
     def __init__(self, filename):
         self.name = _('Imported OPML file')
@@ -171,15 +180,16 @@ class FixedOpmlFileProvider(Provider):
     def on_static(self):
         return directory_entry_from_opml(self.filename)
 
+
 PROVIDERS = [
     GPodderRecommendationsProvider,
     None,
     GPodderNetSearchProvider,
     GPodderNetToplistProvider,
-    #GPodderNetTagsProvider,
+    # GPodderNetTagsProvider,
     None,
     OpmlWebImportProvider,
-    #OpmlFileImportProvider,
+    # OpmlFileImportProvider,
     None,
     SoundcloudSearchProvider,
 ]

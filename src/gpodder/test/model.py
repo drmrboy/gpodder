@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@
 import unittest
 
 import gpodder
-
 from gpodder import model
+
 
 class TestEpisodePublishedProperties(unittest.TestCase):
     PUBLISHED_UNIXTIME = 1360666744
@@ -50,4 +50,3 @@ class TestEpisodePublishedProperties(unittest.TestCase):
 
     def test_pubdate_day(self):
         self.assertEqual(self.episode.pubdate_day, self.PUBLISHED_DAY)
-

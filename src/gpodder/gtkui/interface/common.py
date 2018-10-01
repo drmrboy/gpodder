@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,19 +17,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from gi.repository import Gtk
-from gi.repository import Gdk
-
 import os
 import shutil
 
+from gi.repository import Gdk, Gtk
+
 import gpodder
+from gpodder import util
+from gpodder.gtkui.base import GtkBuilderWidget
 
 _ = gpodder.gettext
-
-from gpodder import util
-
-from gpodder.gtkui.base import GtkBuilderWidget
 
 
 class BuilderWidget(GtkBuilderWidget):
@@ -40,9 +37,8 @@ class BuilderWidget(GtkBuilderWidget):
 
         # Enable support for tracking iconified state
         if hasattr(self, 'on_iconify') and hasattr(self, 'on_uniconify'):
-            self.main_window.connect('window-state-event', \
+            self.main_window.connect('window-state-event',
                     self._on_window_state_event_iconified)
-
 
     def _on_window_state_event_iconified(self, widget, event):
         if event.new_window_state & Gdk.WindowState.ICONIFIED:
@@ -90,9 +86,9 @@ class BuilderWidget(GtkBuilderWidget):
         dlg.destroy()
         return response == Gtk.ResponseType.YES
 
-    def show_text_edit_dialog(self, title, prompt, text=None, empty=False, \
+    def show_text_edit_dialog(self, title, prompt, text=None, empty=False,
             is_url=False, affirmative_text=Gtk.STOCK_OK):
-        dialog = Gtk.Dialog(title, self.get_dialog_parent(), \
+        dialog = Gtk.Dialog(title, self.get_dialog_parent(),
             Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT)
 
         dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
@@ -238,6 +234,7 @@ class BuilderWidget(GtkBuilderWidget):
         dlg.destroy()
         return (result, folder)
 
+
 class TreeViewHelper(object):
     """Container for gPodder-specific TreeView attributes."""
     LAST_TOOLTIP = '_gpodder_last_tooltip'
@@ -295,4 +292,3 @@ class TreeViewHelper(object):
 
             return (x, y, True)
         return position_func
-

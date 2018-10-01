@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,9 +17,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import logging
+
 from mygpoclient import feeds
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -66,8 +67,8 @@ def update_using_feedservice(podcasts):
         podcast.link = feed.get('link', podcast.link)
         podcast.description = feed.get('description', podcast.description)
         podcast.cover_url = feed.get('logo', podcast.cover_url)
-        #podcast.http_etag = feed.get('http_etag', podcast.http_etag)
-        #podcast.http_last_modified = feed.get('http_last_modified', \
+        # podcast.http_etag = feed.get('http_etag', podcast.http_etag)
+        # podcast.http_last_modified = feed.get('http_last_modified', \
         #        podcast.http_last_modified)
         podcast.save()
 
@@ -75,7 +76,3 @@ def update_using_feedservice(podcasts):
         parsed_episodes = [parse_entry(podcast, entry) for entry in feed['episodes']]
 
         # ...
-
-
-
-

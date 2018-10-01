@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,16 +23,17 @@
 # based on libipodsync.py (2006-04-05 Thomas Perl)
 # Ported to gPodder 3 by Joseph Wickremasinghe in June 2012
 
-import gpodder
-
-from gpodder import util
-from gpodder import services
-from gpodder import download
-
+import calendar
+import glob
 import logging
+import os.path
+import time
+
+import gpodder
+from gpodder import download, services, util
+
 logger = logging.getLogger(__name__)
 
-import calendar
 
 _ = gpodder.gettext
 
@@ -48,21 +49,18 @@ except:
     gpod_available = False
     logger.warning('Could not find gpod')
 
-#pymtp_available = True
-#try:
-#    import gpodder.gpopymtp as pymtp
-#except:
-#    pymtp_available = False
-#    logger.warning('Could not load gpopymtp (libmtp not installed?).')
+# pymtp_available = True
+# try:
+#     import gpodder.gpopymtp as pymtp
+# except:
+#     pymtp_available = False
+#     logger.warning('Could not load gpopymtp (libmtp not installed?).')
 
 try:
     import eyed3.mp3
 except:
     logger.warning('Could not find eyed3.mp3')
 
-import os.path
-import glob
-import time
 
 if pymtp_available:
     class MTP(pymtp.MTP):
@@ -109,6 +107,7 @@ if pymtp_available:
             # logger.info('MTP.mkdir: %s = %u' % (path, folder_id))
             return folder_id
 
+
 def open_device(gui):
     config = gui._config
     device_type = gui._config.device_sync.device_type
@@ -123,11 +122,12 @@ def open_device(gui):
 
     return None
 
+
 def get_track_length(filename):
     if util.find_command('mplayer') is not None:
         try:
             mplayer_output = os.popen('mplayer -msglevel all=-1 -identify -vo null -ao null -frames 0 "%s" 2>/dev/null' % filename).read()
-            return int(float(mplayer_output[mplayer_output.index('ID_LENGTH'):].splitlines()[0][10:])*1000)
+            return int(float(mplayer_output[mplayer_output.index('ID_LENGTH'):].splitlines()[0][10:]) * 1000)
         except:
             pass
     else:
@@ -139,7 +139,49 @@ def get_track_length(filename):
     except Exception as e:
         logger.warn('Could not determine length: %s', filename, exc_info=True)
 
-    return int(60*60*1000*3) # Default is three hours (to be on the safe side)
+    return int(60 * 60 * 1000 * 3)
+    # Default is three hours (to be on the safe side)
+
+
+def episode_filename_on_device(config, episode):
+    """
+    :param gpodder.config.Config config: configuration (for sync options)
+    :param gpodder.model.PodcastEpisode episode: episode to get filename for
+    :return str: basename minus extension to use to save episode on device
+    """
+    # get the local file
+    from_file = episode.local_filename(create=False)
+    # get the formated base name
+    filename_base = util.sanitize_filename(episode.sync_filename(
+        config.device_sync.custom_sync_name_enabled,
+        config.device_sync.custom_sync_name),
+        config.device_sync.max_filename_length)
+    # add the file extension
+    to_file = filename_base + os.path.splitext(from_file)[1].lower()
+
+    # dirty workaround: on bad (empty) episode titles,
+    # we simply use the from_file basename
+    # (please, podcast authors, FIX YOUR RSS FEEDS!)
+    if os.path.splitext(to_file)[0] == '':
+        to_file = os.path.basename(from_file)
+    return to_file
+
+
+def episode_foldername_on_device(config, episode):
+    """
+    :param gpodder.config.Config config: configuration (for sync options)
+    :param gpodder.model.PodcastEpisode episode: episode to get folder name for
+    :return str: folder name to save episode to on device
+    """
+    if config.device_sync.one_folder_per_podcast:
+        # Add channel title as subfolder
+        folder = episode.channel.title
+        # Clean up the folder name for use on limited devices
+        folder = util.sanitize_filename(folder, config.device_sync.max_filename_length)
+    else:
+        folder = None
+    return folder
+
 
 class SyncTrack(object):
     """
@@ -203,7 +245,7 @@ class Device(services.ObservableService):
             logger.warning('Not syncing disks. Unmount your device before unplugging.')
         return True
 
-    def add_sync_tasks(self,tracklist, force_played=False, done_callback=None):
+    def add_sync_tasks(self, tracklist, force_played=False, done_callback=None):
         for track in list(tracklist):
             # Filter tracks that are not meant to be synchronized
             does_not_exist = not track.was_downloaded(and_exists=True)
@@ -214,17 +256,17 @@ class Device(services.ObservableService):
             if does_not_exist or exclude_played or wrong_type:
                 logger.info('Excluding %s from sync', track.title)
                 tracklist.remove(track)
-        
+
         if tracklist:
             for track in sorted(tracklist, key=lambda e: e.pubdate_prop):
                 if self.cancelled:
                     return False
-    
+
                 # XXX: need to check if track is added properly?
-                sync_task=SyncTask(track)
-    
-                sync_task.status=sync_task.QUEUED
-                sync_task.device=self
+                sync_task = SyncTask(track)
+
+                sync_task.status = sync_task.QUEUED
+                sync_task.device = self
                 # New Task, we must wait on the GTK Loop
                 self.download_status_model.register_task(sync_task)
                 # Executes after task has been registered
@@ -266,6 +308,7 @@ class Device(services.ObservableService):
                 return t
         return None
 
+
 class iPodDevice(Device):
     def __init__(self, config,
             download_status_model,
@@ -280,7 +323,7 @@ class iPodDevice(Device):
 
     def get_free_space(self):
         # Reserve 10 MiB for iTunesDB writing (to be on the safe side)
-        RESERVED_FOR_ITDB = 1024*1024*10
+        RESERVED_FOR_ITDB = 1024 * 1024 * 10
         result = util.get_free_disk_space(self.mountpoint)
         if result == -1:
             # Can't get free disk space
@@ -358,7 +401,7 @@ class iPodDevice(Device):
             if gpod.itdb_filename_on_ipod(track) is None:
                 logger.info('Episode has no file: %s', track.title)
                 # self.remove_track_gpod(track)
-            elif track.playcount > 0  and not track.rating:
+            elif track.playcount > 0 and not track.rating:
                 logger.info('Purging episode: %s', track.title)
                 self.remove_track_gpod(track)
 
@@ -408,10 +451,10 @@ class iPodDevice(Device):
         gpod.itdb_track_unlink(track)
         util.delete_file(filename)
 
-    def add_track(self, episode,reporthook=None):
+    def add_track(self, episode, reporthook=None):
         self.notify('status', _('Adding %s') % episode.title)
         tracklist = gpod.sw_get_playlist_tracks(self.podcasts_playlist)
-        podcasturls=[track.podcasturl for track in tracklist]
+        podcasturls = [track.podcasturl for track in tracklist]
 
         if episode.url in podcasturls:
             # Mark as played on iPod if played locally (and set podcast flags)
@@ -427,7 +470,7 @@ class iPodDevice(Device):
         if util.calculate_size(original_filename) > self.get_free_space():
             logger.error('Not enough space on %s, sync aborted...', self.mountpoint)
             d = {'episode': episode.title, 'mountpoint': self.mountpoint}
-            message =_('Error copying %(episode)s: Not enough free space on %(mountpoint)s')
+            message = _('Error copying %(episode)s: Not enough free space on %(mountpoint)s')
             self.errors.append(message % d)
             self.cancelled = True
             return False
@@ -503,7 +546,7 @@ class MP3PlayerDevice(Device):
             download_queue_manager):
         Device.__init__(self, config)
         self.destination = self._config.device_sync.device_folder
-        self.buffer_size = 1024*1024 # 1 MiB
+        self.buffer_size = 1024 * 1024  # 1 MiB
         self.download_status_model = download_status_model
         self.download_queue_manager = download_queue_manager
 
@@ -522,12 +565,8 @@ class MP3PlayerDevice(Device):
         return False
 
     def get_episode_folder_on_device(self, episode):
-        if self._config.device_sync.one_folder_per_podcast:
-            # Add channel title as subfolder
-            folder = episode.channel.title
-            # Clean up the folder name for use on limited devices
-            folder = util.sanitize_filename(folder,
-                self._config.device_sync.max_filename_length)
+        folder = episode_foldername_on_device(self._config, episode)
+        if folder:
             folder = os.path.join(self.destination, folder)
         else:
             folder = self.destination
@@ -535,25 +574,9 @@ class MP3PlayerDevice(Device):
         return folder
 
     def get_episode_file_on_device(self, episode):
-        # get the local file
-        from_file = episode.local_filename(create=False)
-        # get the formated base name
-        filename_base = util.sanitize_filename(episode.sync_filename(
-            self._config.device_sync.custom_sync_name_enabled,
-            self._config.device_sync.custom_sync_name),
-            self._config.device_sync.max_filename_length)
-        # add the file extension
-        to_file = filename_base + os.path.splitext(from_file)[1].lower()
+        return episode_filename_on_device(self._config, episode)
 
-        # dirty workaround: on bad (empty) episode titles,
-        # we simply use the from_file basename
-        # (please, podcast authors, FIX YOUR RSS FEEDS!)
-        if os.path.splitext(to_file)[0] == '':
-            to_file = os.path.basename(from_file)
-
-        return to_file
-
-    def add_track(self, episode,reporthook=None):
+    def add_track(self, episode, reporthook=None):
         self.notify('status', _('Adding %s') % episode.title)
 
         # get the folder on the device
@@ -573,7 +596,7 @@ class MP3PlayerDevice(Device):
             logger.warn('Cannot determine free disk space on device')
         elif needed > free:
             d = {'path': self.destination, 'free': util.format_filesize(free), 'need': util.format_filesize(needed)}
-            message =_('Not enough space in %(path)s: %(free)s available, but need at least %(need)s')
+            message = _('Not enough space in %(path)s: %(free)s available, but need at least %(need)s')
             raise SyncFailedException(message % d)
 
         # get the filename that will be used on the device
@@ -630,7 +653,7 @@ class MP3PlayerDevice(Device):
                     pass
                 try:
                     logger.info('Trying to remove partially copied file: %s' % to_file)
-                    os.unlink( to_file)
+                    os.unlink(to_file)
                     logger.info('Yeah! Unlinked %s at least..' % to_file)
                 except:
                     logger.error('Error while trying to unlink %s. OH MY!' % to_file)
@@ -689,7 +712,8 @@ class MP3PlayerDevice(Device):
     def directory_is_empty(self, directory):
         files = glob.glob(os.path.join(directory, '*'))
         dotfiles = glob.glob(os.path.join(directory, '.*'))
-        return len(files+dotfiles) == 0
+        return len(files + dotfiles) == 0
+
 
 class MTPDevice(Device):
     def __init__(self, config):
@@ -705,7 +729,7 @@ class MTPDevice(Device):
     def __callback(self, sent, total):
         if self.cancelled:
             return -1
-        percentage = round(sent/total*100)
+        percentage = round(sent / total * 100)
         text = ('%i%%' % percentage)
         self.notify('progress', sent, total, text)
 
@@ -736,13 +760,14 @@ class MTPDevice(Device):
             return None
 
         try:
-            mtp = mtp.replace(" ", "0") # replace blank with 0 to fix some invalid string
-            d = time.strptime(mtp[:8] + mtp[9:13],"%Y%m%d%H%M%S")
+            mtp = mtp.replace(" ", "0")
+            # replace blank with 0 to fix some invalid string
+            d = time.strptime(mtp[:8] + mtp[9:13], "%Y%m%d%H%M%S")
             _date = calendar.timegm(d)
-            if len(mtp)==20:
+            if len(mtp) == 20:
                 # TIME ZONE SHIFTING: the string contains a hour/min shift relative to a time zone
                 try:
-                    shift_direction=mtp[15]
+                    shift_direction = mtp[15]
                     hour_shift = int(mtp[16:18])
                     minute_shift = int(mtp[18:20])
                     shift_in_sec = hour_shift * 3600 + minute_shift * 60
@@ -754,7 +779,7 @@ class MTPDevice(Device):
                         raise ValueError("Expected + or -")
                 except Exception as exc:
                     logger.warning('WARNING: ignoring invalid time zone information for %s (%s)')
-            return max( 0, _date )
+            return max(0, _date)
         except Exception as exc:
             logger.warning('WARNING: the mtp date "%s" can not be parsed against mtp specification (%s)')
             return None
@@ -779,7 +804,8 @@ class MTPDevice(Device):
         if self.__MTPDevice is None:
             return _('MTP device')
 
-        self.__model_name = self.__MTPDevice.get_devicename() # actually libmtp.Get_Friendlyname
+        self.__model_name = self.__MTPDevice.get_devicename()
+        # actually libmtp.Get_Friendlyname
         if not self.__model_name or self.__model_name == "?????":
             self.__model_name = self.__MTPDevice.get_modelname()
         if not self.__model_name:
@@ -827,7 +853,11 @@ class MTPDevice(Device):
             needed = util.calculate_size(filename)
             free = self.get_free_space()
             if needed > free:
-                logger.error('Not enough space on device %s: %s available, but need at least %s', self.get_name(), util.format_filesize(free), util.format_filesize(needed))
+                logger.error('Not enough space on device %s: %s available, but '
+                             'need at least %s',
+                             self.get_name(),
+                             util.format_filesize(free),
+                             util.format_filesize(needed))
                 self.cancelled = True
                 return False
 
@@ -890,7 +920,7 @@ class MTPDevice(Device):
         tracks = []
         for track in listing:
             title = track.title
-            if not title or title=="": title=track.filename
+            if not title or title == "": title = track.filename
             if len(title) > 50: title = title[0:49] + '...'
             artist = track.artist
             if artist and len(artist) > 50: artist = artist[0:49] + '...'
@@ -898,8 +928,8 @@ class MTPDevice(Device):
             age_in_days = 0
             date = self.__mtp_to_date(track.date)
             if not date:
-                modified = track.date # not a valid mtp date. Display what mtp gave anyway
-                modified_sort = -1 # no idea how to sort invalid date
+                modified = track.date  # not a valid mtp date. Display what mtp gave anyway
+                modified_sort = -1  # no idea how to sort invalid date
             else:
                 modified = util.format_date(date)
                 modified_sort = date
@@ -914,8 +944,12 @@ class MTPDevice(Device):
         else:
             return 0
 
+
 class SyncCancelledException(Exception): pass
+
+
 class SyncFailedException(Exception): pass
+
 
 class SyncTask(download.DownloadTask):
     # An object representing the synchronization task of an episode
@@ -924,7 +958,6 @@ class SyncTask(download.DownloadTask):
     STATUS_MESSAGE = (_('Added'), _('Queued'), _('Synchronizing'),
             _('Finished'), _('Failed'), _('Cancelled'), _('Paused'))
     (INIT, QUEUED, DOWNLOADING, DONE, FAILED, CANCELLED, PAUSED) = list(range(7))
-
 
     def __str__(self):
         return self.__episode.title
@@ -1040,7 +1073,7 @@ class SyncTask(download.DownloadTask):
             self.total_size = float(totalSize)
 
         if self.total_size > 0:
-            self.progress = max(0.0, min(1.0, (count*blockSize)/self.total_size))
+            self.progress = max(0.0, min(1.0, (count * blockSize) / self.total_size))
             self._progress_updated(self.progress)
 
         if self.status == SyncTask.CANCELLED:
@@ -1094,4 +1127,3 @@ class SyncTask(download.DownloadTask):
 
         # We finished, but not successfully (at least not really)
         return False
-

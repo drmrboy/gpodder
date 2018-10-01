@@ -6,13 +6,13 @@
 # (c) 2011-11-23 Bernd Schlapsi <brot@gmx.info>
 # Released under the same license terms as gPodder itself.
 
+import logging
 import os
 import subprocess
 
 import gpodder
 from gpodder import util
 
-import logging
 logger = logging.getLogger(__name__)
 
 _ = gpodder.gettext
@@ -26,20 +26,22 @@ __category__ = 'post-download'
 
 
 DefaultConfig = {
-    'use_ogg': False, # Set to True to convert to .ogg (otherwise .mp3)
-    'context_menu': True, # Show the conversion option in the context menu
+    'use_opus': False,  # Set to True to convert to .opus
+    'use_ogg': False,  # Set to True to convert to .ogg
+    'context_menu': True,  # Show the conversion option in the context menu
 }
 
+
 class gPodderExtension:
-    MIME_TYPES = ('audio/x-m4a', 'audio/mp4', 'audio/mp4a-latm', 'audio/ogg', )
-    EXT = ('.m4a', '.ogg')
+    MIME_TYPES = ('audio/x-m4a', 'audio/mp4', 'audio/mp4a-latm', 'audio/ogg', 'audio/opus')
+    EXT = ('.m4a', '.ogg', '.opus')
     CMD = {'avconv': {'.mp3': ['-i', '%(old_file)s', '-q:a', '2', '-id3v2_version', '3', '-write_id3v1', '1', '%(new_file)s'],
-                      '.ogg': ['-i', '%(old_file)s', '-q:a', '2', '%(new_file)s']
-                     },
+                      '.ogg': ['-i', '%(old_file)s', '-q:a', '2', '%(new_file)s'], '.opus': ['-i', '%(old_file)s', '-q:a', '2', '%(new_file)s']
+                      },
            'ffmpeg': {'.mp3': ['-i', '%(old_file)s', '-q:a', '2', '-id3v2_version', '3', '-write_id3v1', '1', '%(new_file)s'],
-                      '.ogg': ['-i', '%(old_file)s', '-q:a', '2', '%(new_file)s']
-                     }
-          }
+                      '.ogg': ['-i', '%(old_file)s', '-q:a', '2', '%(new_file)s'], '.opus': ['-i', '%(old_file)s', '-q:a', '2', '%(new_file)s']
+                      }
+           }
 
     def __init__(self, container):
         self.container = container
@@ -53,14 +55,20 @@ class gPodderExtension:
 
     def on_episode_downloaded(self, episode):
         self._convert_episode(episode)
-        
+
     def _get_new_extension(self):
-        return ('.ogg' if self.config.use_ogg else '.mp3')
+        if self.config.use_ogg:
+            extension = '.ogg'
+        elif self.config.use_opus:
+            extension = '.opus'
+        else:
+            extension = '.mp3'
+        return extension
 
     def _check_source(self, episode):
         if episode.extension() == self._get_new_extension():
             return False
-            
+
         if episode.mime_type in self.MIME_TYPES:
             return True
 
@@ -80,7 +88,13 @@ class gPodderExtension:
         if not any(self._check_source(episode) for episode in episodes):
             return None
 
-        target_format = ('OGG' if self.config.use_ogg else 'MP3')
+        if self.config.use_ogg:
+            target_format = 'OGG'
+        elif self.config.use_opus:
+            target_format = 'OPUS'
+        else:
+            target_format = 'MP3'
+
         menu_item = _('Convert to %(format)s') % {'format': target_format}
 
         return [(menu_item, self._convert_episodes)]
@@ -99,14 +113,19 @@ class gPodderExtension:
             [param % {'old_file': old_filename, 'new_file': new_filename}
                 for param in cmd_param]
 
-        ffmpeg = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
-        stdout, stderr = ffmpeg.communicate()
+        if gpodder.ui.win32:
+            ffmpeg = util.Popen(cmd)
+            ffmpeg.wait()
+            stdout, stderr = ("<unavailable>",) * 2
+        else:
+            ffmpeg = util.Popen(cmd, stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+            stdout, stderr = ffmpeg.communicate()
 
         if ffmpeg.returncode == 0:
             util.rename_episode_file(episode, new_filename)
             os.remove(old_filename)
-            
+
             logger.info('Converted audio file to %(format)s.' % {'format': new_extension})
             gpodder.user_extensions.on_notification_show(_('File converted'), episode.title)
         else:

@@ -1,5 +1,6 @@
 import dbus.exceptions
 
+
 class SessionBus(object):
     def __init__(self, *args, **kwargs):
         self.fake = True
@@ -10,5 +11,6 @@ class SessionBus(object):
 
     def name_has_owner(self, *args, **kwargs):
         return False
+
 
 SystemBus = SessionBus

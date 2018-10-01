@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,17 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from gi.repository import Gtk
-from gi.repository import Gdk
-from gi.repository import GdkPixbuf
+from gi.repository import Gdk, GdkPixbuf, Gtk
 
 import gpodder
+from gpodder import util
+from gpodder.gtkui.interface.common import BuilderWidget
 
 _ = gpodder.gettext
-
-from gpodder import util
-
-from gpodder.gtkui.interface.common import BuilderWidget
 
 
 class gPodderChannel(BuilderWidget):
@@ -36,8 +32,8 @@ class gPodderChannel(BuilderWidget):
     def new(self):
         self.show_on_cover_load = True
 
-        self.gPodderChannel.set_title( self.channel.title)
-        self.entryTitle.set_text( self.channel.title)
+        self.gPodderChannel.set_title(self.channel.title)
+        self.entryTitle.set_text(self.channel.title)
         self.labelURL.set_text(self.channel.url)
         self.cbSkipFeedUpdate.set_active(self.channel.pause_subscription)
         self.cbEnableDeviceSync.set_active(self.channel.sync_to_mp3_player)
@@ -57,7 +53,7 @@ class gPodderChannel(BuilderWidget):
         self.strategy_list = Gtk.ListStore(str, int)
         active_index = 0
         for index, (checked, strategy_id, strategy) in \
-            enumerate(self.channel.get_download_strategies()):
+                enumerate(self.channel.get_download_strategies()):
             self.strategy_list.append([strategy, strategy_id])
             if checked:
                 active_index = index
@@ -67,33 +63,34 @@ class gPodderChannel(BuilderWidget):
         self.combo_strategy.add_attribute(cell_renderer, 'text', 0)
         self.combo_strategy.set_active(active_index)
 
-        self.LabelDownloadTo.set_text( self.channel.save_dir)
-        self.LabelWebsite.set_text( self.channel.link)
+        self.LabelDownloadTo.set_text(self.channel.save_dir)
+        self.LabelWebsite.set_text(self.channel.link)
 
         if self.channel.auth_username:
-            self.FeedUsername.set_text( self.channel.auth_username)
+            self.FeedUsername.set_text(self.channel.auth_username)
         if self.channel.auth_password:
-            self.FeedPassword.set_text( self.channel.auth_password)
+            self.FeedPassword.set_text(self.channel.auth_password)
 
         self.cover_downloader.register('cover-available', self.cover_download_finished)
         self.cover_downloader.request_cover(self.channel)
 
         # Hide the website button if we don't have a valid URL
         if not self.channel.link:
-            self.btn_website.hide_all()
+            self.btn_website.hide()
 
         b = Gtk.TextBuffer()
-        b.set_text( self.channel.description)
-        self.channel_description.set_buffer( b)
+        b.set_text(self.channel.description)
+        self.channel_description.set_buffer(b)
 
-        #Add Drag and Drop Support
+        # Add Drag and Drop Support
         flags = Gtk.DestDefaults.ALL
         targets = [Gtk.TargetEntry.new('text/uri-list', 0, 2), Gtk.TargetEntry.new('text/plain', 0, 4)]
         actions = Gdk.DragAction.DEFAULT | Gdk.DragAction.COPY
         self.imgCover.drag_dest_set(flags, targets, actions)
         self.imgCover.connect('drag_data_received', self.drag_data_received)
         border = 6
-        self.imgCover.set_size_request(*((self.MAX_SIZE+border*2,)*2))
+        size = self.MAX_SIZE + border * 2
+        self.imgCover.set_size_request(size, size)
         self.imgCoverEventBox.connect('button-press-event',
                 self.on_cover_popup_menu)
 
@@ -108,7 +105,7 @@ class gPodderChannel(BuilderWidget):
                     return
 
             self.section_list.append([text])
-            self.combo_section.set_active(len(self.section_list)-1)
+            self.combo_section.set_active(len(self.section_list) - 1)
 
     def on_cover_popup_menu(self, widget, event):
         if not event.triggers_context_menu():
@@ -132,7 +129,10 @@ class gPodderChannel(BuilderWidget):
         util.open_website(self.channel.link)
 
     def on_btnDownloadCover_clicked(self, widget):
-        dlg = Gtk.FileChooserDialog(title=_('Select new podcast cover artwork'), parent=self.gPodderChannel, action=Gtk.FileChooserAction.OPEN)
+        dlg = Gtk.FileChooserDialog(
+            title=_('Select new podcast cover artwork'),
+            parent=self.gPodderChannel,
+            action=Gtk.FileChooserAction.OPEN)
         dlg.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
         dlg.add_button(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
 
@@ -158,10 +158,12 @@ class gPodderChannel(BuilderWidget):
 
         util.idle_add(set_cover, channel, pixbuf)
 
-    def drag_data_received( self, widget, content, x, y, sel, ttype, time):
+    def drag_data_received(self, widget, content, x, y, sel, ttype, time):
         files = sel.data.strip().split('\n')
         if len(files) != 1:
-            self.show_message( _('You can only drop a single image or URL here.'), _('Drag and drop'))
+            self.show_message(
+                _('You can only drop a single image or URL here.'),
+                _('Drag and drop'))
             return
 
         file = files[0]
@@ -171,7 +173,9 @@ class gPodderChannel(BuilderWidget):
             self.cover_downloader.replace_cover(self.channel, custom_url=file)
             return
 
-        self.show_message( _('You can only drop local files and http:// URLs here.'), _('Drag and drop'))
+        self.show_message(
+            _('You can only drop local files and http:// URLs here.'),
+            _('Drag and drop'))
 
     def on_gPodderChannel_destroy(self, widget, *args):
         self.cover_downloader.unregister('cover-available', self.cover_download_finished)
@@ -180,14 +184,14 @@ class gPodderChannel(BuilderWidget):
 
         # Resize if width is too large
         if pixbuf.get_width() > self.MAX_SIZE:
-            f = float(self.MAX_SIZE)/pixbuf.get_width()
-            (width, height) = (int(pixbuf.get_width()*f), int(pixbuf.get_height()*f))
+            f = float(self.MAX_SIZE) / pixbuf.get_width()
+            (width, height) = (int(pixbuf.get_width() * f), int(pixbuf.get_height() * f))
             pixbuf = pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
         # Resize if height is too large
         if pixbuf.get_height() > self.MAX_SIZE:
-            f = float(self.MAX_SIZE)/pixbuf.get_height()
-            (width, height) = (int(pixbuf.get_width()*f), int(pixbuf.get_height()*f))
+            f = float(self.MAX_SIZE) / pixbuf.get_height()
+            (width, height) = (int(pixbuf.get_width() * f), int(pixbuf.get_height() * f))
             pixbuf = pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
 
         return pixbuf
@@ -219,4 +223,3 @@ class gPodderChannel(BuilderWidget):
 
         self.update_podcast_list_model(selected=True,
                 sections_changed=section_changed)
-

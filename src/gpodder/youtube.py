@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,22 +20,17 @@
 #  Justin Forest <justin.forest@gmail.com> 2008-10-13
 #
 
-
-import gpodder
+import json
+import logging
+import re
+import urllib
+import xml.etree.ElementTree
+from html.parser import HTMLParser
+from urllib.parse import parse_qs
 
 from gpodder import util
 
-import os.path
-
-import logging
 logger = logging.getLogger(__name__)
-
-import json
-
-import re
-import urllib.request, urllib.parse, urllib.error
-
-from urllib.parse import parse_qs
 
 # http://en.wikipedia.org/wiki/YouTube#Quality_and_codecs
 # format id, (preferred ids, path(?), description) # video bitrate, audio bitrate
@@ -44,29 +39,53 @@ formats = [
     # Fallback to an MP4 version of same quality.
     # Try 34 (FLV 360p H.264 AAC) if 18 (MP4 360p) fails.
     # Fallback to 6 or 5 (FLV Sorenson H.263 MP3) if all fails.
-    (46, ([46, 37, 45, 22, 44, 35, 43, 18, 6, 34, 5], '45/1280x720/99/0/0', 'WebM 1080p (1920x1080)')), # N/A,      192 kbps
-    (45, ([45, 22, 44, 35, 43, 18, 6, 34, 5],         '45/1280x720/99/0/0', 'WebM 720p (1280x720)')),   # 2.0 Mbps, 192 kbps
-    (44, ([44, 35, 43, 18, 6, 34, 5],                 '44/854x480/99/0/0',  'WebM 480p (854x480)')),    # 1.0 Mbps, 128 kbps
-    (43, ([43, 18, 6, 34, 5],                         '43/640x360/99/0/0',  'WebM 360p (640x360)')),    # 0.5 Mbps, 128 kbps
+    (46, ([46, 37, 45, 22, 44, 35, 43, 18, 6, 34, 5],
+          '45/1280x720/99/0/0',
+          'WebM 1080p (1920x1080)')),  # N/A,      192 kbps
+    (45, ([45, 22, 44, 35, 43, 18, 6, 34, 5],
+          '45/1280x720/99/0/0',
+          'WebM 720p (1280x720)')),    # 2.0 Mbps, 192 kbps
+    (44, ([44, 35, 43, 18, 6, 34, 5],
+          '44/854x480/99/0/0',
+          'WebM 480p (854x480)')),     # 1.0 Mbps, 128 kbps
+    (43, ([43, 18, 6, 34, 5],
+          '43/640x360/99/0/0',
+          'WebM 360p (640x360)')),     # 0.5 Mbps, 128 kbps
 
     # MP4 H.264 video, AAC audio
     # Try 35 (FLV 480p H.264 AAC) between 720p and 360p because there's no MP4 480p.
     # Try 34 (FLV 360p H.264 AAC) if 18 (MP4 360p) fails.
     # Fallback to 6 or 5 (FLV Sorenson H.263 MP3) if all fails.
-    (38, ([38, 37, 22, 35, 18, 34, 6, 5], '38/1920x1080/9/0/115', 'MP4 4K 3072p (4096x3072)')), # 5.0 - 3.5 Mbps, 192 kbps
-    (37, ([37, 22, 35, 18, 34, 6, 5],     '37/1920x1080/9/0/115', 'MP4 HD 1080p (1920x1080)')), # 4.3 - 3.0 Mbps, 192 kbps
-    (22, ([22, 35, 18, 34, 6, 5],         '22/1280x720/9/0/115',  'MP4 HD 720p (1280x720)')),   # 2.9 - 2.0 Mbps, 192 kbps
-    (18, ([18, 34, 6, 5],                 '18/640x360/9/0/115',   'MP4 360p (640x360)')),       #       0.5 Mbps,  96 kbps
+    (38, ([38, 37, 22, 35, 18, 34, 6, 5],
+          '38/1920x1080/9/0/115',
+          'MP4 4K 3072p (4096x3072)')),  # 5.0 - 3.5 Mbps, 192 kbps
+    (37, ([37, 22, 35, 18, 34, 6, 5],
+          '37/1920x1080/9/0/115',
+          'MP4 HD 1080p (1920x1080)')),  # 4.3 - 3.0 Mbps, 192 kbps
+    (22, ([22, 35, 18, 34, 6, 5],
+          '22/1280x720/9/0/115',
+          'MP4 HD 720p (1280x720)')),    # 2.9 - 2.0 Mbps, 192 kbps
+    (18, ([18, 34, 6, 5],
+          '18/640x360/9/0/115',
+          'MP4 360p (640x360)')),        # 0.5 Mbps,  96 kbps
 
     # FLV H.264 video, AAC audio
     # Does not check for 360p MP4.
     # Fallback to 6 or 5 (FLV Sorenson H.263 MP3) if all fails.
-    (35, ([35, 34, 6, 5], '35/854x480/9/0/115',   'FLV 480p (854x480)')), # 1 - 0.80 Mbps, 128 kbps
-    (34, ([34, 6, 5],     '34/640x360/9/0/115',   'FLV 360p (640x360)')), #     0.50 Mbps, 128 kbps
+    (35, ([35, 34, 6, 5],
+          '35/854x480/9/0/115',
+          'FLV 480p (854x480)')),  # 1 - 0.80 Mbps, 128 kbps
+    (34, ([34, 6, 5],
+          '34/640x360/9/0/115',
+          'FLV 360p (640x360)')),  # 0.50 Mbps, 128 kbps
 
     # FLV Sorenson H.263 video, MP3 audio
-    (6, ([6, 5],         '5/480x270/7/0/0',      'FLV 270p (480x270)')), #     0.80 Mbps,  64 kbps
-    (5, ([5],            '5/320x240/7/0/0',      'FLV 240p (320x240)')), #     0.25 Mbps,  64 kbps
+    (6, ([6, 5],
+         '5/480x270/7/0/0',
+         'FLV 270p (480x270)')),  # 0.80 Mbps,  64 kbps
+    (5, ([5],
+         '5/320x240/7/0/0',
+         'FLV 240p (320x240)')),  # 0.25 Mbps,  64 kbps
 ]
 formats_dict = dict(formats)
 
@@ -74,7 +93,8 @@ V3_API_ENDPOINT = 'https://www.googleapis.com/youtube/v3'
 CHANNEL_VIDEOS_XML = 'https://www.youtube.com/feeds/videos.xml'
 
 
-class YouTubeError(Exception): pass
+class YouTubeError(Exception):
+    pass
 
 
 def get_fmt_ids(youtube_config):
@@ -88,9 +108,10 @@ def get_fmt_ids(youtube_config):
 
     return fmt_ids
 
+
 def get_real_download_url(url, preferred_fmt_ids=None):
     if not preferred_fmt_ids:
-        preferred_fmt_ids, _, _ = formats_dict[22] # MP4 720p
+        preferred_fmt_ids, _, _ = formats_dict[22]  # MP4 720p
 
     vid = get_youtube_id(url)
     if vid is not None:
@@ -104,8 +125,10 @@ def get_real_download_url(url, preferred_fmt_ids=None):
             else:
                 page = req.read()
 
+        page = page.decode()
         # Try to find the best video format available for this video
         # (http://forum.videohelp.com/topic336882-1800.html#1912972)
+
         def find_urls(page):
             r4 = re.search('url_encoded_fmt_stream_map=([^&]+)', page)
             if r4 is not None:
@@ -124,7 +147,7 @@ def get_real_download_url(url, preferred_fmt_ids=None):
             raise YouTubeError('fmt_url_map not found for video ID "%s"' % vid)
 
         # Default to the highest fmt_id if we don't find a match below
-        _, url  = fmt_id_url_map[0]
+        _, url = fmt_id_url_map[0]
 
         formats_available = set(fmt_id for fmt_id, url in fmt_id_url_map)
         fmt_id_url_map = dict(fmt_id_url_map)
@@ -145,6 +168,7 @@ def get_real_download_url(url, preferred_fmt_ids=None):
 
     return url
 
+
 def get_youtube_id(url):
     r = re.compile('http[s]?://(?:[a-z]+\.)?youtube\.com/v/(.*)\.swf', re.IGNORECASE).match(url)
     if r is not None:
@@ -160,11 +184,14 @@ def get_youtube_id(url):
 
     return for_each_feed_pattern(lambda url, channel: channel, url, None)
 
+
 def is_video_link(url):
     return (get_youtube_id(url) is not None)
 
+
 def is_youtube_guid(guid):
     return guid.startswith('tag:youtube.com,2008:video:')
+
 
 def for_each_feed_pattern(func, url, fallback_result):
     """
@@ -192,6 +219,7 @@ def for_each_feed_pattern(func, url, fallback_result):
 
     return fallback_result
 
+
 def get_real_channel_url(url):
     def return_user_feed(url, channel):
         result = 'https://gdata.youtube.com/feeds/users/{0}/uploads'.format(channel)
@@ -200,42 +228,112 @@ def get_real_channel_url(url):
 
     return for_each_feed_pattern(return_user_feed, url, url)
 
-def get_real_cover(url):
-    def return_user_cover(url, channel):
-        try:
-            api_url = 'https://www.youtube.com/channel/{0}'.format(channel)
-            data = util.urlopen(api_url).read().decode('utf-8')
-            # Look for 900x900px image first.
-            m = re.search('<link rel="image_src"[^>]* href=[\'"]([^\'"]+)[\'"][^>]*>', data)
-            if m is None:
+
+def get_cover(url):
+    if 'youtube.com' in url:
+
+        class YouTubeHTMLCoverParser(HTMLParser):
+            """This custom html parser searches for the youtube channel thumbnail/avatar"""
+            def __init__(self):
+                super().__init__()
+                self.url = ""
+
+            def handle_starttag(self, tag, attributes):
+                attribute_dict = {attribute[0]: attribute[1] for attribute in attributes}
+
+                # Look for 900x900px image first.
+                if tag == 'link' \
+                        and 'rel' in attribute_dict \
+                        and attribute_dict['rel'] == 'image_src':
+                    self.url = attribute_dict['href']
+
                 # Fallback to image that may only be 100x100px.
-                m = re.search('<img class="channel-header-profile-image"[^>]* src=[\'"]([^\'"]+)[\'"][^>]*>', data)
-            if m is not None:
-                logger.debug('YouTube userpic for %s is: %s', url, m.group(1))
-                return m.group(1)
-        except Exception as e:
-            logger.warn('Could not retrieve cover art', exc_info=True)
-            return None
+                elif tag == 'img' \
+                        and 'class' in attribute_dict \
+                        and attribute_dict['class'] == "channel-header-profile-image":
+                    self.url = attribute_dict['src']
 
-        return None
+        try:
+            raw_xml_data = util.urlopen(url).read().decode('utf-8')
+            xml_data = xml.etree.ElementTree.fromstring(raw_xml_data)
+            channel_id = xml_data.find("{http://www.youtube.com/xml/schemas/2015}channelId").text
+            channel_url = 'https://www.youtube.com/channel/{}'.format(channel_id)
+            html_data = util.urlopen(channel_url).read().decode('utf-8')
+            parser = YouTubeHTMLCoverParser()
+            parser.feed(html_data)
+            if parser.url:
+                logger.debug('Youtube cover art for {} is: {}'.format(url, parser.url))
+                return parser.url
 
-    return for_each_feed_pattern(return_user_cover, url, None)
+        except Exception:
+            logger.warning('Could not retrieve cover art', exc_info=True)
+
 
 def get_channels_for_user(username, api_key_v3):
+    # already a channel ID: return videos.xml.
+    # Can't rely on automatic discovery, see #371
+    if username.startswith('UC'):
+        try:
+            url = '{0}?channel_id={1}'.format(CHANNEL_VIDEOS_XML, username)
+            stream = util.urlopen(url)
+            return [url]
+        except urllib.error.HTTPError as e:
+            logger.debug("get_channels_for_user(%s) not a channel id (got %i response code)", username, e.code)
+        except:
+            logger.error("get_channels_for_user(%s) not a channel id (got unexpected exception)", username)
+
+    # try username to channel ID conversion
     stream = util.urlopen('{0}/channels?forUsername={1}&part=id&key={2}'.format(V3_API_ENDPOINT, username, api_key_v3))
     data = json.load(stream)
     return ['{0}?channel_id={1}'.format(CHANNEL_VIDEOS_XML, item['id']) for item in data['items']]
 
 
-def resolve_v3_url(url, api_key_v3):
-    # Check if it's a YouTube feed, and if we have an API key, auto-resolve the channel
-    if url and api_key_v3:
-        _, user = for_each_feed_pattern(lambda url, channel: (url, channel), url, (None, None))
-        if user is not None:
-            logger.info('Getting channels for YouTube user %s', user)
-            new_urls = get_channels_for_user(user, api_key_v3)
-            logger.debug('YouTube channels retrieved: %r', new_urls)
-            if len(new_urls) == 1:
-                return new_urls[0]
+def parse_youtube_url(url):
+    """
+    Youtube Channel Links are parsed into youtube feed links
+    >>> parse_youtube_url("https://www.youtube.com/channel/CHANNEL_ID")
+    'https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID'
 
-    return url
+    Youtube User Links are parsed into youtube feed links
+    >>> parse_youtube_url("https://www.youtube.com/user/USERNAME")
+    'https://www.youtube.com/feeds/videos.xml?user=USERNAME'
+
+    Youtube Playlist Links are parsed into youtube feed links
+    >>> parse_youtube_url("https://www.youtube.com/playlist?list=PLAYLIST_ID")
+    'https://www.youtube.com/feeds/videos.xml?playlist_id=PLAYLIST_ID'
+
+    >>> parse_youtube_url(None)
+    None
+
+    @param url: the path to the channel, user or playlist
+    @return: the feed url if successful or the given url if not
+    """
+    if url is None:
+        return url
+    scheme, netloc, path, query, fragment = urllib.parse.urlsplit(url)
+    logger.debug("Analyzing URL: {}".format(" ".join([scheme, netloc, path, query, fragment])))
+
+    if 'youtube.com' in netloc and ('/user/' in path or '/channel/' in path or 'list=' in query):
+        logger.debug("Valid Youtube URL detected. Parsing...")
+
+        if path.startswith('/user/'):
+            user_id = path.split('/')[2]
+            query = 'user={user_id}'.format(user_id=user_id)
+
+        if path.startswith('/channel/'):
+            channel_id = path.split('/')[2]
+            query = 'channel_id={channel_id}'.format(channel_id=channel_id)
+
+        if 'list=' in query:
+            playlist_query = [query_value for query_value in query.split("&") if 'list=' in query_value][0]
+            playlist_id = playlist_query.strip("list=")
+            query = 'playlist_id={playlist_id}'.format(playlist_id=playlist_id)
+
+        path = '/feeds/videos.xml'
+
+        new_url = urllib.parse.urlunsplit((scheme, netloc, path, query, fragment))
+        logger.debug("New Youtube URL: {}".format(new_url))
+        return new_url
+    else:
+        logger.debug("Not a valid Youtube URL: {}".format(url))
+        return url

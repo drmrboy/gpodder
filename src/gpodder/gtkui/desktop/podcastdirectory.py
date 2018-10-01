@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,25 +24,22 @@
 #
 
 
-from gi.repository import Gtk
-from gi.repository import GdkPixbuf
-from gi.repository import Pango
 import cgi
+import logging
 import os
 
+from gi.repository import GdkPixbuf, Gtk, Pango
+
 import gpodder
-
-_ = gpodder.gettext
-
-import logging
-logger = logging.getLogger(__name__)
-
-from gpodder import util
-from gpodder import directory
-
+from gpodder import directory, util
 from gpodder.gtkui.interface.common import BuilderWidget
 from gpodder.gtkui.interface.progress import ProgressIndicator
 from gpodder.gtkui.interface.tagcloud import TagCloud
+
+_ = gpodder.gettext
+
+logger = logging.getLogger(__name__)
+
 
 class DirectoryPodcastsModel(Gtk.ListStore):
     C_SELECTED, C_MARKUP, C_TITLE, C_URL = list(range(4))
@@ -125,7 +122,7 @@ class gPodderPodcastDirectory(BuilderWidget):
 
     def download_opml_file(self, filename):
         self.providers_model.add_provider(directory.FixedOpmlFileProvider(filename))
-        self.tv_providers.set_cursor(len(self.providers_model)-1)
+        self.tv_providers.set_cursor(len(self.providers_model) - 1)
 
     def setup_podcasts_treeview(self):
         column = Gtk.TreeViewColumn('')
@@ -151,7 +148,7 @@ class gPodderPodcastDirectory(BuilderWidget):
         column.pack_start(cell, False)
         column.add_attribute(cell, 'pixbuf', DirectoryProvidersModel.C_ICON)
         cell = Gtk.CellRendererText()
-        #cell.set_property('ellipsize', Pango.EllipsizeMode.END)
+        # cell.set_property('ellipsize', Pango.EllipsizeMode.END)
         column.pack_start(cell, True)
         column.add_attribute(cell, 'text', DirectoryProvidersModel.C_TEXT)
         column.add_attribute(cell, 'weight', DirectoryProvidersModel.C_WEIGHT)
@@ -188,14 +185,14 @@ class gPodderPodcastDirectory(BuilderWidget):
         self.current_provider = provider
 
         if provider.kind == directory.Provider.PROVIDER_SEARCH:
-            self.lb_search.set_text('Search:')
-            self.bt_search.set_label('Search')
+            self.lb_search.set_text(_('Search:'))
+            self.bt_search.set_label(_('Search'))
         elif provider.kind == directory.Provider.PROVIDER_URL:
-            self.lb_search.set_text('URL:')
-            self.bt_search.set_label('Download')
+            self.lb_search.set_text(_('URL:'))
+            self.bt_search.set_label(_('Download'))
         elif provider.kind == directory.Provider.PROVIDER_FILE:
-            self.lb_search.set_text('Filename:')
-            self.bt_search.set_label('Open')
+            self.lb_search.set_text(_('Filename:'))
+            self.bt_search.set_label(_('Open'))
         elif provider.kind == directory.Provider.PROVIDER_TAGCLOUD:
             self.tag_cloud.clear_tags()
 
@@ -226,7 +223,6 @@ class gPodderPodcastDirectory(BuilderWidget):
             self.sw_tagcloud.show()
         else:
             self.sw_tagcloud.hide()
-
 
     def on_tv_providers_cursor_changed(self, treeview):
         path, column = treeview.get_cursor()

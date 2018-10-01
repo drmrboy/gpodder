@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,21 +23,18 @@
 #  Thomas Perl <thp@perli.net>, 2007-11-25
 #
 
-import gpodder
-
-import gi
-gi.require_version('PangoCairo', '1.0')
-
-from gi.repository import Gtk
-from gi.repository import Gdk
-from gi.repository import GdkPixbuf
-from gi.repository import Pango
-from gi.repository import PangoCairo
+import io
+import math
 
 import cairo
 
-import io
-import math
+import gpodder
+
+import gi  # isort:skip
+gi.require_version('Gdk', '3.0')  # isort:skip
+gi.require_version('Gtk', '3.0')  # isort:skip
+gi.require_version('PangoCairo', '1.0')  # isort:skip
+from gi.repository import Gdk, GdkPixbuf, Gtk, Pango, PangoCairo  # isort:skip
 
 
 class TextExtents(object):
@@ -45,12 +42,15 @@ class TextExtents(object):
         tuple = ctx.text_extents(text)
         (self.x_bearing, self.y_bearing, self.width, self.height, self.x_advance, self.y_advance) = tuple
 
+
 EPISODE_LIST_ICON_SIZE = 16
 
 RRECT_LEFT_SIDE = 1
 RRECT_RIGHT_SIDE = 2
 
-def draw_rounded_rectangle(ctx, x, y, w, h, r=10, left_side_width = None, sides_to_draw=0, close=False):
+
+def draw_rounded_rectangle(ctx, x, y, w, h, r=10, left_side_width=None,
+                           sides_to_draw=0, close=False):
     assert left_side_width is not None
 
     x = int(x)
@@ -58,24 +58,24 @@ def draw_rounded_rectangle(ctx, x, y, w, h, r=10, left_side_width = None, sides_
     if close: offset = 0.5
 
     if sides_to_draw & RRECT_LEFT_SIDE:
-        ctx.move_to(x+int(left_side_width)-offset, y+h)
-        ctx.line_to(x+r, y+h)
-        ctx.curve_to(x, y+h, x, y+h, x, y+h-r)
-        ctx.line_to(x, y+r)
-        ctx.curve_to(x, y, x, y, x+r, y)
-        ctx.line_to(x+int(left_side_width)-offset, y)
+        ctx.move_to(x + int(left_side_width) - offset, y + h)
+        ctx.line_to(x + r, y + h)
+        ctx.curve_to(x, y + h, x, y + h, x, y + h - r)
+        ctx.line_to(x, y + r)
+        ctx.curve_to(x, y, x, y, x + r, y)
+        ctx.line_to(x + int(left_side_width) - offset, y)
         if close:
-            ctx.line_to(x+int(left_side_width)-offset, y+h)
+            ctx.line_to(x + int(left_side_width) - offset, y + h)
 
     if sides_to_draw & RRECT_RIGHT_SIDE:
-        ctx.move_to(x+int(left_side_width)+offset, y)
-        ctx.line_to(x+w-r, y)
-        ctx.curve_to(x+w, y, x+w, y, x+w, y+r)
-        ctx.line_to(x+w, y+h-r)
-        ctx.curve_to(x+w, y+h, x+w, y+h, x+w-r, y+h)
-        ctx.line_to(x+int(left_side_width)+offset, y+h)
+        ctx.move_to(x + int(left_side_width) + offset, y)
+        ctx.line_to(x + w - r, y)
+        ctx.curve_to(x + w, y, x + w, y, x + w, y + r)
+        ctx.line_to(x + w, y + h - r)
+        ctx.curve_to(x + w, y + h, x + w, y + h, x + w - r, y + h)
+        ctx.line_to(x + int(left_side_width) + offset, y + h)
         if close:
-            ctx.line_to(x+int(left_side_width)+offset, y)
+            ctx.line_to(x + int(left_side_width) + offset, y)
 
 
 def rounded_rectangle(ctx, x, y, width, height, radius=4.):
@@ -96,13 +96,10 @@ def rounded_rectangle(ctx, x, y, width, height, radius=4.):
 def draw_text_box_centered(ctx, widget, w_width, w_height, text, font_desc=None, add_progress=None):
     style_context = widget.get_style_context()
     text_color = style_context.get_color(Gtk.StateFlags.PRELIGHT)
-    red, green, blue = text_color.red, text_color.green, text_color.blue
-    text_color = [x/65535. for x in (red, green, blue)]
-    text_color.append(.5)
 
     if font_desc is None:
         font_desc = style_context.get_font(Gtk.StateFlags.NORMAL)
-        font_desc.set_size(14*Pango.SCALE)
+        font_desc.set_size(14 * Pango.SCALE)
 
     pango_context = widget.create_pango_context()
     layout = Pango.Layout(pango_context)
@@ -110,8 +107,8 @@ def draw_text_box_centered(ctx, widget, w_width, w_height, text, font_desc=None,
     layout.set_text(text, -1)
     width, height = layout.get_pixel_size()
 
-    ctx.move_to(w_width/2-width/2, w_height/2-height/2)
-    ctx.set_source_rgba(*text_color)
+    ctx.move_to(w_width / 2 - width / 2, w_height / 2 - height / 2)
+    ctx.set_source_rgba(text_color.red, text_color.green, text_color.blue, 0.5)
     PangoCairo.show_layout(ctx, layout)
 
     # Draw an optional progress bar below the text (same width)
@@ -119,10 +116,15 @@ def draw_text_box_centered(ctx, widget, w_width, w_height, text, font_desc=None,
         bar_height = 10
         ctx.set_source_rgba(*text_color)
         ctx.set_line_width(1.)
-        rounded_rectangle(ctx, w_width/2-width/2-.5, w_height/2+height-.5, width+1, bar_height+1)
+        rounded_rectangle(ctx,
+                          w_width / 2 - width / 2 - .5,
+                          w_height / 2 + height - .5, width + 1, bar_height + 1)
         ctx.stroke()
-        rounded_rectangle(ctx, w_width/2-width/2, w_height/2+height, int(width*add_progress)+.5, bar_height)
+        rounded_rectangle(ctx,
+                          w_width / 2 - width / 2,
+                          w_height / 2 + height, int(width * add_progress) + .5, bar_height)
         ctx.fill()
+
 
 def draw_cake(percentage, text=None, emblem=None, size=None):
     # Download percentage bar icon - it turns out the cake is a lie (d'oh!)
@@ -135,19 +137,13 @@ def draw_cake(percentage, text=None, emblem=None, size=None):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, size, size)
     ctx = cairo.Context(surface)
 
-    # ELL: get all black
-    #widget = Gtk.ProgressBar()
-    #style_context = widget.get_style_context()
-    bgc = Gdk.RGBA() #style_context.get_background_color(Gtk.StateFlags.NORMAL)
-    bgc.parse('white')
-    fgc = Gdk.RGBA() #style_context.get_background_color(Gtk.StateFlags.SELECTED)
-    fgc.parse('#4a90d9')
-    txc = Gdk.RGBA() #style_context.get_color(Gtk.StateFlags.NORMAL)
-    txc.parse('#333333')
+    bgc = get_background_color(Gtk.StateFlags.ACTIVE)
+    fgc = get_background_color(Gtk.StateFlags.SELECTED)
+    txc = get_foreground_color(Gtk.StateFlags.NORMAL)
 
     border = 1.5
-    height = int(size*.4)
-    width = size - 2*border
+    height = int(size * .4)
+    width = size - 2 * border
     y = (size - height) / 2 + .5
     x = border
 
@@ -158,8 +154,8 @@ def draw_cake(percentage, text=None, emblem=None, size=None):
 
     # Filling
     if percentage > 0:
-        fill_width = max(1, min(width-2, (width-2)*percentage+.5))
-        ctx.rectangle(x+1, y+1, fill_width, height-2)
+        fill_width = max(1, min(width - 2, (width - 2) * percentage + .5))
+        ctx.rectangle(x + 1, y + 1, fill_width, height - 2)
         ctx.set_source_rgb(0.289, 0.5625, 0.84765625)
         ctx.fill()
 
@@ -172,6 +168,7 @@ def draw_cake(percentage, text=None, emblem=None, size=None):
     del ctx
     return surface
 
+
 def draw_text_pill(left_text, right_text, x=0, y=0, border=2, radius=14, font_desc=None):
 
     # Use GTK+ style of a normal Button
@@ -181,7 +178,7 @@ def draw_text_pill(left_text, right_text, x=0, y=0, border=2, radius=14, font_de
     # Padding (in px) at the right edge of the image (for Ubuntu; bug 1533)
     padding_right = 7
 
-    x_border = border*2
+    x_border = border * 2
 
     if font_desc is None:
         font_desc = style_context.get_font(Gtk.StateFlags.NORMAL)
@@ -200,8 +197,8 @@ def draw_text_pill(left_text, right_text, x=0, y=0, border=2, radius=14, font_de
 
     text_height = max(height_left, height_right)
 
-    image_height = int(y+text_height+border*2)
-    image_width = int(x+width_left+width_right+x_border*4+padding_right)
+    image_height = int(y + text_height + border * 2)
+    image_width = int(x + width_left + width_right + x_border * 4 + padding_right)
 
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, image_width, image_height)
     ctx = cairo.Context(surface)
@@ -215,14 +212,15 @@ def draw_text_pill(left_text, right_text, x=0, y=0, border=2, radius=14, font_de
     if right_text == '0':
         right_text = None
 
-    left_side_width = width_left + x_border*2
-    right_side_width = width_right + x_border*2
+    left_side_width = width_left + x_border * 2
+    right_side_width = width_right + x_border * 2
 
     rect_width = left_side_width + right_side_width
-    rect_height = text_height + border*2
+    rect_height = text_height + border * 2
     if left_text is not None:
-        draw_rounded_rectangle(ctx,x,y,rect_width,rect_height,radius, left_side_width, RRECT_LEFT_SIDE, right_text is None)
-        linear = cairo.LinearGradient(x, y, x+left_side_width/2, y+rect_height/2)
+        draw_rounded_rectangle(ctx, x, y, rect_width, rect_height, radius,
+                               left_side_width, RRECT_LEFT_SIDE, right_text is None)
+        linear = cairo.LinearGradient(x, y, x + left_side_width / 2, y + rect_height / 2)
         linear.add_color_stop_rgba(0, .8, .8, .8, .5)
         linear.add_color_stop_rgba(.4, .8, .8, .8, .7)
         linear.add_color_stop_rgba(.6, .8, .8, .8, .6)
@@ -230,59 +228,65 @@ def draw_text_pill(left_text, right_text, x=0, y=0, border=2, radius=14, font_de
         linear.add_color_stop_rgba(1, .8, .8, .8, .9)
         ctx.set_source(linear)
         ctx.fill()
-        xpos, ypos, width_left, height = x+1, y+1, left_side_width, rect_height-2
+        xpos, ypos, width_left, height = x + 1, y + 1, left_side_width, rect_height - 2
         if right_text is None:
             width_left -= 2
         draw_rounded_rectangle(ctx, xpos, ypos, rect_width, height, radius, width_left, RRECT_LEFT_SIDE, right_text is None)
         ctx.set_source_rgba(1., 1., 1., .3)
         ctx.set_line_width(1)
         ctx.stroke()
-        draw_rounded_rectangle(ctx,x,y,rect_width,rect_height,radius, left_side_width, RRECT_LEFT_SIDE, right_text is None)
+        draw_rounded_rectangle(ctx, x, y, rect_width, rect_height, radius,
+                               left_side_width, RRECT_LEFT_SIDE, right_text is None)
         ctx.set_source_rgba(.2, .2, .2, .6)
         ctx.set_line_width(1)
         ctx.stroke()
 
-        ctx.move_to(x+x_border, y+1+border)
-        ctx.set_source_rgba( 0, 0, 0, 1)
+        ctx.move_to(x + x_border, y + 1 + border)
+        ctx.set_source_rgba(0, 0, 0, 1)
         PangoCairo.show_layout(ctx, layout_left)
-        ctx.move_to(x-1+x_border, y+border)
-        ctx.set_source_rgba( 1, 1, 1, 1)
+        ctx.move_to(x - 1 + x_border, y + border)
+        ctx.set_source_rgba(1, 1, 1, 1)
         PangoCairo.show_layout(ctx, layout_left)
 
     if right_text is not None:
-       draw_rounded_rectangle(ctx, x, y, rect_width, rect_height, radius, left_side_width, RRECT_RIGHT_SIDE, left_text is None)
-       linear = cairo.LinearGradient(x+left_side_width, y, x+left_side_width+right_side_width/2, y+rect_height)
-       linear.add_color_stop_rgba(0, .2, .2, .2, .9)
-       linear.add_color_stop_rgba(.4, .2, .2, .2, .8)
-       linear.add_color_stop_rgba(.6, .2, .2, .2, .6)
-       linear.add_color_stop_rgba(.9, .2, .2, .2, .7)
-       linear.add_color_stop_rgba(1, .2, .2, .2, .5)
-       ctx.set_source(linear)
-       ctx.fill()
-       xpos, ypos, width, height = x, y+1, rect_width-1, rect_height-2
-       if left_text is None:
-           xpos, width = x+1, rect_width-2
-       draw_rounded_rectangle(ctx, xpos, ypos, width, height, radius, left_side_width, RRECT_RIGHT_SIDE, left_text is None)
-       ctx.set_source_rgba(1., 1., 1., .3)
-       ctx.set_line_width(1)
-       ctx.stroke()
-       draw_rounded_rectangle(ctx, x, y, rect_width, rect_height, radius, left_side_width, RRECT_RIGHT_SIDE, left_text is None)
-       ctx.set_source_rgba(.1, .1, .1, .6)
-       ctx.set_line_width(1)
-       ctx.stroke()
+        draw_rounded_rectangle(ctx, x, y, rect_width, rect_height, radius, left_side_width, RRECT_RIGHT_SIDE, left_text is None)
+        linear = cairo.LinearGradient(
+            x + left_side_width,
+            y,
+            x + left_side_width + right_side_width / 2,
+            y + rect_height)
+        linear.add_color_stop_rgba(0, .2, .2, .2, .9)
+        linear.add_color_stop_rgba(.4, .2, .2, .2, .8)
+        linear.add_color_stop_rgba(.6, .2, .2, .2, .6)
+        linear.add_color_stop_rgba(.9, .2, .2, .2, .7)
+        linear.add_color_stop_rgba(1, .2, .2, .2, .5)
+        ctx.set_source(linear)
+        ctx.fill()
+        xpos, ypos, width, height = x, y + 1, rect_width - 1, rect_height - 2
+        if left_text is None:
+            xpos, width = x + 1, rect_width - 2
+        draw_rounded_rectangle(ctx, xpos, ypos, width, height, radius, left_side_width, RRECT_RIGHT_SIDE, left_text is None)
+        ctx.set_source_rgba(1., 1., 1., .3)
+        ctx.set_line_width(1)
+        ctx.stroke()
+        draw_rounded_rectangle(ctx, x, y, rect_width, rect_height, radius, left_side_width, RRECT_RIGHT_SIDE, left_text is None)
+        ctx.set_source_rgba(.1, .1, .1, .6)
+        ctx.set_line_width(1)
+        ctx.stroke()
 
-       ctx.move_to(x+left_side_width+x_border, y+1+border)
-       ctx.set_source_rgba( 0, 0, 0, 1)
-       PangoCairo.show_layout(ctx, layout_right)
-       ctx.move_to(x-1+left_side_width+x_border, y+border)
-       ctx.set_source_rgba( 1, 1, 1, 1)
-       PangoCairo.show_layout(ctx, layout_right)
+        ctx.move_to(x + left_side_width + x_border, y + 1 + border)
+        ctx.set_source_rgba(0, 0, 0, 1)
+        PangoCairo.show_layout(ctx, layout_right)
+        ctx.move_to(x - 1 + left_side_width + x_border, y + border)
+        ctx.set_source_rgba(1, 1, 1, 1)
+        PangoCairo.show_layout(ctx, layout_right)
 
     return surface
 
 
 def draw_cake_pixbuf(percentage, text=None, emblem=None):
     return cairo_surface_to_pixbuf(draw_cake(percentage, text, emblem))
+
 
 def draw_pill_pixbuf(left_text, right_text):
     return cairo_surface_to_pixbuf(draw_text_pill(left_text, right_text))
@@ -302,7 +306,11 @@ def cairo_surface_to_pixbuf(s):
         # load. This happens in PyCairo < 1.1.6, see:
         # http://webcvs.cairographics.org/pycairo/NEWS?view=markup
         # Thanks to Chris Arnold for reporting this bug
-        bio.write('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A\n/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9cMEQkqIyxn3RkAAAAZdEVYdENv\nbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAADUlEQVQI12NgYGBgAAAABQABXvMqOgAAAABJ\nRU5ErkJggg==\n'.decode('base64'))
+        bio.write('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4'
+                  'c6QAAAAZiS0dEAP8A\n/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAA'
+                  'AAd0SU1FB9cMEQkqIyxn3RkAAAAZdEVYdENv\nbW1lbnQAQ3JlYXRlZCB3a'
+                  'XRoIEdJTVBXgQ4XAAAADUlEQVQI12NgYGBgAAAABQABXvMqOgAAAABJ\nRU'
+                  '5ErkJggg==\n'.decode('base64'))
 
     pbl = GdkPixbuf.PixbufLoader()
     pbl.write(bio.getvalue())
@@ -321,10 +329,10 @@ def progressbar_pixbuf(width, height, percentage):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
     ctx = cairo.Context(surface)
 
-    padding = int(width/8.0)
-    bar_width = 2*padding
-    bar_height = height - 2*padding
-    bar_height_fill = bar_height*percentage
+    padding = int(width / 8.0)
+    bar_width = 2 * padding
+    bar_height = height - 2 * padding
+    bar_height_fill = bar_height * percentage
 
     # Background
     ctx.rectangle(padding, padding, bar_width, bar_height)
@@ -332,17 +340,54 @@ def progressbar_pixbuf(width, height, percentage):
     ctx.fill()
 
     # Foreground
-    ctx.rectangle(padding, padding+bar_height-bar_height_fill, bar_width, bar_height_fill)
+    ctx.rectangle(padding, padding + bar_height - bar_height_fill, bar_width, bar_height_fill)
     ctx.set_source_rgba(*COLOR_FG)
     ctx.fill()
-    ctx.rectangle(padding+bar_width/3, padding+bar_height-bar_height_fill, bar_width/4, bar_height_fill)
+    ctx.rectangle(padding + bar_width / 3,
+                  padding + bar_height - bar_height_fill,
+                  bar_width / 4,
+                  bar_height_fill)
     ctx.set_source_rgba(*COLOR_FG_HIGH)
     ctx.fill()
 
     # Border
-    ctx.rectangle(padding-.5, padding-.5, bar_width+1, bar_height+1)
-    ctx.set_source_rgba(*COLOR_BORDER)
+    ctx.rectangle(padding - .5, padding - .5, bar_width + 1, bar_height + 1)
+    ctx.set_source_rgba(* COLOR_BORDER)
     ctx.set_line_width(1.)
     ctx.stroke()
 
     return cairo_surface_to_pixbuf(surface)
+
+
+def get_background_color(state=Gtk.StateFlags.NORMAL, widget=Gtk.TreeView()):
+    """
+    @param state state flag (e.g. Gtk.StateFlags.SELECTED to get selected background)
+    @param widget specific widget to get info from.
+           defaults to TreeView which has all one usually wants.
+    @return background color from theme for widget or from its parents if transparent.
+    """
+    p = widget
+    color = Gdk.RGBA(0, 0, 0, 0)
+    while p is not None and color.alpha == 0:
+        style_context = p.get_style_context()
+        color = style_context.get_background_color(0)
+        p = p.get_parent()
+    return color
+
+
+def get_foreground_color(state=Gtk.StateFlags.NORMAL, widget=Gtk.TreeView()):
+    """
+    @param state state flag (e.g. Gtk.StateFlags.SELECTED to get selected text color)
+    @param widget specific widget to get info from
+           defaults to TreeView which has all one usually wants.
+    @return text color from theme for widget or its parents if transparent
+    """
+    p = widget
+    color = Gdk.RGBA(0, 0, 0, 0)
+    style_context = widget.get_style_context()
+    foreground = style_context.get_color(0)
+    while p is not None and color.alpha == 0:
+        style_context = p.get_style_context()
+        color = style_context.get_color(0)
+        p = p.get_parent()
+    return color

@@ -4,9 +4,14 @@
 # Thomas Perl <thp@gpodder.org>; 2012-07-31
 #
 
-import gpodder
-
 import logging
+import os.path
+
+from gi.repository import Gtk
+
+import gpodder
+from gpodder.gtkui import draw
+
 logger = logging.getLogger(__name__)
 
 _ = gpodder.gettext
@@ -17,14 +22,10 @@ __category__ = 'desktop-integration'
 __only_for__ = 'gtk'
 __disable_in__ = 'unity,win32,python3'
 
-from gi.repository import Gtk
-import os.path
-
-from gpodder.gtkui import draw
-
 DefaultConfig = {
-    'download_progress_bar': False, # draw progress bar on icon while downloading?
+    'download_progress_bar': False,  # draw progress bar on icon while downloading?
 }
+
 
 class gPodderExtension:
     def __init__(self, container):
@@ -107,12 +108,12 @@ class gPodderExtension:
             return
 
         if progress == 1:
-            self.set_icon() # no progress bar
+            self.set_icon()  # no progress bar
             self.last_progress = progress
             return
 
         # Only update in 3-percent-steps to save some resources
-        if abs(progress-self.last_progress) < 0.03 and progress > self.last_progress:
+        if abs(progress - self.last_progress) < 0.03 and progress > self.last_progress:
             return
 
         icon = self.get_icon_pixbuf().copy()
@@ -121,4 +122,3 @@ class gPodderExtension:
 
         self.status_icon.set_from_pixbuf(icon)
         self.last_progress = progress
-

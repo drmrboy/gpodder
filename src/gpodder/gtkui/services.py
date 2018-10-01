@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,19 +23,17 @@
 #
 
 
-import gpodder
-_ = gpodder.gettext
+import logging
 
+from gi.repository import GdkPixbuf, Gtk
+
+import gpodder
+from gpodder import coverart, util
 from gpodder.services import ObservableService
 
-import logging
+_ = gpodder.gettext
+
 logger = logging.getLogger(__name__)
-
-from gpodder import util
-from gpodder import coverart
-
-from gi.repository import Gtk
-from gi.repository import GdkPixbuf
 
 
 class CoverDownloader(ObservableService):
@@ -101,7 +99,7 @@ class CoverDownloader(ObservableService):
         """
         self.request_cover(channel, custom_url)
 
-    def __get_cover(self, channel, url, async=False, avoid_downloading=False):
+    def __get_cover(self, channel, url, async_mode=False, avoid_downloading=False):
         def get_filename():
             return self.downloader.get_cover(channel.cover_file,
                     url or channel.cover_url, channel.url, channel.title,
@@ -131,8 +129,7 @@ class CoverDownloader(ObservableService):
                 logger.warn('Corrupt cover art on server, deleting', exc_info=True)
                 util.delete_file(filename)
 
-        if async:
+        if async_mode:
             self.notify('cover-available', channel, pixbuf)
         else:
             return (channel.url, pixbuf)
-

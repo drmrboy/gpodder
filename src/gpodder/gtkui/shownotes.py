@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,19 +16,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-from urllib.parse import urlparse
-
-from gi.repository import Gtk
-from gi.repository import Gdk
-from gi.repository import Pango
-
 import html
 import logging
+from urllib.parse import urlparse
 
 import gpodder
-
 from gpodder import util
-from gpodder.gtkui.draw import draw_text_box_centered
+from gpodder.gtkui.draw import (draw_text_box_centered, get_background_color,
+                                get_foreground_color)
+
+import gi  # isort:skip
+gi.require_version('Gdk', '3.0')  # isort:skip
+gi.require_version('Gtk', '3.0')  # isort:skip
+from gi.repository import Gdk, Gtk, Pango  # isort:skip
+
 
 _ = gpodder.gettext
 
@@ -36,7 +37,6 @@ logger = logging.getLogger(__name__)
 
 has_webkit2 = False
 try:
-    import gi
     gi.require_version('WebKit2', '4.0')
     from gi.repository import WebKit2
     has_webkit2 = True
@@ -55,17 +55,29 @@ class gPodderShownotes:
     def __init__(self, shownotes_pane):
         self.shownotes_pane = shownotes_pane
 
+        self.text_view = Gtk.TextView()
+        self.text_view.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+        self.text_view.set_border_width(10)
+        self.text_view.set_editable(False)
+        self.text_buffer = Gtk.TextBuffer()
+        self.text_buffer.create_tag('heading', scale=1.6, weight=Pango.Weight.BOLD)
+        self.text_buffer.create_tag('subheading', scale=1.3)
+        self.text_view.set_buffer(self.text_buffer)
+
         self.scrolled_window = Gtk.ScrolledWindow()
+        # main_component is the scrolled_window, except for gPodderShownotesText
+        # where it's an overlay, to show hyperlink targets
+        self.main_component = self.scrolled_window
         self.scrolled_window.set_shadow_type(Gtk.ShadowType.IN)
         self.scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.scrolled_window.add(self.init())
-        self.scrolled_window.show_all()
+        self.main_component.show_all()
 
         self.da_message = Gtk.DrawingArea()
         self.da_message.set_property('expand', True)
         self.da_message.connect('draw', self.on_shownotes_message_expose_event)
         self.shownotes_pane.add(self.da_message)
-        self.shownotes_pane.add(self.scrolled_window)
+        self.shownotes_pane.add(self.main_component)
 
         self.set_complain_about_selection(True)
         self.hide_pane()
@@ -106,8 +118,10 @@ class gPodderShownotes:
             self.show_pane(selected_episodes)
 
     def on_shownotes_message_expose_event(self, drawingarea, ctx):
-        # paint the background white
-        ctx.set_source_rgba(1, 1, 1)
+        background = get_background_color()
+        if background is None:
+            background = Gdk.RGBA(1, 1, 1, 1)
+        ctx.set_source_rgba(background.red, background.green, background.blue, 1)
         x1, y1, x2, y2 = ctx.clip_extents()
         ctx.rectangle(x1, y1, x2 - x1, y2 - y1)
         ctx.fill()
@@ -120,18 +134,26 @@ class gPodderShownotes:
 
 class gPodderShownotesText(gPodderShownotes):
     def init(self):
-        self.text_view = Gtk.TextView()
         self.text_view.set_property('expand', True)
-        self.text_view.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
-        self.text_view.set_border_width(10)
-        self.text_view.set_editable(False)
         self.text_view.connect('button-release-event', self.on_button_release)
         self.text_view.connect('key-press-event', self.on_key_press)
-        self.text_buffer = Gtk.TextBuffer()
-        self.text_buffer.create_tag('heading', scale=2, weight=Pango.Weight.BOLD)
-        self.text_buffer.create_tag('subheading', scale=1.5)
         self.text_buffer.create_tag('hyperlink', foreground="#0000FF", underline=Pango.Underline.SINGLE)
-        self.text_view.set_buffer(self.text_buffer)
+        self.text_view.connect('motion-notify-event', self.on_hover_hyperlink)
+        self.overlay = Gtk.Overlay()
+        self.overlay.add(self.scrolled_window)
+        self.hyperlink_target = Gtk.Label()
+        self.hyperlink_target.set_alignment(0., 1.)
+        # need an EventBox for an opaque background behind the label
+        box = Gtk.EventBox()
+        box.add(self.hyperlink_target)
+        box.override_background_color(Gtk.StateFlags.NORMAL, get_background_color())
+        box.set_hexpand(False)
+        box.set_vexpand(False)
+        box.set_valign(Gtk.Align.END)
+        box.set_halign(Gtk.Align.START)
+        self.overlay.add_overlay(box)
+        self.overlay.set_overlay_pass_through(box, True)
+        self.main_component = self.overlay
         return self.text_view
 
     def update(self, heading, subheading, episode):
@@ -141,7 +163,7 @@ class gPodderShownotesText(gPodderShownotes):
         self.text_buffer.insert_at_cursor('\n')
         self.text_buffer.insert_with_tags_by_name(self.text_buffer.get_end_iter(), subheading, 'subheading')
         self.text_buffer.insert_at_cursor('\n\n')
-        for target, text in util.extract_hyperlinked_text(episode.description):
+        for target, text in util.extract_hyperlinked_text(episode.description_html or episode.description):
             hyperlinks.append((self.text_buffer.get_char_count(), target))
             if target:
                 self.text_buffer.insert_with_tags_by_name(
@@ -164,45 +186,68 @@ class gPodderShownotesText(gPodderShownotes):
 
         return False
 
+    def hyperlink_at_pos(self, pos):
+        """
+        :param int pos: offset in text buffer
+        :return str: hyperlink target at pos if any or None
+        """
+        return next((url for start, end, url in self.hyperlinks if start < pos < end), None)
+
     def activate_links(self):
         if self.text_buffer.get_selection_bounds() == ():
             pos = self.text_buffer.props.cursor_position
-            target = next((url for start, end, url in self.hyperlinks if start < pos < end), None)
+            target = self.hyperlink_at_pos(pos)
             if target is not None:
                 util.open_website(target)
+
+    def on_hover_hyperlink(self, textview, e):
+        x, y = textview.window_to_buffer_coords(Gtk.TextWindowType.TEXT, e.x, e.y)
+        w = self.text_view.get_window(Gtk.TextWindowType.TEXT)
+        success, it = textview.get_iter_at_location(x, y)
+        if success:
+            pos = it.get_offset()
+            target = self.hyperlink_at_pos(pos)
+            if target:
+                self.hyperlink_target.set_text(target)
+                w.set_cursor(Gdk.Cursor.new_from_name(w.get_display(), 'pointer'))
+                return
+        self.hyperlink_target.set_text('')
+        w.set_cursor(None)
 
 
 class gPodderShownotesHTML(gPodderShownotes):
     def init(self):
         # basic restrictions
-        settings = WebKit2.Settings()
+        self.stylesheet = None
+        self.manager = WebKit2.UserContentManager()
+        self.html_view = WebKit2.WebView.new_with_user_content_manager(self.manager)
+        settings = self.html_view.get_settings()
         settings.set_enable_java(False)
         settings.set_enable_plugins(False)
         settings.set_enable_javascript(False)
-        self.html_view = WebKit2.WebView.new_with_settings(settings)
+        # uncomment to show web inspector
+        # settings.set_enable_developer_extras(True)
         self.html_view.set_property('expand', True)
         self.html_view.connect('mouse-target-changed', self.on_mouse_over)
         self.html_view.connect('context-menu', self.on_context_menu)
         self.html_view.connect('decide-policy', self.on_decide_policy)
-        self.header = Gtk.Label.new()
-        self.header.set_halign(Gtk.Align.START)
-        self.header.set_valign(Gtk.Align.START)
-        self.header.set_property('margin', 10)
-        self.header.set_selectable(True)
+        # give the vertical space to the html view!
+        self.text_view.set_property('hexpand', True)
         self.status = Gtk.Label.new()
         self.status.set_halign(Gtk.Align.START)
         self.status.set_valign(Gtk.Align.END)
         self.set_status(None)
         grid = Gtk.Grid()
-        grid.attach(self.header, 0, 0, 1, 1)
+        grid.attach(self.text_view, 0, 0, 1, 1)
         grid.attach(self.html_view, 0, 1, 1, 1)
         grid.attach(self.status, 0, 2, 1, 1)
         return grid
 
     def update(self, heading, subheading, episode):
-        tmpl = '<span size="x-large" font_weight="bold">%s</span>\n' \
-              + '<span size="medium">%s</span>'
-        self.header.set_markup(tmpl % (html.escape(heading), html.escape(subheading)))
+        self.text_buffer.set_text('')
+        self.text_buffer.insert_with_tags_by_name(self.text_buffer.get_end_iter(), heading, 'heading')
+        self.text_buffer.insert_at_cursor('\n')
+        self.text_buffer.insert_with_tags_by_name(self.text_buffer.get_end_iter(), subheading, 'subheading')
 
         if episode.has_website_link:
             self._base_uri = episode.link
@@ -215,11 +260,18 @@ class gPodderShownotesHTML(gPodderShownotes):
             self._base_uri += '/'
         self._loaded = False
 
+        stylesheet = self.get_stylesheet()
+        if stylesheet:
+            self.manager.add_style_sheet(stylesheet)
         description_html = episode.description_html
         if description_html:
+            # uncomment to prevent background override in html shownotes
+            # self.manager.remove_all_style_sheets ()
             self.html_view.load_html(description_html, self._base_uri)
         else:
             self.html_view.load_plain_text(episode.description)
+            # uncomment to show web inspector
+            # self.html_view.get_inspector().show()
 
     def on_mouse_over(self, webview, hit_test_result, modifiers):
         if hit_test_result.context_is_link():
@@ -290,3 +342,13 @@ class gPodderShownotesHTML(gPodderShownotes):
 
     def set_status(self, text):
         self.status.set_label(text or " ")
+
+    def get_stylesheet(self):
+        if self.stylesheet is None:
+            foreground = get_foreground_color()
+            background = get_background_color(Gtk.StateFlags.ACTIVE)
+            if background is not None:
+                style = "html { background: %s; color: %s;}" % \
+                            (background.to_string(), foreground.to_string())
+                self.stylesheet = WebKit2.UserStyleSheet(style, 0, 1, None, None)
+        return self.stylesheet

@@ -3,6 +3,11 @@
 # Ubuntu AppIndicator Icon
 # Thomas Perl <thp@gpodder.org>; 2012-02-24
 
+import logging
+
+from gi.repository import AppIndicator3 as appindicator
+from gi.repository import Gtk
+
 import gpodder
 
 _ = gpodder.gettext
@@ -16,16 +21,11 @@ __mandatory_in__ = 'unity'
 __disable_in__ = 'win32'
 
 
-import appindicator
-from gi.repository import Gtk
-
-import logging
-
 logger = logging.getLogger(__name__)
 
 
 DefaultConfig = {
-    'visible': True, # Set to False if you don't want to show the appindicator
+    'visible': True,  # Set to False if you don't want to show the appindicator
 }
 
 
@@ -38,14 +38,15 @@ class gPodderExtension:
 
     def on_load(self):
         if self.config.visible:
-            self.indicator = appindicator.Indicator('gpodder', 'gpodder',
-                    appindicator.CATEGORY_APPLICATION_STATUS)
-            self.indicator.set_status(appindicator.STATUS_ACTIVE)
+            self.indicator = appindicator.Indicator.new('gpodder', 'gpodder',
+                    appindicator.IndicatorCategory.APPLICATION_STATUS)
+            self.indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
 
     def _rebuild_menu(self):
         menu = Gtk.Menu()
         toggle_visible = Gtk.CheckMenuItem(_('Show main window'))
         toggle_visible.set_active(True)
+
         def on_toggle_visible(menu_item):
             if menu_item.get_active():
                 self.gpodder.main_window.show()
@@ -55,6 +56,7 @@ class gPodderExtension:
         menu.append(toggle_visible)
         menu.append(Gtk.SeparatorMenuItem())
         quit_gpodder = Gtk.MenuItem(_('Quit'))
+
         def on_quit(menu_item):
             self.gpodder.on_gPodder_delete_event(self.gpodder.main_window)
         quit_gpodder.connect('activate', on_quit)
@@ -69,4 +71,3 @@ class gPodderExtension:
         if name == 'gpodder-gtk':
             self.gpodder = ui_object
             self._rebuild_menu()
-

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,16 +22,16 @@
 # Thomas Perl <thp@gpodder.org>; 2009-06-11
 #
 
-import podcastparser
+import logging
+import urllib.parse
+from html.parser import HTMLParser
+from urllib.error import HTTPError
 
+import podcastparser
 from gpodder import util
 
-import logging
 logger = logging.getLogger(__name__)
 
-from urllib.error import HTTPError
-from html.parser import HTMLParser
-import urllib.parse
 
 try:
     # Python 2
@@ -52,22 +52,37 @@ class ExceptionWithData(Exception):
     def __str__(self):
         return '%s: %s' % (self.__class__.__name__, str(self.data))
 
+
 # Temporary errors
 class BadRequest(Exception): pass
+
+
 class InternalServerError(Exception): pass
+
+
 class WifiLogin(ExceptionWithData): pass
+
 
 # Fatal errors
 class Unsubscribe(Exception): pass
+
+
 class NotFound(Exception): pass
+
+
 class InvalidFeed(Exception): pass
+
+
 class UnknownStatusCode(ExceptionWithData): pass
+
 
 # Authentication error
 class AuthenticationRequired(Exception): pass
 
+
 # Successful status codes
 UPDATED_FEED, NEW_LOCATION, NOT_MODIFIED, CUSTOM_FEED = list(range(4))
+
 
 class Result:
     def __init__(self, status, feed=None):
@@ -178,7 +193,7 @@ class Fetcher(object):
             # Not very robust attempt to detect encoding: http://stackoverflow.com/a/1495675/1072626
             charset = stream.headers.get_param('charset')
             if charset is None:
-                charset = 'utf-8' # utf-8 appears hard-coded elsewhere in this codebase
+                charset = 'utf-8'  # utf-8 appears hard-coded elsewhere in this codebase
 
             # We use StringIO in case the stream needs to be read again
             data = StringIO(stream.read().decode(charset))
@@ -199,7 +214,6 @@ class Fetcher(object):
 
             # Reset the stream so podcastparser can give it a go
             data.seek(0)
-
 
         try:
             feed = podcastparser.parse(url, data)

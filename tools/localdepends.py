@@ -8,14 +8,16 @@
 # Thomas Perl <thp.io/about>; 2012-02-11
 #
 
-import urllib.request, urllib.error, urllib.parse
-import re
-import sys
 import io
-import tarfile
 import os
+import re
 import shutil
+import sys
+import tarfile
 import tempfile
+import urllib.error
+import urllib.parse
+import urllib.request
 
 sys.stdout = sys.stderr
 
@@ -28,11 +30,13 @@ MODULES = [
     ('mygpoclient', r'mygpoclient-[0-9.]+/(mygpoclient/[^/]*\.py)')
 ]
 
+
 def get_tarball_url(modulename):
     url = 'http://pypi.python.org/pypi/' + modulename
     html = urllib.request.urlopen(url).read().decode('utf-8')
     match = re.search(r'(http[s]?://[^>]*%s-([0-9.]*)(?:\.post\d+)?\.tar\.gz)' % modulename, html)
     return match.group(0) if match is not None else None
+
 
 for module, required_files in MODULES:
     print('Fetching', module, '...', end=' ')
@@ -41,7 +45,8 @@ for module, required_files in MODULES:
         print('Cannot determine download URL for', module, '- aborting!')
         break
     data = urllib.request.urlopen(tarball_url).read()
-    print('%d KiB' % (len(data)//1024))
+    print('%d KiB' % (len(data) // 1024))
+    print('  downloaded from %s' % tarball_url)
     tar = tarfile.open(fileobj=io.BytesIO(data))
     for name in tar.getnames():
         match = re.match(required_files, name)
@@ -61,4 +66,3 @@ for module, required_files in MODULES:
             shutil.move(os.path.join(tmp_dir, name), target_file)
 
 shutil.rmtree(tmp_dir)
-

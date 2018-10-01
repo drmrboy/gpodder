@@ -6,15 +6,18 @@
 #           Thomas Perl <thp.io/about>; 2009-09-13
 
 import sys
-sys.path.insert(0, 'src')
 
 from gi.repository import Gtk
 
 from gpodder.gtkui.draw import draw_cake_pixbuf
 
+sys.path.insert(0, 'src')
+
+
 def gen(percentage):
     pixbuf = draw_cake_pixbuf(percentage)
     return Gtk.Image.new_from_pixbuf(pixbuf)
+
 
 w = Gtk.Window()
 w.connect('destroy', Gtk.main_quit)
@@ -26,8 +29,7 @@ for y in range(1):
     v.add(h)
     PARTS = 20
     for x in range(PARTS + 1):
-        h.add(gen(x/PARTS))
+        h.add(gen(x / PARTS))
 w.set_default_size(400, 100)
 w.show_all()
 Gtk.main()
-

@@ -3,22 +3,27 @@
 # (c) 2014-04-10 Alex Mayer <magictrick4906@aim.com>
 # Released under the same license terms as gPodder itself.
 
+# Use a logger for debug output - this will be managed by gPodder
+import logging
 import os
 import shutil
 
-# Use a logger for debug output - this will be managed by gPodder
-import logging
+import gpodder
+
 logger = logging.getLogger(__name__)
+_ = gpodder.gettext
+
 
 # Provide some metadata that will be displayed in the gPodder GUI
-__title__ = 'Rockbox Cover Art Sync'
-__description__ = 'Copy Cover Art To Rockboxed Media Player'
+__title__ = _('Rockbox Cover Art Sync')
+__description__ = _('Copy Cover Art To Rockboxed Media Player')
 __only_for__ = 'gtk, cli'
 __authors__ = 'Alex Mayer <magictrick4906@aim.com>'
 
 DefaultConfig = {
-    "art_name_on_device": "cover.jpg" # The file name that will be used on the device for cover art
+    "art_name_on_device": "cover.jpg"  # The file name that will be used on the device for cover art
 }
+
 
 class gPodderExtension:
 
@@ -39,4 +44,3 @@ class gPodderExtension:
                 logger.info('Syncing cover art for %s', episode.channel.title)
                 # copy and rename art
                 shutil.copy(episode_art, device_art)
-

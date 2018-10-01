@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,14 @@
 # Windows 7 taskbar progress
 # Sean Munkel; 2013-01-05
 
+import functools
+import logging
+from ctypes import (HRESULT, POINTER, Structure, alignment, c_int, c_uint,
+                    c_ulong, c_ulonglong, c_ushort, c_wchar_p, sizeof)
+from ctypes.wintypes import tagRECT
+
 import gpodder
+from comtypes import COMMETHOD, GUID, IUnknown, client, wireHWND
 
 _ = gpodder.gettext
 
@@ -31,15 +38,6 @@ __authors__ = 'Sean Munkel <seanmunkel@gmail.com>'
 __category__ = 'desktop-integration'
 __only_for__ = 'win32'
 
-
-from ctypes import (c_ushort, c_int, c_uint, c_ulong, c_ulonglong,
-                    c_wchar_p, alignment, sizeof, Structure, POINTER)
-from comtypes import IUnknown, GUID, COMMETHOD, wireHWND, client
-from ctypes import HRESULT
-from ctypes.wintypes import tagRECT
-import functools
-
-import logging
 logger = logging.getLogger(__name__)
 
 WSTRING = c_wchar_p
@@ -152,8 +150,8 @@ class gPodderExtension:
 
     def on_load(self):
         self.taskbar = client.CreateObject(
-                '{56FDF344-FD6D-11d0-958A-006097C9A090}',
-                interface=ITaskbarList3)
+            '{56FDF344-FD6D-11d0-958A-006097C9A090}',
+            interface=ITaskbarList3)
         self.taskbar.HrInit()
 
     def on_unload(self):
@@ -181,4 +179,3 @@ class gPodderExtension:
                     int(progress * 100), 100)
         else:
             self.taskbar.SetProgressState(self.window_handle, TBPF_NOPROGRESS)
-

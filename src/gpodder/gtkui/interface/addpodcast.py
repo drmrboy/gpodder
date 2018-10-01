@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,16 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from gi.repository import Gtk
-from gi.repository import Gdk
+from gi.repository import Gdk, Gtk
 
 import gpodder
-
-_ = gpodder.gettext
-
+from gpodder import util
 from gpodder.gtkui.interface.common import BuilderWidget
 
-from gpodder import util
+_ = gpodder.gettext
 
 
 class gPodderAddPodcast(BuilderWidget):
@@ -49,6 +46,7 @@ class gPodderAddPodcast(BuilderWidget):
             # then from SELECTION (text selected and pasted via
             # middle mouse button).
             clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+
             def receive_clipboard_text(clipboard, text, second_try):
                 # Heuristic: If there is a space in the clipboard
                 # text, assume it's some arbitrary text, and no URL
@@ -87,6 +85,5 @@ class gPodderAddPodcast(BuilderWidget):
         url = self.entry_url.get_text()
         self.on_btn_close_clicked(widget)
         if self.add_podcast_list is not None:
-            title = None # FIXME: Add title GUI element
+            title = None  # FIXME: Add title GUI element
             self.add_podcast_list([(title, url)])
-

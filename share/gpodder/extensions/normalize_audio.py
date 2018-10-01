@@ -7,13 +7,13 @@
 # (c) 2011-11-06 Bernd Schlapsi <brot@gmx.info>
 # Released under the same license terms as gPodder itself.
 
+import logging
 import os
 import subprocess
 
 import gpodder
 from gpodder import util
 
-import logging
 logger = logging.getLogger(__name__)
 
 _ = gpodder.gettext
@@ -27,7 +27,7 @@ __category__ = 'post-download'
 
 
 DefaultConfig = {
-    'context_menu': True, # Show action in the episode list context menu
+    'context_menu': True,  # Show action in the episode list context menu
 }
 
 # a tuple of (extension, command)
@@ -35,6 +35,7 @@ CONVERT_COMMANDS = {
     '.ogg': 'normalize-ogg',
     '.mp3': 'normalize-mp3',
 }
+
 
 class gPodderExtension:
     MIME_TYPES = ('audio/mpeg', 'audio/ogg', )
@@ -90,9 +91,14 @@ class gPodderExtension:
 
         cmd = [CONVERT_COMMANDS.get(extension, 'normalize-audio'), filename]
 
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
-        stdout, stderr = p.communicate()
+        if gpodder.ui.win32:
+            p = util.Popen(cmd)
+            p.wait()
+            stdout, stderr = ("<unavailable>",) * 2
+        else:
+            p = util.Popen(cmd, stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+            stdout, stderr = p.communicate()
 
         if p.returncode == 0:
             logger.info('normalize-audio processing successful.')
@@ -104,4 +110,3 @@ class gPodderExtension:
     def convert_episodes(self, episodes):
         for episode in episodes:
             self._convert_episode(episode)
-

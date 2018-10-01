@@ -3,7 +3,13 @@
 # Ubuntu Unity Launcher Integration
 # Thomas Perl <thp@gpodder.org>; 2012-02-06
 
+import logging
+import os
+import subprocess
+import sys
+
 import gpodder
+from gpodder import util
 
 _ = gpodder.gettext
 
@@ -22,10 +28,6 @@ __disable_in__ = 'win32'
 # this and still expose the same "interface' (LauncherEntry and its methods)
 # to our callers.
 
-import os
-import subprocess
-import sys
-import logging
 
 if __name__ != '__main__':
     logger = logging.getLogger(__name__)
@@ -40,8 +42,8 @@ if __name__ != '__main__':
         def on_load(self):
             logger.info('Starting Ubuntu Unity Integration.')
             os.environ['PYTHONPATH'] = os.pathsep.join(sys.path)
-            self.process = subprocess.Popen(['python', __file__],
-                    stdin=subprocess.PIPE)
+            self.process = util.Popen(['python', __file__],
+                                      stdin=subprocess.PIPE)
 
         def on_unload(self):
             logger.info('Killing process...')
@@ -84,7 +86,7 @@ else:
 
         def __init__(self):
             self.launcher = Unity.LauncherEntry.get_for_desktop_id(
-                    self.FILENAME)
+                self.FILENAME)
 
         def set_count(self, count):
             self.launcher.set_property('count', count)
@@ -103,4 +105,3 @@ else:
     reader.read()
 
     loop.quit()
-

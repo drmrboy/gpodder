@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,16 +23,16 @@
 #
 
 
+import logging
+import os
+
 import gpodder
+from gpodder import util, youtube
+
 _ = gpodder.gettext
 
-import logging
 logger = logging.getLogger(__name__)
 
-from gpodder import util
-from gpodder import youtube
-
-import os
 
 class CoverDownloader(object):
     # File name extension dict, lists supported cover art extensions
@@ -69,7 +69,7 @@ class CoverDownloader(object):
         # If allowed to download files, do so here
         if download:
             # YouTube-specific cover art image resolver
-            youtube_cover_url = youtube.get_real_cover(feed_url)
+            youtube_cover_url = youtube.get_cover(feed_url)
             if youtube_cover_url is not None:
                 cover_url = youtube_cover_url
 
@@ -117,5 +117,4 @@ class CoverDownloader(object):
         return os.path.join(gpodder.images_folder, basename)
 
     def _fallback_filename(self, title):
-        return self._default_filename('podcast-%d.png' % (hash(title)%5))
-
+        return self._default_filename('podcast-%d.png' % (hash(title) % 5))

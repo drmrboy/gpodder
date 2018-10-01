@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@
 # Based on an initial draft by Neal Walfield
 
 
-import gpodder
-
 import glob
 import logging
 import os
@@ -31,7 +29,10 @@ import sys
 import time
 import traceback
 
+import gpodder
+
 logger = logging.getLogger(__name__)
+
 
 def setup(verbose=True):
     # Configure basic stdout logging
@@ -41,6 +42,7 @@ def setup(verbose=True):
 
     # Replace except hook with a custom one that logs it as an error
     original_excepthook = sys.excepthook
+
     def on_uncaught_exception(exctype, value, tb):
         message = ''.join(traceback.format_exception(exctype, value, tb))
         logger.error('Uncaught exception: %s', message)
@@ -66,7 +68,7 @@ def setup(verbose=True):
         old_logfiles = glob.glob(os.path.join(logging_directory, '*-*-*.log'))
         for old_logfile in old_logfiles:
             st = os.stat(old_logfile)
-            if time.time() - st.st_mtime > 60*60*24*LOG_KEEP_DAYS:
+            if time.time() - st.st_mtime > 60 * 60 * 24 * LOG_KEEP_DAYS:
                 logger.info('Purging old logfile: %s', old_logfile)
                 try:
                     os.remove(old_logfile)
@@ -84,4 +86,3 @@ def setup(verbose=True):
         for name in ('cli', 'gtk') if getattr(gpodder.ui, name, False)))
 
     return True
-

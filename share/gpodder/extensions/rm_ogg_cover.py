@@ -23,14 +23,15 @@
 # The reason for this script is that my media player (MEIZU SL6)
 # couldn't handle ogg files with included coverart
 
+import logging
 import os
+
+from mutagen.oggvorbis import OggVorbis
 
 import gpodder
 
-import logging
 logger = logging.getLogger(__name__)
 
-from mutagen.oggvorbis import OggVorbis
 
 _ = gpodder.gettext
 
@@ -43,7 +44,7 @@ __category__ = 'post-download'
 
 
 DefaultConfig = {
-    'context_menu': True, # Show item in context menu
+    'context_menu': True,  # Show item in context menu
 }
 
 
@@ -59,8 +60,9 @@ class gPodderExtension:
         if not self.config.context_menu:
             return None
 
-        if 'audio/ogg' not in [e.mime_type for e in episodes
-            if e.mime_type is not None and e.file_exists()]:
+        episode_types = [e.mime_type for e in episodes
+                         if e.mime_type is not None and e.file_exists()]
+        if 'audio/ogg' not in episode_types:
             return None
 
         return [(_('Remove cover art'), self._rm_ogg_covers)]
@@ -96,4 +98,3 @@ class gPodderExtension:
                 ogg.save()
         except Exception as e:
             logger.warn('Failed to remove OGG cover: %s', e, exc_info=True)
-

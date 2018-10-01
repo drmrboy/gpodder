@@ -3,12 +3,12 @@
 # Requirements: gPodder 3.x (or "tres" branch newer than 2011-06-08)
 # (c) 2011-06-08 Thomas Perl <thp.io/about>
 # Released under the same license terms as gPodder itself.
+import logging
 import subprocess
 
 import gpodder
 from gpodder import util
 
-import logging
 logger = logging.getLogger(__name__)
 
 _ = gpodder.gettext
@@ -58,8 +58,7 @@ class FreeDesktopPlayer(Player):
         return util.find_command(self.command[0]) is not None
 
     def open_files(self, filenames):
-        subprocess.Popen(self.command + filenames,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        util.Popen(self.command + filenames)
 
 
 class Win32Player(Player):
@@ -78,7 +77,7 @@ class Win32Player(Player):
 
     def open_files(self, filenames):
         for cmd in util.format_desktop_command(self.command, filenames):
-            subprocess.Popen(cmd)
+            util.Popen(cmd, close_fds=True)
 
 
 class MPRISResumer(FreeDesktopPlayer):

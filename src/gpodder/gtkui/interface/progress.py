@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,15 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from gi.repository import Gtk
-from gi.repository import GObject
-from gi.repository import Pango
+from gi.repository import GObject, Gtk, Pango
 
 import gpodder
+from gpodder.gtkui.widgets import SpinningProgressIndicator
 
 _ = gpodder.gettext
 
-from gpodder.gtkui.widgets import SpinningProgressIndicator
 
 class ProgressIndicator(object):
     # Delayed time until window is shown (for short operations)
@@ -53,7 +51,7 @@ class ProgressIndicator(object):
         return True
 
     def _create_progress(self):
-        self.dialog = Gtk.MessageDialog(self.parent, \
+        self.dialog = Gtk.MessageDialog(self.parent,
                 0, 0, Gtk.ButtonsType.CANCEL, self.subtitle or self.title)
         self.dialog.set_modal(True)
         self.dialog.connect('delete-event', self._on_delete_event)
@@ -66,7 +64,7 @@ class ProgressIndicator(object):
                 if isinstance(label, Gtk.Label):
                     label.set_selectable(False)
 
-        self.dialog.set_response_sensitive(Gtk.ResponseType.CANCEL, \
+        self.dialog.set_response_sensitive(Gtk.ResponseType.CANCEL,
                 self.cancellable)
 
         self.progressbar = Gtk.ProgressBar()
@@ -113,4 +111,3 @@ class ProgressIndicator(object):
         if self.dialog is not None:
             self.dialog.destroy()
         GObject.source_remove(self.source_id)
-

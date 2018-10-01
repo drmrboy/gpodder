@@ -25,20 +25,21 @@
 
 import base64
 import datetime
+import logging
 import mimetypes
 import os
+
+from mutagen import File
+from mutagen.flac import Picture
+from mutagen.id3 import APIC, ID3
+from mutagen.mp3 import MP3
+from mutagen.mp4 import MP4Cover, MP4Tags
 
 import gpodder
 from gpodder import coverart
 
-import logging
 logger = logging.getLogger(__name__)
 
-from mutagen import File
-from mutagen.flac import Picture
-from mutagen.mp3 import MP3
-from mutagen.id3 import ID3, APIC
-from mutagen.mp4 import MP4Cover, MP4Tags
 
 # workaround for https://github.com/quodlibet/mutagen/issues/334
 # can't add_tags to MP4 when file has no tag
@@ -147,7 +148,7 @@ class Mp4File(AudioFile):
             cover_format = MP4Cover.FORMAT_JPEG
 
         data = open(self.cover, 'rb').read()
-        audio.tags['covr'] =  [MP4Cover(data, cover_format)]
+        audio.tags['covr'] = [MP4Cover(data, cover_format)]
         audio.save()
 
 
@@ -163,11 +164,11 @@ class Mp3File(AudioFile):
 
         audio.tags.add(
             APIC(
-                encoding = 3, # 3 is for utf-8
-                mime = mimetypes.guess_type(self.cover)[0],
-                type = 3,
-                desc = 'Cover',
-                data = open(self.cover).read()
+                encoding=3,  # 3 is for utf-8
+                mime=mimetypes.guess_type(self.cover)[0],
+                type=3,
+                desc='Cover',
+                data=open(self.cover).read()
             )
         )
         audio.save()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,18 +23,17 @@
 #
 
 
+import json
+import logging
+import re
+
 import gpodder
+from gpodder import util
 
 _ = gpodder.gettext
 
-from gpodder import util
-
-import logging
 logger = logging.getLogger(__name__)
 
-import json
-
-import re
 
 VIMEOCOM_RE = re.compile(r'http[s]?://vimeo\.com/(channels/[^/]+|\d+)$', re.IGNORECASE)
 VIMEOCOM_VIDEO_RE = re.compile(r'http[s]?://vimeo.com/channels/(?:[^/])+/(\d+)$', re.IGNORECASE)
@@ -46,7 +45,9 @@ FILEFORMAT_RANKING = ['270p', '360p', '720p', '1080p']
 
 FORMATS = tuple((x, x) for x in FILEFORMAT_RANKING)
 
+
 class VimeoError(BaseException): pass
+
 
 def get_real_download_url(url, preferred_fileformat=None):
     video_id = get_vimeo_id(url)
@@ -84,6 +85,7 @@ def get_real_download_url(url, preferred_fileformat=None):
 
     return url
 
+
 def get_vimeo_id(url):
     result = MOOGALOOP_RE.match(url)
     if result is not None:
@@ -99,8 +101,10 @@ def get_vimeo_id(url):
 
     return None
 
+
 def is_video_link(url):
     return (get_vimeo_id(url) is not None)
+
 
 def get_real_channel_url(url):
     result = VIMEOCOM_RE.match(url)
@@ -109,6 +113,6 @@ def get_real_channel_url(url):
 
     return url
 
+
 def get_real_cover(url):
     return None
-

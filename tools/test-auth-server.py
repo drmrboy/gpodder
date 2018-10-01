@@ -4,11 +4,11 @@
 # from our crappy-but-does-the-job department
 # Thomas Perl <thp.io/about>; 2012-01-20
 
-import http.server
-import sys
-import re
-import hashlib
 import datetime
+import hashlib
+import http.server
+import re
+import sys
 
 USERNAME = 'user@example.com'    # Username used for HTTP Authentication
 PASSWORD = 'secret'              # Password used for HTTP Authentication
@@ -20,20 +20,22 @@ GUID = hashlib.sha1(open(__file__).read()).hexdigest()
 
 URL = 'http://%(HOST)s:%(PORT)s' % locals()
 
-FEEDNAME = sys.argv[0]       # The title of the RSS feed
-FEEDFILE = 'feed.rss'        # The "filename" of the feed on the server
-EPISODES = 'episode'         # Base name for the episode files
-EPISODES_EXT = '.mp3'        # Extension for the episode files
-EPISODES_MIME = 'audio/mpeg' # Mime type for the episode files
-EP_COUNT = 7                 # Number of episodes in the feed
-SIZE = 500000                # Size (in bytes) of the episode downloads)
+FEEDNAME = sys.argv[0]        # The title of the RSS feed
+FEEDFILE = 'feed.rss'         # The "filename" of the feed on the server
+EPISODES = 'episode'          # Base name for the episode files
+EPISODES_EXT = '.mp3'         # Extension for the episode files
+EPISODES_MIME = 'audio/mpeg'  # Mime type for the episode files
+EP_COUNT = 7                  # Number of episodes in the feed
+SIZE = 500000                 # Size (in bytes) of the episode downloads)
+
 
 def mkpubdates(items):
     """Generate fake pubDates (one each day, recently)"""
-    current = datetime.datetime.now() - datetime.timedelta(days=items+3)
+    current = datetime.datetime.now() - datetime.timedelta(days=items + 3)
     for i in range(items):
         yield current.ctime()
         current += datetime.timedelta(days=1)
+
 
 def mkrss(items=EP_COUNT):
     """Generate a dumm RSS feed with a given number of items"""
@@ -47,7 +49,7 @@ def mkrss(items=EP_COUNT):
           type="%(EPISODES_MIME)s"
           length="%(SIZE)s"/>
     </item>
-    """ % dict(list(locals().items())+list(globals().items()))
+    """ % dict(list(locals().items()) + list(globals().items()))
         for INDEX, PUBDATE in enumerate(mkpubdates(items)))
 
     return """
@@ -56,11 +58,13 @@ def mkrss(items=EP_COUNT):
     %(ITEMS)s
     </channel>
     </rss>
-    """ % dict(list(locals().items())+list(globals().items()))
+    """ % dict(list(locals().items()) + list(globals().items()))
+
 
 def mkdata(size=SIZE):
     """Generate dummy data of a given size (in bytes)"""
-    return ''.join(chr(32+(i%(127-32))) for i in range(size))
+    return ''.join(chr(32 + (i % (127 - 32))) for i in range(size))
+
 
 class AuthRequestHandler(http.server.BaseHTTPRequestHandler):
     FEEDFILE_PATH = '/%s' % FEEDFILE
@@ -94,14 +98,14 @@ class AuthRequestHandler(http.server.BaseHTTPRequestHandler):
             print('Not authorized - sending WWW-Authenticate header.')
             self.send_response(401)
             self.send_header('WWW-Authenticate',
-                    'Basic realm="%s"' % sys.argv[0])
+                             'Basic realm="%s"' % sys.argv[0])
             self.end_headers()
             self.wfile.close()
             return
 
         self.send_response(200)
         self.send_header('Content-type',
-                'application/xml' if is_feed else 'audio/mpeg')
+                         'application/xml' if is_feed else 'audio/mpeg')
         self.end_headers()
         self.wfile.write(mkrss() if is_feed else mkdata())
         self.wfile.close()
@@ -116,4 +120,3 @@ if __name__ == '__main__':
     """ % locals())
     while True:
         httpd.handle_request()
-

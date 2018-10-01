@@ -17,38 +17,42 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import logging
 import os
+
 import gpodder
+from gpodder import util
+from gpodder.sync import (episode_filename_on_device,
+                          episode_foldername_on_device)
 
 _ = gpodder.gettext
 
-from gpodder import util
 
-import logging
 logger = logging.getLogger(__name__)
+
 
 class gPodderDevicePlaylist(object):
     def __init__(self, config, playlist_name):
-        self._config=config
+        self._config = config
         self.linebreak = '\r\n'
-        self.playlist_file=util.sanitize_filename(playlist_name + '.m3u')
+        self.playlist_file = util.sanitize_filename(playlist_name, self._config.device_sync.max_filename_length) + '.m3u'
         self.playlist_folder = os.path.join(self._config.device_sync.device_folder, self._config.device_sync.playlists.folder)
         self.mountpoint = util.find_mount_point(self.playlist_folder)
         if self.mountpoint == '/':
             self.mountpoint = self.playlist_folder
             logger.warning('MP3 player resides on / - using %s as MP3 player root', self.mountpoint)
-        self.playlist_absolute_filename=os.path.join(self.playlist_folder, self.playlist_file)
+        self.playlist_absolute_filename = os.path.join(self.playlist_folder, self.playlist_file)
 
     def build_extinf(self, filename):
-#TO DO: Windows playlists
-#        if self._config.mp3_player_playlist_win_path:
-#            filename = filename.replace('\\', os.sep)
+        # TODO: Windows playlists
+        #        if self._config.mp3_player_playlist_win_path:
+        #            filename = filename.replace('\\', os.sep)
 
-#        # rebuild the whole filename including the mountpoint
-#        if self._config.device_sync.playlist_absolute_path:
-#            absfile = os.path.join(self.mountpoint,filename)
-#        else: #TODO: Test rel filenames
-#            absfile = util.rel2abs(filename, os.path.dirname(self.playlist_file))
+        #        # rebuild the whole filename including the mountpoint
+        #        if self._config.device_sync.playlist_absolute_path:
+        #            absfile = os.path.join(self.mountpoint,filename)
+        #        else: #TODO: Test rel filenames
+        #            absfile = util.rel2abs(filename, os.path.dirname(self.playlist_file))
 
         # fallback: use the basename of the file
         (title, extension) = os.path.splitext(os.path.basename(filename))
@@ -71,20 +75,16 @@ class gPodderDevicePlaylist(object):
         """
         get the filename for the given episode for the playlist
         """
-        filename_base = util.sanitize_filename(episode.sync_filename(
-            self._config.device_sync.custom_sync_name_enabled,
-            self._config.device_sync.custom_sync_name),
-            self._config.device_sync.max_filename_length)
-        filename = filename_base + os.path.splitext(episode.local_filename(create=False))[1].lower()
-        return filename
+        return episode_filename_on_device(self._config, episode)
 
     def get_absolute_filename_for_playlist(self, episode):
         """
         get the filename including full path for the given episode for the playlist
         """
         filename = self.get_filename_for_playlist(episode)
-        if self._config.device_sync.one_folder_per_podcast:
-            filename = os.path.join(util.sanitize_filename(episode.channel.title), filename)
+        foldername = episode_foldername_on_device(self._config, episode)
+        if foldername:
+            filename = os.path.join(foldername, filename)
         if self._config.device_sync.playlist.absolute_path:
             filename = os.path.join(util.relpath(self.mountpoint, self._config.device_sync.device_folder), filename)
         return filename
@@ -100,15 +100,9 @@ class gPodderDevicePlaylist(object):
             fp = open(os.path.join(self.playlist_folder, self.playlist_file), 'w')
             fp.write('#EXTM3U%s' % self.linebreak)
             for current_episode in episodes:
-                filename_base = util.sanitize_filename(current_episode.sync_filename(
-                    self._config.device_sync.custom_sync_name_enabled,
-                    self._config.device_sync.custom_sync_name),
-                    self._config.device_sync.max_filename_length)
-                filename = filename_base + os.path.splitext(current_episode.local_filename(create=False))[1].lower()
                 filename = self.get_filename_for_playlist(current_episode)
                 fp.write(self.build_extinf(filename))
                 filename = self.get_absolute_filename_for_playlist(current_episode)
                 fp.write(filename)
                 fp.write(self.linebreak)
             fp.close()
-

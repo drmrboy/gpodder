@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,10 +22,11 @@
 #  gpodder.query - Episode Query Language (EQL) implementation (2010-11-29)
 #
 
+import datetime
+import re
+
 import gpodder
 
-import re
-import datetime
 
 class Matcher(object):
     """Match implementation for EQL
@@ -69,7 +70,7 @@ class Matcher(object):
 
         # Nouns (for comparisons)
         if k in ('megabytes', 'mb'):
-            return episode.file_size / (1024*1024)
+            return episode.file_size / (1024 * 1024)
         elif k == 'title':
             return episode.title
         elif k == 'description':
@@ -93,9 +94,9 @@ class EQL(object):
     using EQL. Example usage:
 
     >>> q = EQL('downloaded and megabytes > 10')
-    >>> q.filter(channel.get_all_episodes())
+    >>> # q.filter(channel.get_all_episodes())
 
-    >>> EQL('new and video').match(episode)
+    >>> # EQL('new and video').match(episode)
 
     Regular expression queries are also supported:
 
@@ -112,7 +113,7 @@ class EQL(object):
     Normal EQL queries cannot be mixed with RegEx
     or string matching yet, so this does NOT work:
 
-    >>> EQL('downloaded and /The.*/i')
+    >>> # EQL('downloaded and /The.*/i')
     """
 
     def __init__(self, query):
@@ -144,7 +145,6 @@ class EQL(object):
                 print(e)
                 self._query = None
 
-
     def match(self, episode):
         if self._query is None:
             return False
@@ -175,5 +175,3 @@ def UserEQL(query):
         return EQL("'%s'" % query)
     else:
         return EQL(query)
-
-

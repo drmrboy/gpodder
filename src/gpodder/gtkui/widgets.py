@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,12 +24,10 @@
 #  Thomas Perl <thp@gpodder.org> 2009-03-31
 #
 
-from gi.repository import Gdk
-from gi.repository import Gtk
-from gi.repository import GObject
-from gi.repository import Pango
-
 import cgi
+
+from gi.repository import Gdk, GObject, Gtk, Pango
+
 
 class SimpleMessageArea(Gtk.HBox):
     """A simple, yellow message area. Inspired by gedit.
@@ -110,9 +108,9 @@ class SpinningProgressIndicator(Gtk.Image):
             width, height = icon.get_width(), icon.get_height()
             if width < size or height < size:
                 size = min(width, height)
-            for row in range(height//size):
-                for column in range(width//size):
-                    frame = icon.subpixbuf(column*size, row*size, size, size)
+            for row in range(height // size):
+                for column in range(width // size):
+                    frame = icon.subpixbuf(column * size, row * size, size, size)
                     self._frames.append(frame)
             # Remove the first frame (the "idle" icon)
             if self._frames:
@@ -128,4 +126,3 @@ class SpinningProgressIndicator(Gtk.Image):
             if self._frame_id >= len(self._frames):
                 self._frame_id = 0
             self.set_from_pixbuf(self._frames[self._frame_id])
-

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@
 from gi.repository import Gtk
 
 import gpodder
+from gpodder.gtkui.interface.common import BuilderWidget
 
 _ = gpodder.gettext
 
-from gpodder.gtkui.interface.common import BuilderWidget
 
 class gPodderWelcome(BuilderWidget):
     PADDING = 10
@@ -33,10 +33,9 @@ class gPodderWelcome(BuilderWidget):
             for child in widget.get_children():
                 if isinstance(child, Gtk.Alignment):
                     child.set_padding(self.PADDING, self.PADDING,
-                        self.PADDING, self.PADDING)
+                                      self.PADDING, self.PADDING)
                 else:
                     child.set_padding(self.PADDING, self.PADDING)
 
     def on_btnCancel_clicked(self, button):
         self.main_window.response(Gtk.ResponseType.CANCEL)
-

@@ -29,25 +29,25 @@ their parameters.
 For an example extension see share/gpodder/examples/extensions.py
 """
 
+import functools
 import glob
 import imp
 import inspect
 import json
+import logging
 import os
-import functools
+import re
 import shlex
 import subprocess
 import sys
-import re
 from datetime import datetime
 
 import gpodder
+from gpodder import util
 
 _ = gpodder.gettext
 
-from gpodder import util
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -117,17 +117,20 @@ class ExtensionMetadata(object):
 
         category = metadata.get('category', 'other')
         metadata['category'] = CATEGORY_DICT.get(category, DEFAULT_CATEGORY)
-        
+
         self.__dict__.update(metadata)
-        
+
     def __getattr__(self, name):
         try:
             return self.DEFAULTS[name]
         except KeyError as e:
             raise AttributeError(name, e)
-            
+
     def get_sorted(self):
-        kf = lambda x: self.SORTKEYS.get(x[0], 99)
+
+        def kf(x):
+            return self.SORTKEYS.get(x[0], 99)
+
         return sorted([(k, v) for k, v in list(self.__dict__.items())], key=kf)
 
     def check_ui(self, target, default):
@@ -162,17 +165,18 @@ class ExtensionMetadata(object):
         uis = [_f for _f in [x.strip() for x in getattr(self, target).split(',')] if _f]
         return any(getattr(gpodder.ui, ui.lower(), False) for ui in uis)
 
-    @property   
+    @property
     def available_for_current_ui(self):
         return self.check_ui('only_for', True)
-    
+
     @property
     def mandatory_in_current_ui(self):
         return self.check_ui('mandatory_in', False)
-        
+
     @property
     def disable_in_current_ui(self):
         return self.check_ui('disable_in', False)
+
 
 class MissingDependency(Exception):
     def __init__(self, message, dependency, cause=None):
@@ -180,8 +184,12 @@ class MissingDependency(Exception):
         self.dependency = dependency
         self.cause = cause
 
+
 class MissingModule(MissingDependency): pass
+
+
 class MissingCommand(MissingDependency): pass
+
 
 class ExtensionContainer(object):
     """An extension container wraps one extension module"""
@@ -233,7 +241,8 @@ class ExtensionContainer(object):
         if not filename or not os.path.exists(filename):
             return {}
 
-        extension_py = open(filename).read()
+        encoding = util.guess_encoding(filename)
+        extension_py = open(filename, "r", encoding=encoding).read()
         metadata = dict(re.findall("__([a-z_]+)__ = '([^']+)'", extension_py))
 
         # Support for using gpodder.gettext() as _ to localize text
@@ -344,12 +353,12 @@ class ExtensionManager(object):
     def _config_value_changed(self, name, old_value, new_value):
         if name != 'extensions.enabled':
             return
-            
+
         for container in self.containers:
             new_enabled = (container.name in new_value)
             if new_enabled == container.enabled:
                 continue
-                
+
             logger.info('Extension "%s" is now %s', container.name,
                     'enabled' if new_enabled else 'disabled')
             container.set_enabled(new_enabled)
@@ -382,8 +391,8 @@ class ExtensionManager(object):
 
     def get_extensions(self):
         """Get a list of all loaded extensions and their enabled flag"""
-        return [c for c in self.containers 
-            if c.metadata.available_for_current_ui and 
+        return [c for c in self.containers
+            if c.metadata.available_for_current_ui and
             not c.metadata.mandatory_in_current_ui and
             not c.metadata.disable_in_current_ui]
 

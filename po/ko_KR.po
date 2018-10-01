@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-03 21:09+0100\n"
+"POT-Creation-Date: 2018-09-15 12:26+0200\n"
 "PO-Revision-Date: 2016-01-01 21:09+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,264 +18,274 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 1.8.6\n"
 
-#: src/gpodder/util.py:429
+#: src/gpodder/config.py:54
+#, python-format
+msgid "gPodder on %s"
+msgstr "gPodder on %s"
+
+#: src/gpodder/util.py:442
 #, python-format
 msgid "%(count)d day ago"
 msgid_plural "%(count)d days ago"
 msgstr[0] "%(count)d 일 전"
 
-#: src/gpodder/util.py:508
+#: src/gpodder/util.py:521
 msgid "Today"
 msgstr "오늘"
 
-#: src/gpodder/util.py:510
+#: src/gpodder/util.py:523
 msgid "Yesterday"
 msgstr "어제"
 
-#: src/gpodder/util.py:553 src/gpodder/util.py:556
+#: src/gpodder/util.py:566 src/gpodder/util.py:569
 msgid "(unknown)"
 msgstr "알수없는"
 
-#: src/gpodder/util.py:1193 src/gpodder/util.py:1212
+#: src/gpodder/util.py:1372 src/gpodder/util.py:1394
 #, python-format
 msgid "%(count)d second"
 msgid_plural "%(count)d seconds"
 msgstr[0] "%(count)d 초"
 
-#: src/gpodder/util.py:1206
+#: src/gpodder/util.py:1386
 #, python-format
 msgid "%(count)d hour"
 msgid_plural "%(count)d hours"
 msgstr[0] "%(count)d 시간"
 
-#: src/gpodder/util.py:1209
+#: src/gpodder/util.py:1390
 #, python-format
 msgid "%(count)d minute"
 msgid_plural "%(count)d minutes"
 msgstr[0] "%(count)d 분"
 
-#: src/gpodder/util.py:1215
+#: src/gpodder/util.py:1398
 msgid "and"
 msgstr "그리고"
 
-#: src/gpodder/model.py:446 src/gpodder/plugins/soundcloud.py:156
-msgid "No description available"
-msgstr "사용가능한 설명이 없습니다"
+#: src/gpodder/download.py:325
+msgid "Wrong username/password"
+msgstr "잘못된 사용자이름/암호"
 
-#: src/gpodder/model.py:679
-msgid "unknown"
-msgstr "알수없는"
+#: src/gpodder/download.py:505 src/gpodder/sync.py:958
+msgid "Added"
+msgstr "추가"
 
-#: src/gpodder/model.py:721 src/gpodder/sync.py:925
-#: src/gpodder/download.py:528
+#: src/gpodder/download.py:505 src/gpodder/sync.py:958
+msgid "Queued"
+msgstr "대기중"
+
+#: src/gpodder/download.py:505 src/gpodder/gtkui/model.py:372
+msgid "Downloading"
+msgstr "다운로드중"
+
+#: src/gpodder/download.py:506 src/gpodder/model.py:622 src/gpodder/sync.py:959
 msgid "Finished"
 msgstr "완료"
 
-#: src/gpodder/model.py:746
+#: src/gpodder/download.py:506 src/gpodder/sync.py:959
+msgid "Failed"
+msgstr "실패"
+
+#: src/gpodder/download.py:506 src/gpodder/sync.py:959
+msgid "Cancelled"
+msgstr "취소됨"
+
+#: src/gpodder/download.py:506 src/gpodder/sync.py:959
+msgid "Paused"
+msgstr "잠시멈춤"
+
+#: src/gpodder/download.py:834
+msgid "Missing content from server"
+msgstr "서버에서 컨텐츠를 찾을 수 없음"
+
+#: src/gpodder/download.py:840
+#, python-format
+msgid "I/O Error: %(error)s: %(filename)s"
+msgstr "I/O 에러: %(error)s: %(filename)s"
+
+#: src/gpodder/download.py:847
+#, python-format
+msgid "HTTP Error %(code)s: %(message)s"
+msgstr "HTTP 에러 %(code)s: %(message)s"
+
+#: src/gpodder/download.py:851 src/gpodder/sync.py:1114
+#, python-format
+msgid "Error: %s"
+msgstr "에러: %s"
+
+#: src/gpodder/directory.py:97
+msgid "gpodder.net search"
+msgstr "gpodder.net 에서 검색"
+
+#: src/gpodder/directory.py:107
+msgid "OPML from web"
+msgstr "웹에서 OPML가져오기"
+
+#: src/gpodder/directory.py:117
+msgid "OPML file"
+msgstr "OPML 파일"
+
+#: src/gpodder/directory.py:127 share/gpodder/ui/gtk/gpodderwelcome.ui.h:1
+msgid "Getting started"
+msgstr "시작하기"
+
+#: src/gpodder/directory.py:137
+msgid "gpodder.net Top 50"
+msgstr "gpodder.net Top 50"
+
+#: src/gpodder/directory.py:147
+msgid "gpodder.net Tags"
+msgstr "gpodder.net 태그"
+
+#: src/gpodder/directory.py:160
+msgid "Soundcloud search"
+msgstr "Soundcloud에서 검색"
+
+#: src/gpodder/directory.py:174
+msgid "Imported OPML file"
+msgstr "가져온 파일"
+
+#: src/gpodder/model.py:348 src/gpodder/plugins/soundcloud.py:176
+msgid "No description available"
+msgstr "사용가능한 설명이 없습니다"
+
+#: src/gpodder/model.py:580
+msgid "unknown"
+msgstr "알수없는"
+
+#: src/gpodder/model.py:647
 msgid "Default"
 msgstr "기본"
 
-#: src/gpodder/model.py:747
+#: src/gpodder/model.py:648
 msgid "Only keep latest"
 msgstr "최신으로 유지"
 
-#: src/gpodder/model.py:779 src/gpodder/model.py:1225
+#: src/gpodder/model.py:682 src/gpodder/model.py:1106
 #: src/gpodder/extensions.py:59
 msgid "Other"
 msgstr "다른"
 
-#: src/gpodder/model.py:1208 src/gpodder/model.py:1223
+#: src/gpodder/model.py:1089 src/gpodder/model.py:1104
 #: share/gpodder/ui/gtk/gpodderpreferences.ui.h:10
 msgid "Video"
 msgstr "비디오"
 
-#: src/gpodder/model.py:1221
+#: src/gpodder/model.py:1102
 msgid "Audio"
 msgstr "오디오"
 
-#: src/gpodder/my.py:174
+#: src/gpodder/model.py:1275
 #, python-format
-msgid "Add %s"
-msgstr "%s 추가"
+msgid ""
+"Warning: path to gPodder home (%(root)s) is very long and can result in "
+"failure to download files.\n"
+msgstr ""
 
-#: src/gpodder/my.py:176
-#, python-format
-msgid "Remove %s"
-msgstr "%s 삭제"
+#: src/gpodder/model.py:1276
+msgid "You're advised to set it to a shorter path."
+msgstr ""
 
-#: src/gpodder/config.py:55
-#, python-format
-msgid "gPodder on %s"
-msgstr "gPodder on %s"
-
-#: src/gpodder/directory.py:95
-msgid "gpodder.net search"
-msgstr "gpodder.net 에서 검색"
-
-#: src/gpodder/directory.py:104
-msgid "OPML from web"
-msgstr "웹에서 OPML가져오기"
-
-#: src/gpodder/directory.py:113
-msgid "OPML file"
-msgstr "OPML 파일"
-
-#: src/gpodder/directory.py:122 share/gpodder/ui/gtk/gpodderwelcome.ui.h:1
-msgid "Getting started"
-msgstr "시작하기"
-
-#: src/gpodder/directory.py:131
-msgid "gpodder.net Top 50"
-msgstr "gpodder.net Top 50"
-
-#: src/gpodder/directory.py:140
-msgid "gpodder.net Tags"
-msgstr "gpodder.net 태그"
-
-#: src/gpodder/directory.py:152
-msgid "Soundcloud search"
-msgstr "Soundcloud에서 검색"
-
-#: src/gpodder/directory.py:165
-msgid "Imported OPML file"
-msgstr "가져온 파일"
-
-#: src/gpodder/sync.py:196
+#: src/gpodder/sync.py:238
 msgid "Cancelled by user"
 msgstr "사용자 취소"
 
-#: src/gpodder/sync.py:199
+#: src/gpodder/sync.py:241
 msgid "Writing data to disk"
 msgstr "디스크에 기록중입니다"
 
-#: src/gpodder/sync.py:295
+#: src/gpodder/sync.py:338
 msgid "Opening iPod database"
 msgstr "아이팟 데이터베이스를 열고 있습니다"
 
-#: src/gpodder/sync.py:305
+#: src/gpodder/sync.py:348
 msgid "iPod opened"
 msgstr "아이팟 연결됨"
 
-#: src/gpodder/sync.py:316
+#: src/gpodder/sync.py:359
 msgid "Saving iPod database"
 msgstr "아이팟 데이터베이스에 저장하고 있습니다"
 
-#: src/gpodder/sync.py:321
+#: src/gpodder/sync.py:364
 msgid "Writing extended gtkpod database"
 msgstr "확장된 gtkpod 데이터베이스에 기록하고 있습니다"
 
-#: src/gpodder/sync.py:397 src/gpodder/sync.py:680 src/gpodder/sync.py:874
+#: src/gpodder/sync.py:440 src/gpodder/sync.py:703 src/gpodder/sync.py:904
 #, python-format
 msgid "Removing %s"
 msgstr "%s 삭제중"
 
-#: src/gpodder/sync.py:412 src/gpodder/sync.py:557
+#: src/gpodder/sync.py:455 src/gpodder/sync.py:580
 #, python-format
 msgid "Adding %s"
 msgstr "추가중 %s"
 
-#: src/gpodder/sync.py:430
+#: src/gpodder/sync.py:473
 #, python-format
 msgid "Error copying %(episode)s: Not enough free space on %(mountpoint)s"
 msgstr "%(episode)s 복사중 에러: %(mountpoint)s 에 공간이 부족합니다"
 
-#: src/gpodder/sync.py:515
+#: src/gpodder/sync.py:558
 msgid "Opening MP3 player"
 msgstr "MP3 플레이어 연결중"
 
-#: src/gpodder/sync.py:518
+#: src/gpodder/sync.py:561
 msgid "MP3 player opened"
 msgstr "MP3 플레이어가 연결됨"
 
-#: src/gpodder/sync.py:576
+#: src/gpodder/sync.py:599
 #, python-format
 msgid ""
 "Not enough space in %(path)s: %(free)s available, but need at least %(need)s"
 msgstr ""
 
-#: src/gpodder/sync.py:603 src/gpodder/sync.py:611
+#: src/gpodder/sync.py:626 src/gpodder/sync.py:634
 #, python-format
 msgid "Error opening %(filename)s: %(message)s"
 msgstr "파일여는중 에러 %(filename)s: %(message)s"
 
-#: src/gpodder/sync.py:780 src/gpodder/sync.py:786
+#: src/gpodder/sync.py:805 src/gpodder/sync.py:812
 msgid "MTP device"
 msgstr "MTP디바이스"
 
-#: src/gpodder/sync.py:793
+#: src/gpodder/sync.py:819
 msgid "Opening the MTP device"
 msgstr "MTP디바이스를 연결중입니다"
 
-#: src/gpodder/sync.py:803
+#: src/gpodder/sync.py:829
 #, python-format
 msgid "%s opened"
 msgstr "%s 열렸습니다"
 
-#: src/gpodder/sync.py:808
+#: src/gpodder/sync.py:834
 #, python-format
 msgid "Closing %s"
 msgstr "%s 종료중"
 
-#: src/gpodder/sync.py:816
+#: src/gpodder/sync.py:842
 #, python-format
 msgid "%s closed"
 msgstr "%s 완료됨"
 
-#: src/gpodder/sync.py:821 bin/gpo:708
+#: src/gpodder/sync.py:847 bin/gpo:720
 #, python-format
 msgid "Adding %s..."
 msgstr "%s 추가중..."
 
-#: src/gpodder/sync.py:924 src/gpodder/download.py:527
-msgid "Added"
-msgstr "추가"
-
-#: src/gpodder/sync.py:924 src/gpodder/download.py:527
-msgid "Queued"
-msgstr "대기중"
-
-#: src/gpodder/sync.py:924
+#: src/gpodder/sync.py:958
 msgid "Synchronizing"
 msgstr "동기화중"
 
-#: src/gpodder/sync.py:925 src/gpodder/download.py:528
-msgid "Failed"
-msgstr "실패"
-
-#: src/gpodder/sync.py:925 src/gpodder/download.py:528
-msgid "Cancelled"
-msgstr "취소됨"
-
-#: src/gpodder/sync.py:925 src/gpodder/download.py:528
-msgid "Paused"
-msgstr "잠시멈춤"
-
-#: src/gpodder/sync.py:1081 src/gpodder/download.py:879
+#: src/gpodder/my.py:178
 #, python-format
-msgid "Error: %s"
-msgstr "에러: %s"
+msgid "Add %s"
+msgstr "%s 추가"
 
-#: src/gpodder/download.py:329
-msgid "Wrong username/password"
-msgstr "잘못된 사용자이름/암호"
-
-#: src/gpodder/download.py:527 src/gpodder/gtkui/model.py:327
-msgid "Downloading"
-msgstr "다운로드중"
-
-#: src/gpodder/download.py:862
-msgid "Missing content from server"
-msgstr "서버에서 컨텐츠를 찾을 수 없음"
-
-#: src/gpodder/download.py:868
+#: src/gpodder/my.py:180
 #, python-format
-msgid "I/O Error: %(error)s: %(filename)s"
-msgstr "I/O 에러: %(error)s: %(filename)s"
-
-#: src/gpodder/download.py:875
-#, python-format
-msgid "HTTP Error %(code)s: %(message)s"
-msgstr "HTTP 에러 %(code)s: %(message)s"
+msgid "Remove %s"
+msgstr "%s 삭제"
 
 #: src/gpodder/extensions.py:55
 msgid "Desktop Integration"
@@ -294,18 +304,18 @@ msgstr "Post download"
 msgid "No description for this extension."
 msgstr "확장기능에 대한 설명이 없습니다."
 
-#: src/gpodder/extensions.py:212
+#: src/gpodder/extensions.py:220
 #, python-format
 msgid "Command not found: %(command)s"
 msgstr "명령어를 찾지 못했습니다: %(command)s"
 
-#: src/gpodder/extensions.py:228
+#: src/gpodder/extensions.py:236
 #, python-format
 msgid "Need at least one of the following commands: %(list_of_commands)s"
 msgstr ""
 "아래 명령어중에서 최소한 하나의 명령어가 픽요합니다: %(list_of_commands)s"
 
-#: src/gpodder/extensions.py:265
+#: src/gpodder/extensions.py:273
 #, python-format
 msgid "Python module not found: %(module)s"
 msgstr "파이썬 모듈을 찾지 못했습니다: %(module)s"
@@ -315,533 +325,447 @@ msgstr "파이썬 모듈을 찾지 못했습니다: %(module)s"
 msgid "Command: %s"
 msgstr "명령어: %s"
 
-#: src/gpodder/gtkui/desktopfile.py:150
+#: src/gpodder/gtkui/desktopfile.py:156
 msgid "Default application"
 msgstr "기본 어플리케이션"
 
-#: src/gpodder/gtkui/shownotes.py:84 src/gpodder/gtkui/model.py:69
-#: src/gpodder/gtkui/model.py:87 src/gpodder/gtkui/model.py:237
-#, python-format
-msgid "from %s"
-msgstr "%s 에서"
-
-#: src/gpodder/gtkui/shownotes.py:118
-msgid "Please select an episode"
-msgstr "에피소드를 선택하세요"
-
-#: src/gpodder/gtkui/config.py:50
-msgid "Integer"
-msgstr "숫자"
-
-#: src/gpodder/gtkui/config.py:52
-msgid "Float"
-msgstr "소수점 숫자"
-
-#: src/gpodder/gtkui/config.py:54
-msgid "Boolean"
-msgstr "불(참/거짓)"
-
-#: src/gpodder/gtkui/config.py:56
-msgid "String"
-msgstr "문자열"
-
-#: src/gpodder/gtkui/model.py:68
-#, python-format
-msgid "released %s"
-msgstr "배포 %s"
-
-#: src/gpodder/gtkui/model.py:80 src/gpodder/gtkui/model.py:393
-msgid "played"
-msgstr "재생됨"
-
-#: src/gpodder/gtkui/model.py:82
-msgid "unplayed"
-msgstr "재생전"
-
-#: src/gpodder/gtkui/model.py:85
-msgid "today"
-msgstr "오늘"
-
-#: src/gpodder/gtkui/model.py:86
-#, python-format
-msgid "downloaded %s"
-msgstr "다운로드됨 %s"
-
-#: src/gpodder/gtkui/model.py:337
-msgid "Deleted"
-msgstr "삭제"
-
-#: src/gpodder/gtkui/model.py:342
-msgid "New episode"
-msgstr "새로운 에피소드"
-
-#: src/gpodder/gtkui/model.py:356
-msgid "Downloaded episode"
-msgstr "다운로드한 에피소드"
-
-#: src/gpodder/gtkui/model.py:359
-msgid "Downloaded video episode"
-msgstr "다운로드한 비디오 에피소드"
-
-#: src/gpodder/gtkui/model.py:362
-msgid "Downloaded image"
-msgstr "다운로드한 이미지"
-
-#: src/gpodder/gtkui/model.py:365
-msgid "Downloaded file"
-msgstr "다운로드한 파일"
-
-#: src/gpodder/gtkui/model.py:380
-msgid "missing file"
-msgstr "찾을 수 없는 파일"
-
-#: src/gpodder/gtkui/model.py:384
-msgid "never displayed"
-msgstr "디스플레이 하기 전"
-
-#: src/gpodder/gtkui/model.py:386
-msgid "never played"
-msgstr "재생하기 전"
-
-#: src/gpodder/gtkui/model.py:388
-msgid "never opened"
-msgstr "열리기 전"
-
-#: src/gpodder/gtkui/model.py:391
-msgid "displayed"
-msgstr "디스플레이됨"
-
-#: src/gpodder/gtkui/model.py:395
-msgid "opened"
-msgstr "열림"
-
-#: src/gpodder/gtkui/model.py:397
-msgid "deletion prevented"
-msgstr "삭제 방지됨"
-
-#: src/gpodder/gtkui/model.py:432 share/gpodder/ui/gtk/gpodder.ui.h:32
-msgid "All episodes"
-msgstr "모든 에피소드"
-
-#: src/gpodder/gtkui/model.py:433
-msgid "from all podcasts"
-msgstr "모든 팟캐스트에서"
-
-#: src/gpodder/gtkui/model.py:625
-msgid "Subscription paused"
-msgstr "구독 중지됨"
-
-#: src/gpodder/gtkui/main.py:205 share/applications/gpodder.desktop.in.h:1
+#: src/gpodder/gtkui/main.py:161 share/applications/gpodder.desktop.in.h:1
 msgid "gPodder"
 msgstr "지파더"
 
-#: src/gpodder/gtkui/main.py:288
+#: src/gpodder/gtkui/main.py:381 share/gpodder/ui/gtk/menus.ui.h:28
+msgid "E_xtras"
+msgstr "E_xtras"
+
+#: src/gpodder/gtkui/main.py:382
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:11
+msgid "Extensions"
+msgstr "확장기능"
+
+#: src/gpodder/gtkui/main.py:401
 msgid "Loading incomplete downloads"
 msgstr "완료되지 않은 파일들을 로딩중"
 
-#: src/gpodder/gtkui/main.py:289
+#: src/gpodder/gtkui/main.py:402
 msgid "Some episodes have not finished downloading in a previous session."
 msgstr "이전 세션에서, 모든 에피소드를 다운로드 하지 못했습니다"
 
-#: src/gpodder/gtkui/main.py:291
+#: src/gpodder/gtkui/main.py:405
 #, python-format
 msgid "%(count)d partial file"
 msgid_plural "%(count)d partial files"
 msgstr[0] "%(count)d 부분 파일"
 
-#: src/gpodder/gtkui/main.py:306
+#: src/gpodder/gtkui/main.py:421
 msgid "Resume all"
 msgstr "모두 다시 시작"
 
-#: src/gpodder/gtkui/main.py:316
+#: src/gpodder/gtkui/main.py:433
 msgid "Incomplete downloads from a previous session were found."
 msgstr "이전 세션에서 전부 다운로드 되지 못한 파일이 있습니다"
 
-#: src/gpodder/gtkui/main.py:414
+#: src/gpodder/gtkui/main.py:538
 msgid "Action"
 msgstr "액션"
 
-#: src/gpodder/gtkui/main.py:461
+#: src/gpodder/gtkui/main.py:585
 msgid "Confirm changes from gpodder.net"
 msgstr "gpodder.net 에서 변경사항 확인"
 
-#: src/gpodder/gtkui/main.py:462
+#: src/gpodder/gtkui/main.py:586
 msgid "Select the actions you want to carry out."
 msgstr "수행할 액션을 선택하세요"
 
-#: src/gpodder/gtkui/main.py:502
+#: src/gpodder/gtkui/main.py:626
 msgid "Uploading subscriptions"
 msgstr "구독내역을 업로드중"
 
-#: src/gpodder/gtkui/main.py:503
+#: src/gpodder/gtkui/main.py:627
 msgid "Your subscriptions are being uploaded to the server."
 msgstr "구독내역을 서버에 업로드 하고 있습니다"
 
-#: src/gpodder/gtkui/main.py:508
+#: src/gpodder/gtkui/main.py:632
 msgid "List uploaded successfully."
 msgstr "리스트를 업로드 했습니다"
 
-#: src/gpodder/gtkui/main.py:515
+#: src/gpodder/gtkui/main.py:639
 msgid "Error while uploading"
 msgstr "업로드중 에러"
 
-#: src/gpodder/gtkui/main.py:800 src/gpodder/gtkui/main.py:928
-#: src/gpodder/gtkui/main.py:2622 src/gpodder/gtkui/main.py:2815
-#: src/gpodder/gtkui/desktop/episodeselector.py:132
-#: src/gpodder/gtkui/desktop/sync.py:270
+#: src/gpodder/gtkui/main.py:910 src/gpodder/gtkui/main.py:1036
+#: src/gpodder/gtkui/main.py:2821 src/gpodder/gtkui/main.py:3024
+#: src/gpodder/gtkui/desktop/episodeselector.py:127
+#: src/gpodder/gtkui/desktop/sync.py:269
 msgid "Episode"
 msgstr "에피소드"
 
-#: src/gpodder/gtkui/main.py:819
+#: src/gpodder/gtkui/main.py:929
 msgid "Size"
 msgstr "사이즈"
 
-#: src/gpodder/gtkui/main.py:824
+#: src/gpodder/gtkui/main.py:934
 msgid "Duration"
 msgstr "기간"
 
-#: src/gpodder/gtkui/main.py:828
+#: src/gpodder/gtkui/main.py:938
 msgid "Released"
 msgstr "배포"
 
-#: src/gpodder/gtkui/main.py:855
-msgid "Visible columns"
-msgstr "보이는 컬럼"
-
-#: src/gpodder/gtkui/main.py:948 src/gpodder/gtkui/main.py:1108
-#: share/gpodder/ui/gtk/gpodder.ui.h:45
+#: src/gpodder/gtkui/main.py:1056 src/gpodder/gtkui/main.py:1205
+#: share/gpodder/ui/gtk/gpodder.ui.h:11
 msgid "Progress"
 msgstr "진행상황"
 
-#: src/gpodder/gtkui/main.py:982
-msgid "Loading episodes"
-msgstr "에피소드를 불러오고 있습니다"
-
-#: src/gpodder/gtkui/main.py:985
+#: src/gpodder/gtkui/main.py:1084
 msgid "No episodes in current view"
 msgstr "현재뷰에 에피소드가 없습니다"
 
-#: src/gpodder/gtkui/main.py:987
+#: src/gpodder/gtkui/main.py:1086
 msgid "No episodes available"
 msgstr "에피소드가 없습니다"
 
-#: src/gpodder/gtkui/main.py:993
+#: src/gpodder/gtkui/main.py:1092
 msgid "No podcasts in this view"
 msgstr "현재 뷰에 팟캐스트가 없습니다"
 
-#: src/gpodder/gtkui/main.py:995
+#: src/gpodder/gtkui/main.py:1094
 msgid "No subscriptions"
 msgstr "설명이 없습니다"
 
-#: src/gpodder/gtkui/main.py:997
+#: src/gpodder/gtkui/main.py:1096
 msgid "No active tasks"
 msgstr "동작중인 태스크가 없습니다"
 
-#: src/gpodder/gtkui/main.py:1112 src/gpodder/gtkui/main.py:1114
+#: src/gpodder/gtkui/main.py:1209 src/gpodder/gtkui/main.py:1211
 #, python-format
 msgid "%(count)d active"
 msgid_plural "%(count)d active"
 msgstr[0] "%(count)d 실행중"
 
-#: src/gpodder/gtkui/main.py:1116
+#: src/gpodder/gtkui/main.py:1213
 #, python-format
 msgid "%(count)d failed"
 msgid_plural "%(count)d failed"
 msgstr[0] "%(count)d 실패"
 
-#: src/gpodder/gtkui/main.py:1118
+#: src/gpodder/gtkui/main.py:1215
 #, python-format
 msgid "%(count)d queued"
 msgid_plural "%(count)d queued"
 msgstr[0] "%(count)d 대기중"
 
-#: src/gpodder/gtkui/main.py:1132
+#: src/gpodder/gtkui/main.py:1228
 #, python-format
 msgid "downloading %(count)d file"
 msgid_plural "downloading %(count)d files"
 msgstr[0] "%(count)d 파일을 다운로드 중"
 
-#: src/gpodder/gtkui/main.py:1142
+#: src/gpodder/gtkui/main.py:1240
 #, python-format
 msgid "synchronizing %(count)d file"
 msgid_plural "synchronizing %(count)d files"
 msgstr[0] "%(count)d 파일을 동기화중"
 
-#: src/gpodder/gtkui/main.py:1144
+#: src/gpodder/gtkui/main.py:1244
 #, python-format
 msgid "%(queued)d task queued"
 msgid_plural "%(queued)d tasks queued"
 msgstr[0] "%(queued)d 태스크 대기중"
 
-#: src/gpodder/gtkui/main.py:1168
+#: src/gpodder/gtkui/main.py:1270
 msgid "Please report this problem and restart gPodder:"
 msgstr "이 문제점을 보고하고, 지파더를 다시 시작합니다"
 
-#: src/gpodder/gtkui/main.py:1168
+#: src/gpodder/gtkui/main.py:1271
 msgid "Unhandled exception"
 msgstr "처리되지 않은 예외"
 
-#: src/gpodder/gtkui/main.py:1235
+#: src/gpodder/gtkui/main.py:1338
 #, python-format
 msgid "Feedparser error: %s"
 msgstr "피드파서 에러: %s"
 
-#: src/gpodder/gtkui/main.py:1371
+#: src/gpodder/gtkui/main.py:1474
 msgid "Could not download some episodes:"
 msgstr "에피소드 몇개를 다운로드 하지 못 했습니다"
 
-#: src/gpodder/gtkui/main.py:1373 src/gpodder/gtkui/main.py:1376
+#: src/gpodder/gtkui/main.py:1476 src/gpodder/gtkui/main.py:1479
 msgid "Downloads finished"
 msgstr "다운로드 완료"
 
-#: src/gpodder/gtkui/main.py:1379
+#: src/gpodder/gtkui/main.py:1482
 msgid "Downloads failed"
 msgstr "다운로드 실패"
 
-#: src/gpodder/gtkui/main.py:1383
+#: src/gpodder/gtkui/main.py:1487
 msgid "Could not sync some episodes:"
 msgstr "에피소드 몇개를 동기화하지 못했습니다"
 
-#: src/gpodder/gtkui/main.py:1385 src/gpodder/gtkui/main.py:1388
+#: src/gpodder/gtkui/main.py:1490 src/gpodder/gtkui/main.py:1494
 msgid "Device synchronization finished"
 msgstr "디바이스 동기화가 완료되었습니다"
 
-#: src/gpodder/gtkui/main.py:1391
+#: src/gpodder/gtkui/main.py:1498
 msgid "Device synchronization failed"
 msgstr "디바이스 동기화 실패"
 
-#: src/gpodder/gtkui/main.py:1434
+#: src/gpodder/gtkui/main.py:1541
 #, python-format
 msgid "%(count)d more episode"
 msgid_plural "%(count)d more episodes"
 msgstr[0] "추가 에피소드 %(count)d 개"
 
-#: src/gpodder/gtkui/main.py:1508
+#: src/gpodder/gtkui/main.py:1652
 msgid "Start download now"
 msgstr "지금 다운로드 시작"
 
-#: src/gpodder/gtkui/main.py:1510 src/gpodder/gtkui/main.py:1719
-#: src/gpodder/gtkui/desktop/episodeselector.py:144
-#: share/gpodder/ui/gtk/gpodder.ui.h:20
+#: src/gpodder/gtkui/main.py:1657 src/gpodder/gtkui/main.py:1901
+#: src/gpodder/gtkui/desktop/podcastdirectory.py:192
+#: src/gpodder/gtkui/desktop/episodeselector.py:139
+#: share/gpodder/ui/gtk/gpodder.ui.h:1 share/gpodder/ui/gtk/menus.ui.h:22
 msgid "Download"
 msgstr "다운로드"
 
-#: src/gpodder/gtkui/main.py:1511 share/gpodder/ui/gtk/gpodder.ui.h:21
+#: src/gpodder/gtkui/main.py:1662 share/gpodder/ui/gtk/gpodder.ui.h:2
+#: share/gpodder/ui/gtk/menus.ui.h:23
 msgid "Cancel"
 msgstr "취소"
 
-#: src/gpodder/gtkui/main.py:1512
+#: src/gpodder/gtkui/main.py:1666
 msgid "Pause"
 msgstr "잠시멈춤"
 
-#: src/gpodder/gtkui/main.py:1514
+#: src/gpodder/gtkui/main.py:1670
+msgid "Move up"
+msgstr ""
+
+#: src/gpodder/gtkui/main.py:1672
+msgid "Move down"
+msgstr ""
+
+#: src/gpodder/gtkui/main.py:1675
 msgid "Remove from list"
 msgstr "리스트에서 삭제"
 
-#: src/gpodder/gtkui/main.py:1553 share/gpodder/ui/gtk/gpodder.ui.h:13
+#: src/gpodder/gtkui/main.py:1716 share/gpodder/ui/gtk/menus.ui.h:15
 msgid "Update podcast"
 msgstr "팟캐스트 업데이트"
 
-#: src/gpodder/gtkui/main.py:1560
+#: src/gpodder/gtkui/main.py:1723
 msgid "Open download folder"
 msgstr "다운로드 폴더 열기"
 
-#: src/gpodder/gtkui/main.py:1566
+#: src/gpodder/gtkui/main.py:1729
 msgid "Mark episodes as old"
 msgstr "읽은 에피소드로 표시"
 
-#: src/gpodder/gtkui/main.py:1570 src/gpodder/gtkui/main.py:1778
+#: src/gpodder/gtkui/main.py:1733 src/gpodder/gtkui/main.py:1959
 msgid "Archive"
 msgstr "보관"
 
-#: src/gpodder/gtkui/main.py:1575
-msgid "Remove podcast"
-msgstr "팟캐스트 삭제"
+#: src/gpodder/gtkui/main.py:1738
+#, fuzzy
+msgid "Delete podcast"
+msgstr "에피소드 삭제"
 
-#: src/gpodder/gtkui/main.py:1590 share/gpodder/ui/gtk/gpodder.ui.h:10
+#: src/gpodder/gtkui/main.py:1753 share/gpodder/ui/gtk/menus.ui.h:16
 msgid "Podcast settings"
 msgstr "팟캐스트 세팅"
 
-#: src/gpodder/gtkui/main.py:1650
+#: src/gpodder/gtkui/main.py:1831
 msgid "Error converting file."
 msgstr "파일 변환 에러"
 
-#: src/gpodder/gtkui/main.py:1650
+#: src/gpodder/gtkui/main.py:1831
 msgid "Bluetooth file transfer"
 msgstr "블루투스로 파일 전송"
 
-#: src/gpodder/gtkui/main.py:1709
+#: src/gpodder/gtkui/main.py:1887 share/gpodder/ui/gtk/menus.ui.h:20
+msgid "Play"
+msgstr "재생"
+
+#: src/gpodder/gtkui/main.py:1891
 msgid "Preview"
 msgstr "미리보기"
 
-#: src/gpodder/gtkui/main.py:1711
+#: src/gpodder/gtkui/main.py:1893
 msgid "Stream"
 msgstr "스트림"
 
-#: src/gpodder/gtkui/main.py:1755
+#: src/gpodder/gtkui/main.py:1906
+#, fuzzy
+msgid "_Cancel"
+msgstr "취소"
+
+#: src/gpodder/gtkui/main.py:1910
+#, fuzzy
+msgid "_Delete"
+msgstr "삭제"
+
+#: src/gpodder/gtkui/main.py:1936
 msgid "Send to"
 msgstr "보내기"
 
 # local 을 번역할 적절한 단어를 추천해주세요
-#: src/gpodder/gtkui/main.py:1757
+#: src/gpodder/gtkui/main.py:1938
 msgid "Local folder"
 msgstr "Local 폴더"
 
-#: src/gpodder/gtkui/main.py:1762
+#: src/gpodder/gtkui/main.py:1943
 msgid "Bluetooth device"
 msgstr "블루투스 장치"
 
-#: src/gpodder/gtkui/main.py:1769
+#: src/gpodder/gtkui/main.py:1950
 msgid "New"
 msgstr "새"
 
-#: src/gpodder/gtkui/main.py:1785 share/gpodder/ui/gtk/gpodder.ui.h:25
+#: src/gpodder/gtkui/main.py:1968 share/gpodder/ui/gtk/menus.ui.h:27
 msgid "Episode details"
 msgstr "에피소드 설명"
 
-#: src/gpodder/gtkui/main.py:1938
+#: src/gpodder/gtkui/main.py:2124
 msgid "Please check your media player settings in the preferences dialog."
 msgstr "환경설정에서 미디어 플레이어 설정을 확인해주세요"
 
-#: src/gpodder/gtkui/main.py:1939
+#: src/gpodder/gtkui/main.py:2125
 msgid "Error opening player"
 msgstr "플레이어 에러"
 
-#: src/gpodder/gtkui/main.py:2178
+#: src/gpodder/gtkui/main.py:2365
 msgid "Adding podcasts"
 msgstr "팟캐스트 추가"
 
-#: src/gpodder/gtkui/main.py:2179
+#: src/gpodder/gtkui/main.py:2366
 msgid "Please wait while episode information is downloaded."
 msgstr "기다려주세요. 에피소드 정보를 다운로드 중입니다."
 
-#: src/gpodder/gtkui/main.py:2186
+#: src/gpodder/gtkui/main.py:2373
 msgid "Existing subscriptions skipped"
 msgstr "구독중인것은 건너뜀니다"
 
-#: src/gpodder/gtkui/main.py:2187
+#: src/gpodder/gtkui/main.py:2374
 msgid "You are already subscribed to these podcasts:"
 msgstr "구독하고 있는 팟캐스트입니다"
 
-#: src/gpodder/gtkui/main.py:2195
+#: src/gpodder/gtkui/main.py:2382
 msgid "Podcast requires authentication"
 msgstr "인증이 필요합니다"
 
-#: src/gpodder/gtkui/main.py:2196
+#: src/gpodder/gtkui/main.py:2383
 #, python-format
 msgid "Please login to %s:"
 msgstr "%s 에 로그인하세요"
 
-#: src/gpodder/gtkui/main.py:2204 src/gpodder/gtkui/main.py:2299
+#: src/gpodder/gtkui/main.py:2391 src/gpodder/gtkui/main.py:2486
 msgid "Authentication failed"
 msgstr "인증 실패"
 
-#: src/gpodder/gtkui/main.py:2210
+#: src/gpodder/gtkui/main.py:2397
 msgid "Website redirection detected"
 msgstr "웹사이트 리다이렉션 검출됨"
 
-#: src/gpodder/gtkui/main.py:2211
+#: src/gpodder/gtkui/main.py:2398
 #, python-format
 msgid "The URL %(url)s redirects to %(target)s."
 msgstr "%(url)s 이 %(target)s 으로 리다이렉션 됩니다"
 
-#: src/gpodder/gtkui/main.py:2212
+#: src/gpodder/gtkui/main.py:2399
 msgid "Do you want to visit the website now?"
 msgstr "웹사이트에 방문하시겠습니까?"
 
-#: src/gpodder/gtkui/main.py:2221
+#: src/gpodder/gtkui/main.py:2408
 msgid "Could not add some podcasts"
 msgstr "팟캐스트를 추가하지 못했습니다"
 
-#: src/gpodder/gtkui/main.py:2222
+#: src/gpodder/gtkui/main.py:2409
 msgid "Some podcasts could not be added to your list:"
 msgstr "팟캐스트를 리스트에 추가하지 못했습니다"
 
-#: src/gpodder/gtkui/main.py:2224
+#: src/gpodder/gtkui/main.py:2412
 msgid "Unknown"
 msgstr "알수없는"
 
-#: src/gpodder/gtkui/main.py:2308
+#: src/gpodder/gtkui/main.py:2495
 msgid "Redirection detected"
 msgstr "웹사이트 리다이렉션 검출됨"
 
-#: src/gpodder/gtkui/main.py:2342
+#: src/gpodder/gtkui/main.py:2529
 msgid "Merging episode actions"
 msgstr "에피소드 액션을 합치는 중"
 
-#: src/gpodder/gtkui/main.py:2343
+#: src/gpodder/gtkui/main.py:2530
 msgid "Episode actions from gpodder.net are merged."
 msgstr "gpodder.net의 에피소드 액션을 합쳤습니다"
 
-#: src/gpodder/gtkui/main.py:2368
+#: src/gpodder/gtkui/main.py:2554
 msgid "Cancelling..."
 msgstr "취소중"
 
-#: src/gpodder/gtkui/main.py:2377
+#: src/gpodder/gtkui/main.py:2563
 msgid "Please connect to a network, then try again."
 msgstr "네트웍에 연결한 후, 다시 시도하세요"
 
-#: src/gpodder/gtkui/main.py:2378
+#: src/gpodder/gtkui/main.py:2564
 msgid "No network connection"
 msgstr "네트웍에 연결되어 있지 않습니다"
 
-#: src/gpodder/gtkui/main.py:2399
+#: src/gpodder/gtkui/main.py:2585
 #, python-format
 msgid "Updating %(count)d feed..."
 msgid_plural "Updating %(count)d feeds..."
 msgstr[0] " %(count)d 피드를 업데이트 중"
 
-#: src/gpodder/gtkui/main.py:2417
+#: src/gpodder/gtkui/main.py:2600
+#, fuzzy, python-format
+msgid "Updating %(podcast)s (%(position)d/%(total)d)"
+msgstr "업데이트됨 %(podcast)s (%(position)d/%(total)d)"
+
+#: src/gpodder/gtkui/main.py:2611
 #, python-format
 msgid "Error while updating %(url)s: %(message)s"
 msgstr "%(url)s: %(message)s 업데이트하는 중 에러"
 
-#: src/gpodder/gtkui/main.py:2419
+#: src/gpodder/gtkui/main.py:2613
 #, python-format
 msgid "The feed at %(url)s could not be updated."
 msgstr "%(url)s 의 피드를 업데이트 할 수 없습니다"
 
-#: src/gpodder/gtkui/main.py:2420
+#: src/gpodder/gtkui/main.py:2614
 msgid "Error while updating feed"
 msgstr "피드를 업데이트하는 중 에러"
 
-#: src/gpodder/gtkui/main.py:2435
-#, python-format
-msgid "Updated %(podcast)s (%(position)d/%(total)d)"
-msgstr "업데이트됨 %(podcast)s (%(position)d/%(total)d)"
-
-#: src/gpodder/gtkui/main.py:2466
+#: src/gpodder/gtkui/main.py:2656
 msgid "No new episodes"
 msgstr "새 에피소드가 없습니다"
 
-#: src/gpodder/gtkui/main.py:2479
+#: src/gpodder/gtkui/main.py:2669
 #, python-format
 msgid "Downloading %(count)d new episode."
 msgid_plural "Downloading %(count)d new episodes."
 msgstr[0] "새 에피소드 %(count)d 개를 다운로드 중"
 
-#: src/gpodder/gtkui/main.py:2480 src/gpodder/gtkui/main.py:2484
-#: src/gpodder/gtkui/main.py:2833
+#: src/gpodder/gtkui/main.py:2672 src/gpodder/gtkui/main.py:2679
+#: src/gpodder/gtkui/main.py:3042
 msgid "New episodes available"
 msgstr "새 에피소드가 있습니다"
 
-#: src/gpodder/gtkui/main.py:2483
+#: src/gpodder/gtkui/main.py:2676
 #, python-format
 msgid "%(count)d new episode added to download list."
 msgid_plural "%(count)d new episodes added to download list."
 msgstr[0] "다운로드 리스트에, 새로운 에피소드 %(count)d개를 추가합니다"
 
-#: src/gpodder/gtkui/main.py:2490
+#: src/gpodder/gtkui/main.py:2685
 #, python-format
 msgid "%(count)d new episode available"
 msgid_plural "%(count)d new episodes available"
 msgstr[0] "새 에피소드 %(count)d 개가 있습니다"
 
-#: src/gpodder/gtkui/main.py:2509
+#: src/gpodder/gtkui/main.py:2716
 msgid "Quit gPodder"
 msgstr "지파더 종료"
 
-#: src/gpodder/gtkui/main.py:2510
+#: src/gpodder/gtkui/main.py:2717
 msgid ""
 "You are downloading episodes. You can resume downloads the next time you "
 "start gPodder. Do you want to quit now?"
@@ -849,168 +773,178 @@ msgstr ""
 "에피소드 다운로드 중입니다. 종료 후에, 지파더를 실행했을 때, 다운로드를 다시 "
 "시작할 수 있습니다. 종료 할까요?"
 
-#: src/gpodder/gtkui/main.py:2559
+#: src/gpodder/gtkui/main.py:2757
 msgid "Episodes are locked"
 msgstr "에피소드가 잠겼습니다"
 
-#: src/gpodder/gtkui/main.py:2560
+#: src/gpodder/gtkui/main.py:2758
 msgid ""
 "The selected episodes are locked. Please unlock the episodes that you want "
 "to delete before trying to delete them."
 msgstr "선택한 에피소드들은 잠겨 있습니다. 삭제하려면, 잠금을 해제해주세요."
 
-#: src/gpodder/gtkui/main.py:2565
+#: src/gpodder/gtkui/main.py:2763
 #, python-format
 msgid "Delete %(count)d episode?"
 msgid_plural "Delete %(count)d episodes?"
 msgstr[0] "%(count)d 개의 에피소드를 삭제합니까?"
 
-#: src/gpodder/gtkui/main.py:2566
+#: src/gpodder/gtkui/main.py:2765
 msgid "Deleting episodes removes downloaded files."
 msgstr "에피소드와 다운로드된 파일을 삭제하고 있습니다"
 
-#: src/gpodder/gtkui/main.py:2571
+#: src/gpodder/gtkui/main.py:2770
 msgid "Deleting episodes"
 msgstr "에피소드 삭제중"
 
-#: src/gpodder/gtkui/main.py:2572
+#: src/gpodder/gtkui/main.py:2771
 msgid "Please wait while episodes are deleted"
 msgstr "에피소드를 삭제하고 있습니다. 잠시만 기다려주세요"
 
-#: src/gpodder/gtkui/main.py:2625
+#: src/gpodder/gtkui/main.py:2824
 #, python-format
 msgid "Select older than %(count)d day"
 msgid_plural "Select older than %(count)d days"
 msgstr[0] "%(count)d 일이 넘은 것들 선택"
 
-#: src/gpodder/gtkui/main.py:2627
+#: src/gpodder/gtkui/main.py:2826
 msgid "Select played"
 msgstr "재생한것 선택"
 
-#: src/gpodder/gtkui/main.py:2628
+#: src/gpodder/gtkui/main.py:2827
 msgid "Select finished"
 msgstr "완료된것 선택"
 
-#: src/gpodder/gtkui/main.py:2632
+#: src/gpodder/gtkui/main.py:2831
 msgid "Select the episodes you want to delete:"
 msgstr "삭제할 에피소드를 선택하세요"
 
-#: src/gpodder/gtkui/main.py:2648 share/gpodder/ui/gtk/gpodder.ui.h:4
+#: src/gpodder/gtkui/main.py:2848 share/gpodder/ui/gtk/menus.ui.h:10
 msgid "Delete episodes"
 msgstr "에피소드 삭제"
 
-#: src/gpodder/gtkui/main.py:2703 src/gpodder/gtkui/main.py:2934
-#: src/gpodder/gtkui/main.py:3034
+#: src/gpodder/gtkui/main.py:2901 src/gpodder/gtkui/main.py:3136
+#: src/gpodder/gtkui/main.py:3236
 msgid "No podcast selected"
 msgstr "팟캐스트가 선택되지 않았습니다"
 
-#: src/gpodder/gtkui/main.py:2704
+#: src/gpodder/gtkui/main.py:2902
 msgid "Please select a podcast in the podcasts list to update."
 msgstr "업데이트할 팟캐스트를 팟캐스트 리스트에서 선택하세요"
 
-#: src/gpodder/gtkui/main.py:2774
+#: src/gpodder/gtkui/main.py:2975
 #, python-format
 msgid "Download error while downloading %(episode)s: %(message)s"
 msgstr "%(episode)s 다운로드 중 에러 %(message)s"
 
-#: src/gpodder/gtkui/main.py:2775
+#: src/gpodder/gtkui/main.py:2976
 msgid "Download error"
 msgstr "다운로드 에러"
 
-#: src/gpodder/gtkui/main.py:2818
+#: src/gpodder/gtkui/main.py:3027
 msgid "Select the episodes you want to download:"
 msgstr "다운로드 하려는 에피소드를 선택하세요"
 
-#: src/gpodder/gtkui/main.py:2841
+#: src/gpodder/gtkui/main.py:3050
 msgid "Mark as old"
 msgstr "재생한 것으로 표시"
 
-#: src/gpodder/gtkui/main.py:2848
+#: src/gpodder/gtkui/main.py:3057
 msgid "Please check for new episodes later."
 msgstr "새로운 에피소드를 위해 나중에 확인 하세요"
 
-#: src/gpodder/gtkui/main.py:2849
+#: src/gpodder/gtkui/main.py:3058
 msgid "No new episodes available"
 msgstr "새로운 에피소드가 없습니다"
 
-#: src/gpodder/gtkui/main.py:2900
+#: src/gpodder/gtkui/main.py:3099
+#, fuzzy, python-format
+msgid "Subscriptions on %(server)s"
+msgstr "gpodder.net에서 구독합니다"
+
+#: src/gpodder/gtkui/main.py:3110
 msgid "Login to gpodder.net"
 msgstr "gpodder.net에 로그인"
 
-#: src/gpodder/gtkui/main.py:2901
+#: src/gpodder/gtkui/main.py:3111
 msgid "Please login to download your subscriptions."
 msgstr "구독한 팟캐스트를 다운로드 하려면 로그인하세요"
 
-#: src/gpodder/gtkui/main.py:2916
-msgid "Subscriptions on gpodder.net"
-msgstr "gpodder.net에서 구독합니다"
-
-#: src/gpodder/gtkui/main.py:2935
+#: src/gpodder/gtkui/main.py:3137
 msgid "Please select a podcast in the podcasts list to edit."
 msgstr "팟캐스트리스트에서 수정할 팟캣트를 선택하세요"
 
-#: src/gpodder/gtkui/main.py:2949
+#: src/gpodder/gtkui/main.py:3151
 msgid "Podcast"
 msgstr "팟캐스트"
 
-#: src/gpodder/gtkui/main.py:2955 share/gpodder/ui/gtk/gpodder.ui.h:12
-msgid "Remove podcasts"
+#: src/gpodder/gtkui/main.py:3157 share/gpodder/ui/gtk/menus.ui.h:14
+#, fuzzy
+msgid "Delete podcasts"
 msgstr "팟캐스트 삭제"
 
-#: src/gpodder/gtkui/main.py:2956
-msgid "Select the podcast you want to remove."
+#: src/gpodder/gtkui/main.py:3158
+#, fuzzy
+msgid "Select the podcast you want to delete."
 msgstr "삭제할 팟캐스트를 선택하세요"
 
-#: src/gpodder/gtkui/main.py:2960
-#: src/gpodder/gtkui/desktop/episodeselector.py:105
-msgid "Remove"
+#: src/gpodder/gtkui/main.py:3162 share/gpodder/ui/gtk/menus.ui.h:24
+msgid "Delete"
 msgstr "삭제"
 
-#: src/gpodder/gtkui/main.py:2969
-msgid "Removing podcast"
-msgstr "팟캐스트 삭제중"
+#: src/gpodder/gtkui/main.py:3171
+#, fuzzy
+msgid "Deleting podcast"
+msgstr "에피소드 삭제중"
 
-#: src/gpodder/gtkui/main.py:2970
-msgid "Please wait while the podcast is removed"
+#: src/gpodder/gtkui/main.py:3172
+#, fuzzy
+msgid "Please wait while the podcast is deleted"
 msgstr "팟캐스트를 삭제하고 있습니다. 잠시 기다려주세요"
 
-#: src/gpodder/gtkui/main.py:2971
-msgid "Do you really want to remove this podcast and its episodes?"
-msgstr "팟캐스트와 에피소드를 삭제하시겠습니까?"
+#: src/gpodder/gtkui/main.py:3173
+msgid ""
+"This podcast and all its episodes will be PERMANENTLY DELETED.\r\n"
+"Are you sure you want to continue?"
+msgstr ""
 
-#: src/gpodder/gtkui/main.py:2973
-msgid "Removing podcasts"
+#: src/gpodder/gtkui/main.py:3175
+#, fuzzy
+msgid "Deleting podcasts"
 msgstr "팟캐스트 삭제중"
 
-#: src/gpodder/gtkui/main.py:2974
-msgid "Please wait while the podcasts are removed"
+#: src/gpodder/gtkui/main.py:3176
+#, fuzzy
+msgid "Please wait while the podcasts are deleted"
 msgstr "팟캐스트를 삭제하고 있습니다. 잠시만 기다려주세요"
 
-#: src/gpodder/gtkui/main.py:2975
-msgid "Do you really want to remove the selected podcasts and their episodes?"
-msgstr "선택한 팟캐스트와 에피소드를 삭제하시겠습니까?"
+#: src/gpodder/gtkui/main.py:3177
+msgid ""
+"These podcasts and all their episodes will be PERMANENTLY DELETED.\r\n"
+"Are you sure you want to continue?"
+msgstr ""
 
-#: src/gpodder/gtkui/main.py:3035
+#: src/gpodder/gtkui/main.py:3237
 msgid "Please select a podcast in the podcasts list to remove."
 msgstr "팟캐스트 리스트에서 삭제할 팟캐스트를 선택하세요."
 
-#: src/gpodder/gtkui/main.py:3045
+#: src/gpodder/gtkui/main.py:3247
 msgid "OPML files"
 msgstr "OPML 파일"
 
-#: src/gpodder/gtkui/main.py:3050
+#: src/gpodder/gtkui/main.py:3252
 msgid "Import from OPML"
 msgstr "OPML 파일에서 불러오기"
 
-#: src/gpodder/gtkui/main.py:3064
+#: src/gpodder/gtkui/main.py:3266
 msgid "Import podcasts from OPML file"
 msgstr "OPML파일에서 팟캐스트를 불러오기"
 
-#: src/gpodder/gtkui/main.py:3071
+#: src/gpodder/gtkui/main.py:3273
 msgid "Nothing to export"
 msgstr "내보낼 것이 없습니다"
 
-#: src/gpodder/gtkui/main.py:3072
+#: src/gpodder/gtkui/main.py:3274
 msgid ""
 "Your list of podcast subscriptions is empty. Please subscribe to some "
 "podcasts first before trying to export your subscription list."
@@ -1018,150 +952,300 @@ msgstr ""
 "구독하고 있는 팟캐스트가 없습니다. 구독 목록을 외부파일에 저장하기 전에 팟캐"
 "스트를 구독하세요"
 
-#: src/gpodder/gtkui/main.py:3076
+#: src/gpodder/gtkui/main.py:3280
 msgid "Export to OPML"
 msgstr "OPML로 내보내기"
 
-#: src/gpodder/gtkui/main.py:3087
+#: src/gpodder/gtkui/main.py:3293
 #, python-format
 msgid "%(count)d subscription exported"
 msgid_plural "%(count)d subscriptions exported"
 msgstr[0] "%(count)d 개 구독목록을 내보냈습니다"
 
-#: src/gpodder/gtkui/main.py:3088
+#: src/gpodder/gtkui/main.py:3296
 msgid "Your podcast list has been successfully exported."
 msgstr "팟캐스트 리스트를 내보냈습니다"
 
-#: src/gpodder/gtkui/main.py:3090
+#: src/gpodder/gtkui/main.py:3300
 msgid "Could not export OPML to file. Please check your permissions."
 msgstr "OPML파일을 내보내지 못했습니다. 권한을 확인해주세요"
 
-#: src/gpodder/gtkui/main.py:3090
+#: src/gpodder/gtkui/main.py:3302
 msgid "OPML export failed"
 msgstr "OPML 내보내기 실패"
 
-#: src/gpodder/gtkui/main.py:3117
+#: src/gpodder/gtkui/main.py:3326
+#, fuzzy
+msgid "Could not check for updates"
+msgstr "팟캐스트를 추가하지 못했습니다"
+
+#: src/gpodder/gtkui/main.py:3327
+msgid "Please try again later."
+msgstr ""
+
+#: src/gpodder/gtkui/main.py:3332
 msgid "No updates available"
 msgstr "업데이트가 없습니다"
 
-#: src/gpodder/gtkui/main.py:3118
+#: src/gpodder/gtkui/main.py:3333
 msgid "You have the latest version of gPodder."
 msgstr "gPodder 최신버전을 사용중입니다"
 
-#: src/gpodder/gtkui/main.py:3122
+#: src/gpodder/gtkui/main.py:3337
 msgid "New version available"
 msgstr "새 버전이 있습니다"
 
-#: src/gpodder/gtkui/main.py:3124
+#: src/gpodder/gtkui/main.py:3339
 #, python-format
 msgid "Installed version: %s"
 msgstr "설치된 버전 : %s"
 
-#: src/gpodder/gtkui/main.py:3125
+#: src/gpodder/gtkui/main.py:3340
 #, python-format
 msgid "Newest version: %s"
 msgstr "최신버전: %s"
 
-#: src/gpodder/gtkui/main.py:3126
+#: src/gpodder/gtkui/main.py:3341
 #, python-format
 msgid "Release date: %s"
 msgstr "배포 날짜: %s"
 
-#: src/gpodder/gtkui/main.py:3128
+#: src/gpodder/gtkui/main.py:3343
 msgid "Download the latest version from gpodder.org?"
 msgstr "gpodder.org에서 최신버전을 다운로드하겠습니까?"
 
-#: src/gpodder/gtkui/main.py:3141
-msgid "About gPodder"
-msgstr "gPodder에 대해서"
-
-#: src/gpodder/gtkui/main.py:3424
+#: src/gpodder/gtkui/main.py:3591
 msgid "Please register a YouTube API key and set it in the preferences."
 msgstr "유튜브 API키를 등록하고, 설정에 추가해주세요"
 
-#: src/gpodder/gtkui/main.py:3425
+#: src/gpodder/gtkui/main.py:3592
 msgid "Would you like to set up an API key now?"
 msgstr "API키를 지금 설정할까요?"
 
-#: src/gpodder/gtkui/main.py:3425
+#: src/gpodder/gtkui/main.py:3592
 msgid "API key required"
 msgstr "API키가 필요합니다"
 
-#: src/gpodder/gtkui/main.py:3444 bin/gpo:631
+#: src/gpodder/gtkui/main.py:3611 bin/gpo:643
 msgid "No unique URL found"
 msgstr "URL이 없습니다"
 
-#: src/gpodder/gtkui/main.py:3449 bin/gpo:637
+#: src/gpodder/gtkui/main.py:3616 bin/gpo:649
 msgid "Already subscribed"
 msgstr "이미 구독중"
 
-#: src/gpodder/gtkui/main.py:3458 bin/gpo:649
+#: src/gpodder/gtkui/main.py:3625 bin/gpo:661
 #, python-format
 msgid "Make sure the API key is correct. Error: %(message)s"
 msgstr "API키가 올바른 키인지 확인해주세요. 에러: %(message)s"
 
-#: src/gpodder/gtkui/main.py:3459
+#: src/gpodder/gtkui/main.py:3626
 msgid "Error getting YouTube channels"
 msgstr "유튜브 채널을 불러오기 에러"
 
-#: src/gpodder/gtkui/main.py:3462
+#: src/gpodder/gtkui/main.py:3629
 msgid "Successfully migrated subscriptions"
 msgstr "구목목록을 이전했습니다"
 
-#: src/gpodder/gtkui/main.py:3464
+#: src/gpodder/gtkui/main.py:3631
 msgid "Subscriptions are up to date"
 msgstr "구독목록이 업데이트 되었습니다"
 
-#: src/gpodder/gtkui/main.py:3467
+#: src/gpodder/gtkui/main.py:3634
 msgid "These URLs failed:"
 msgstr "URL들이 실패함"
 
-#: src/gpodder/gtkui/main.py:3469
+#: src/gpodder/gtkui/main.py:3636
 msgid "Could not migrate some subscriptions"
 msgstr "몇몇 구독목록을 이전하지 못했습니다"
 
-#: src/gpodder/gtkui/main.py:3493
+#: src/gpodder/gtkui/main.py:3726
 msgid "Cannot start gPodder"
 msgstr "gPodder를 시작할 수 없습니다"
 
-#: src/gpodder/gtkui/main.py:3494
+#: src/gpodder/gtkui/main.py:3727
 #, python-format
 msgid "D-Bus error: %s"
 msgstr "D-Bus 에러: %s"
 
-#: src/gpodder/gtkui/interface/addpodcast.py:74
+#: src/gpodder/gtkui/main.py:3750
+msgid "About gPodder"
+msgstr "gPodder에 대해서"
+
+#: src/gpodder/gtkui/main.py:3774
+#, fuzzy
+msgid "Website"
+msgstr "웹사이트:"
+
+#: src/gpodder/gtkui/main.py:3775
+msgid "Bug Tracker"
+msgstr ""
+
+#: src/gpodder/gtkui/main.py:3826
+msgid "Path to gPodder home is too long"
+msgstr ""
+
+#: src/gpodder/gtkui/shownotes.py:99 src/gpodder/gtkui/model.py:67
+#: src/gpodder/gtkui/model.py:85 src/gpodder/gtkui/model.py:285
+#, python-format
+msgid "from %s"
+msgstr "%s 에서"
+
+#: src/gpodder/gtkui/shownotes.py:130
+msgid "Please select an episode"
+msgstr "에피소드를 선택하세요"
+
+#: src/gpodder/gtkui/shownotes.py:306
+msgid "Open shownotes in web browser"
+msgstr ""
+
+#: src/gpodder/gtkui/shownotes.py:312
+msgid "Open link in web browser"
+msgstr ""
+
+#: src/gpodder/gtkui/config.py:48
+msgid "Integer"
+msgstr "숫자"
+
+#: src/gpodder/gtkui/config.py:50
+msgid "Float"
+msgstr "소수점 숫자"
+
+#: src/gpodder/gtkui/config.py:52
+msgid "Boolean"
+msgstr "불(참/거짓)"
+
+#: src/gpodder/gtkui/config.py:54
+msgid "String"
+msgstr "문자열"
+
+#: src/gpodder/gtkui/model.py:66
+#, python-format
+msgid "released %s"
+msgstr "배포 %s"
+
+#: src/gpodder/gtkui/model.py:78 src/gpodder/gtkui/model.py:439
+msgid "played"
+msgstr "재생됨"
+
+#: src/gpodder/gtkui/model.py:80
+msgid "unplayed"
+msgstr "재생전"
+
+#: src/gpodder/gtkui/model.py:83
+msgid "today"
+msgstr "오늘"
+
+#: src/gpodder/gtkui/model.py:84
+#, python-format
+msgid "downloaded %s"
+msgstr "다운로드됨 %s"
+
+#: src/gpodder/gtkui/model.py:382
+msgid "Deleted"
+msgstr "삭제"
+
+#: src/gpodder/gtkui/model.py:387
+msgid "New episode"
+msgstr "새로운 에피소드"
+
+#: src/gpodder/gtkui/model.py:401
+msgid "Downloaded episode"
+msgstr "다운로드한 에피소드"
+
+#: src/gpodder/gtkui/model.py:404
+msgid "Downloaded video episode"
+msgstr "다운로드한 비디오 에피소드"
+
+#: src/gpodder/gtkui/model.py:407
+msgid "Downloaded image"
+msgstr "다운로드한 이미지"
+
+#: src/gpodder/gtkui/model.py:410
+msgid "Downloaded file"
+msgstr "다운로드한 파일"
+
+#: src/gpodder/gtkui/model.py:426
+msgid "missing file"
+msgstr "찾을 수 없는 파일"
+
+#: src/gpodder/gtkui/model.py:430
+msgid "never displayed"
+msgstr "디스플레이 하기 전"
+
+#: src/gpodder/gtkui/model.py:432
+msgid "never played"
+msgstr "재생하기 전"
+
+#: src/gpodder/gtkui/model.py:434
+msgid "never opened"
+msgstr "열리기 전"
+
+#: src/gpodder/gtkui/model.py:437
+msgid "displayed"
+msgstr "디스플레이됨"
+
+#: src/gpodder/gtkui/model.py:441
+msgid "opened"
+msgstr "열림"
+
+#: src/gpodder/gtkui/model.py:443
+msgid "deletion prevented"
+msgstr "삭제 방지됨"
+
+#: src/gpodder/gtkui/model.py:485 share/gpodder/ui/gtk/menus.ui.h:34
+msgid "All episodes"
+msgstr "모든 에피소드"
+
+#: src/gpodder/gtkui/model.py:486
+msgid "from all podcasts"
+msgstr "모든 팟캐스트에서"
+
+#: src/gpodder/gtkui/model.py:712
+msgid "Subscription paused"
+msgstr "구독 중지됨"
+
+#: src/gpodder/gtkui/interface/addpodcast.py:76
 msgid "Nothing to paste."
 msgstr "붙여넣기 할 내용 없음"
 
-#: src/gpodder/gtkui/interface/addpodcast.py:74
+#: src/gpodder/gtkui/interface/addpodcast.py:76
 msgid "Clipboard is empty"
 msgstr "클립보드가 비었습니다"
 
-#: src/gpodder/gtkui/interface/common.py:160
+#: src/gpodder/gtkui/interface/common.py:134
 msgid "Username"
 msgstr "사용자 이름"
 
-#: src/gpodder/gtkui/interface/common.py:163
+#: src/gpodder/gtkui/interface/common.py:137
 msgid "New user"
 msgstr "새 유저"
 
-#: src/gpodder/gtkui/interface/common.py:170
+#: src/gpodder/gtkui/interface/common.py:144
 msgid "Login"
 msgstr "로그인"
 
-#: src/gpodder/gtkui/interface/common.py:172
+#: src/gpodder/gtkui/interface/common.py:146
 msgid "Authentication required"
 msgstr "인증이 필요합니다"
 
-#: src/gpodder/gtkui/interface/common.py:203
+#: src/gpodder/gtkui/interface/common.py:155
+msgid "hostname or root URL (e.g. https://gpodder.net)"
+msgstr ""
+
+#: src/gpodder/gtkui/interface/common.py:176
+msgid "Server"
+msgstr ""
+
+#: src/gpodder/gtkui/interface/common.py:182
 msgid "Password"
 msgstr "암호"
 
-#: src/gpodder/gtkui/interface/common.py:225
+#: src/gpodder/gtkui/interface/common.py:217
 msgid "Select destination"
 msgstr "대상을 선택하세요"
 
-#: src/gpodder/gtkui/interface/configeditor.py:34
+#: src/gpodder/gtkui/interface/configeditor.py:33
 msgid "Setting"
 msgstr "셋팅"
 
@@ -1169,112 +1253,112 @@ msgstr "셋팅"
 msgid "Set to"
 msgstr "Set to"
 
-#: src/gpodder/gtkui/interface/configeditor.py:81
+#: src/gpodder/gtkui/interface/configeditor.py:82
 #, python-format
 msgid "Cannot set %(field)s to %(value)s. Needed data type: %(datatype)s"
 msgstr ""
 "%(field)s 필드에 %(value)s 값을 저장할 수 없습니다. 데이터 타입 필요: "
 "%(datatype)s"
 
-#: src/gpodder/gtkui/interface/configeditor.py:85
+#: src/gpodder/gtkui/interface/configeditor.py:86
 msgid "Error setting option"
 msgstr "셋팅 옵션 에러"
 
-#: src/gpodder/gtkui/desktop/preferences.py:51
-#: src/gpodder/gtkui/desktop/preferences.py:93
+#: src/gpodder/gtkui/desktop/preferences.py:46
+#: src/gpodder/gtkui/desktop/preferences.py:89
 msgid "Do nothing"
 msgstr "아무것도 하지 않기"
 
-#: src/gpodder/gtkui/desktop/preferences.py:52
+#: src/gpodder/gtkui/desktop/preferences.py:47
 msgid "Show episode list"
 msgstr "에피소드 리스트 표시"
 
-#: src/gpodder/gtkui/desktop/preferences.py:53
+#: src/gpodder/gtkui/desktop/preferences.py:48
 msgid "Add to download list"
 msgstr "다운로드 리스트에 추가"
 
-#: src/gpodder/gtkui/desktop/preferences.py:54
+#: src/gpodder/gtkui/desktop/preferences.py:49
 msgid "Download immediately"
 msgstr "즉시 다운로드"
 
-#: src/gpodder/gtkui/desktop/preferences.py:72
+#: src/gpodder/gtkui/desktop/preferences.py:68
 msgid "None"
 msgstr "없음"
 
-#: src/gpodder/gtkui/desktop/preferences.py:73
+#: src/gpodder/gtkui/desktop/preferences.py:69
 msgid "iPod"
 msgstr "아이팟"
 
-#: src/gpodder/gtkui/desktop/preferences.py:74
+#: src/gpodder/gtkui/desktop/preferences.py:70
 msgid "Filesystem-based"
 msgstr "파일시스템 기반"
 
-#: src/gpodder/gtkui/desktop/preferences.py:94
+#: src/gpodder/gtkui/desktop/preferences.py:90
 msgid "Mark as played"
 msgstr "재생한 것으로 표시"
 
-#: src/gpodder/gtkui/desktop/preferences.py:95
+#: src/gpodder/gtkui/desktop/preferences.py:91
 msgid "Delete from gPodder"
 msgstr "gPodder에서 삭제"
 
-#: src/gpodder/gtkui/desktop/preferences.py:123
+#: src/gpodder/gtkui/desktop/preferences.py:118
 #, python-format
 msgid "Custom (%(format_ids)s)"
 msgstr "커스텀 (%(format_ids)s)"
 
-#: src/gpodder/gtkui/desktop/preferences.py:318
+#: src/gpodder/gtkui/desktop/preferences.py:321
 msgid "Name"
 msgstr "이름"
 
-#: src/gpodder/gtkui/desktop/preferences.py:369
+#: src/gpodder/gtkui/desktop/preferences.py:373
 msgid "Documentation"
 msgstr "문서화"
 
-#: src/gpodder/gtkui/desktop/preferences.py:374
+#: src/gpodder/gtkui/desktop/preferences.py:378
 msgid "Extension info"
 msgstr "확장 정보"
 
-#: src/gpodder/gtkui/desktop/preferences.py:379
+#: src/gpodder/gtkui/desktop/preferences.py:383
 msgid "Support the author"
 msgstr "저자를 후원하기"
 
-#: src/gpodder/gtkui/desktop/preferences.py:413
+#: src/gpodder/gtkui/desktop/preferences.py:425
 msgid "Extension cannot be activated"
 msgstr "확장기능을 사용할 수 없습니다"
 
-#: src/gpodder/gtkui/desktop/preferences.py:426
+#: src/gpodder/gtkui/desktop/preferences.py:438
 msgid "Extension module info"
 msgstr "확장 모듈 정보"
 
-#: src/gpodder/gtkui/desktop/preferences.py:463
+#: src/gpodder/gtkui/desktop/preferences.py:475
 msgid "Configure audio player"
 msgstr "오디오 플레이어 설정"
 
-#: src/gpodder/gtkui/desktop/preferences.py:464
-#: src/gpodder/gtkui/desktop/preferences.py:474
+#: src/gpodder/gtkui/desktop/preferences.py:476
+#: src/gpodder/gtkui/desktop/preferences.py:486
 msgid "Command:"
 msgstr "명렁어:"
 
-#: src/gpodder/gtkui/desktop/preferences.py:473
+#: src/gpodder/gtkui/desktop/preferences.py:485
 msgid "Configure video player"
 msgstr "비디오 플레이어 설정"
 
-#: src/gpodder/gtkui/desktop/preferences.py:485
-#: src/gpodder/gtkui/desktop/preferences.py:503
+#: src/gpodder/gtkui/desktop/preferences.py:498
+#: src/gpodder/gtkui/desktop/preferences.py:522
 msgid "manually"
 msgstr "수동으로"
 
-#: src/gpodder/gtkui/desktop/preferences.py:505
+#: src/gpodder/gtkui/desktop/preferences.py:524
 #, python-format
 msgid "after %(count)d day"
 msgid_plural "after %(count)d days"
 msgstr[0] "%(count)d 일 후에"
 
-#: src/gpodder/gtkui/desktop/preferences.py:541
+#: src/gpodder/gtkui/desktop/preferences.py:564
 msgid "Replace subscription list on server"
 msgstr "서버에 있는 구독목록과 교체합니다"
 
-#: src/gpodder/gtkui/desktop/preferences.py:542
+#: src/gpodder/gtkui/desktop/preferences.py:565
 msgid ""
 "Remote podcasts that have not been added locally will be removed on the "
 "server. Continue?"
@@ -1282,43 +1366,72 @@ msgstr ""
 "서버에 저장되어 있는 팟캐스트(이 컴퓨터에 저장되어 있지 않음)를 삭제 하시겠습"
 "니까?"
 
-#: src/gpodder/gtkui/desktop/preferences.py:621
+#: src/gpodder/gtkui/desktop/preferences.py:644
 msgid "Select folder for mount point"
 msgstr "마운트 포인트로 사용할 폴더를 선택하세요"
 
-#: src/gpodder/gtkui/desktop/preferences.py:638
+#: src/gpodder/gtkui/desktop/preferences.py:661
 msgid "Select folder for playlists"
 msgstr "플레이리스트를 위한 폴더를 선택하세요"
 
-#: src/gpodder/gtkui/desktop/podcastdirectory.py:238
+#: src/gpodder/gtkui/desktop/podcastdirectory.py:188
+#, fuzzy
+msgid "Search:"
+msgstr "검색:"
+
+#: src/gpodder/gtkui/desktop/podcastdirectory.py:189
+#, fuzzy
+msgid "Search"
+msgstr "검색:"
+
+#: src/gpodder/gtkui/desktop/podcastdirectory.py:191
+#: share/gpodder/ui/gtk/gpodderaddpodcast.ui.h:2
+msgid "URL:"
+msgstr "URL:"
+
+#: src/gpodder/gtkui/desktop/podcastdirectory.py:194
+#, fuzzy
+msgid "Filename:"
+msgstr "사용자 이름:"
+
+#: src/gpodder/gtkui/desktop/podcastdirectory.py:195
+#: share/gpodder/ui/gtk/menus.ui.h:21
+msgid "Open"
+msgstr "열기"
+
+#: src/gpodder/gtkui/desktop/podcastdirectory.py:236
 msgid "Loading podcasts"
 msgstr "팟캐스트 로딩"
 
-#: src/gpodder/gtkui/desktop/podcastdirectory.py:239
+#: src/gpodder/gtkui/desktop/podcastdirectory.py:237
 msgid "Please wait while the podcast list is downloaded"
 msgstr "팟캐스트 리스트를 다운로드 하고 있습니다. 잠시만 기다려주세요"
 
-#: src/gpodder/gtkui/desktop/episodeselector.py:288
+#: src/gpodder/gtkui/desktop/episodeselector.py:100
+msgid "Remove"
+msgstr "삭제"
+
+#: src/gpodder/gtkui/desktop/episodeselector.py:283
 #: share/gpodder/ui/gtk/gpodderepisodeselector.ui.h:2
 msgid "Select all"
 msgstr "전부 선택"
 
-#: src/gpodder/gtkui/desktop/episodeselector.py:292
+#: src/gpodder/gtkui/desktop/episodeselector.py:287
 #: share/gpodder/ui/gtk/gpodderepisodeselector.ui.h:3
 msgid "Select none"
 msgstr "모두 선택 해제"
 
-#: src/gpodder/gtkui/desktop/episodeselector.py:324
+#: src/gpodder/gtkui/desktop/episodeselector.py:319
 msgid "Nothing selected"
 msgstr "선택된 것 없음"
 
-#: src/gpodder/gtkui/desktop/episodeselector.py:325
+#: src/gpodder/gtkui/desktop/episodeselector.py:320
 #, python-format
 msgid "%(count)d episode"
 msgid_plural "%(count)d episodes"
 msgstr[0] "%(count)d 개의 에피소드"
 
-#: src/gpodder/gtkui/desktop/episodeselector.py:327
+#: src/gpodder/gtkui/desktop/episodeselector.py:323
 #, python-format
 msgid "size: %s"
 msgstr "크기: %s"
@@ -1332,52 +1445,61 @@ msgstr "%s 폴더를 만들 수 없습니다"
 msgid "Error writing playlist"
 msgstr "플레이 리스트 저장 에러"
 
-#: src/gpodder/gtkui/desktop/channel.py:100
+#: src/gpodder/gtkui/desktop/channel.py:98
 msgid "Add section"
 msgstr "섹션 추가"
 
-#: src/gpodder/gtkui/desktop/channel.py:100
+#: src/gpodder/gtkui/desktop/channel.py:98
 msgid "New section:"
 msgstr "새 섹션:"
+
+#: src/gpodder/gtkui/desktop/channel.py:116
+#, fuzzy
+msgid "_Open"
+msgstr "열기"
+
+#: src/gpodder/gtkui/desktop/channel.py:120
+msgid "_Refresh"
+msgstr ""
 
 #: src/gpodder/gtkui/desktop/channel.py:133
 msgid "Select new podcast cover artwork"
 msgstr "새 팟캐스트 커버 아트웍을 선택하세요"
 
-#: src/gpodder/gtkui/desktop/channel.py:161
+#: src/gpodder/gtkui/desktop/channel.py:165
 msgid "You can only drop a single image or URL here."
 msgstr "이미지 또는 URL을 한개만 놓을 수 있습니다"
 
-#: src/gpodder/gtkui/desktop/channel.py:161
-#: src/gpodder/gtkui/desktop/channel.py:171
+#: src/gpodder/gtkui/desktop/channel.py:166
+#: src/gpodder/gtkui/desktop/channel.py:178
 msgid "Drag and drop"
 msgstr "드래그 앤 드랍"
 
-#: src/gpodder/gtkui/desktop/channel.py:171
+#: src/gpodder/gtkui/desktop/channel.py:177
 msgid "You can only drop local files and http:// URLs here."
 msgstr "로컬 파일 과 URL을 한개만 놓을 수 있습니다"
 
-#: src/gpodder/gtkui/desktop/sync.py:86
+#: src/gpodder/gtkui/desktop/sync.py:83
 msgid "No device configured"
 msgstr "설정된 디바이스가 없습니다"
 
-#: src/gpodder/gtkui/desktop/sync.py:87
+#: src/gpodder/gtkui/desktop/sync.py:84
 msgid "Please set up your device in the preferences dialog."
 msgstr "환경설정 다이얼로그에서 디바이스를 셋업하세요"
 
-#: src/gpodder/gtkui/desktop/sync.py:91
+#: src/gpodder/gtkui/desktop/sync.py:89
 msgid "Cannot open device"
 msgstr "디바이스를 열 수 없습니다"
 
-#: src/gpodder/gtkui/desktop/sync.py:92
+#: src/gpodder/gtkui/desktop/sync.py:90
 msgid "Please check the settings in the preferences dialog."
 msgstr "환경설정 다이얼로그를 확인하세요"
 
-#: src/gpodder/gtkui/desktop/sync.py:139
+#: src/gpodder/gtkui/desktop/sync.py:137
 msgid "Not enough space left on device"
 msgstr "디바이스에 공간이 부족합니다"
 
-#: src/gpodder/gtkui/desktop/sync.py:140
+#: src/gpodder/gtkui/desktop/sync.py:138
 #, python-format
 msgid ""
 "Additional free space required: %(required_space)s\n"
@@ -1386,11 +1508,11 @@ msgstr ""
 "저장 공간이 %(required_space)s 만큼 필요합니다\n"
 "계속하시겠습니까?"
 
-#: src/gpodder/gtkui/desktop/sync.py:199
+#: src/gpodder/gtkui/desktop/sync.py:200
 msgid "Update successful"
 msgstr "업데이트했습니다"
 
-#: src/gpodder/gtkui/desktop/sync.py:200
+#: src/gpodder/gtkui/desktop/sync.py:201
 msgid "The playlist on your MP3 player has been updated."
 msgstr "MP3 플레이어에 있는 플레이리스트를 업데이트 했습니다"
 
@@ -1398,39 +1520,39 @@ msgstr "MP3 플레이어에 있는 플레이리스트를 업데이트 했습니�
 msgid "Episodes have been deleted on device"
 msgstr "디바에스에 있는 에피소드를 삭제했습니다"
 
-#: src/gpodder/gtkui/desktop/sync.py:285
+#: src/gpodder/gtkui/desktop/sync.py:286
 msgid "Error writing playlist files"
 msgstr "플레이리스트 저장중 에러"
 
-#: src/gpodder/plugins/soundcloud.py:154
+#: src/gpodder/plugins/soundcloud.py:174
 msgid "Unknown track"
 msgstr "알수 없는 트랙"
 
-#: src/gpodder/plugins/soundcloud.py:181
+#: src/gpodder/plugins/soundcloud.py:202
 #, python-format
 msgid "%s on Soundcloud"
 msgstr "Soundcloud에서 %s "
 
-#: src/gpodder/plugins/soundcloud.py:190
+#: src/gpodder/plugins/soundcloud.py:211
 #, python-format
 msgid "Tracks published by %s on Soundcloud."
 msgstr "트랙은 %s 가 사운드 클라우드에서 게재했습니다"
 
-#: src/gpodder/plugins/soundcloud.py:217
+#: src/gpodder/plugins/soundcloud.py:238
 #, python-format
 msgid "%s's favorites on Soundcloud"
 msgstr "%s의 Soundcloud에 있는 즐겨찾기"
 
-#: src/gpodder/plugins/soundcloud.py:223
+#: src/gpodder/plugins/soundcloud.py:244
 #, python-format
 msgid "Tracks favorited by %s on Soundcloud."
 msgstr "%s이 Soundcloud에서 즐겨찾는 트랙"
 
-#: share/gpodder/extensions/ted_subtitles.py:16
+#: share/gpodder/extensions/ted_subtitles.py:17
 msgid "Subtitle Downloader for TED Talks"
 msgstr "TED Talks 비디오을 위한 자막 다운로더"
 
-#: share/gpodder/extensions/ted_subtitles.py:17
+#: share/gpodder/extensions/ted_subtitles.py:18
 msgid "Downloads .srt subtitles for TED Talks Videos"
 msgstr "TED Talks 비디오의 .srt 자막 다운로드"
 
@@ -1443,24 +1565,24 @@ msgid "Converts all videos to a Rockbox-compatible format"
 msgstr "모든 비디오 파일을 Rockbox 에서 재생가능한 포맷으로 변환"
 
 #: share/gpodder/extensions/rockbox_convert2mp4.py:65
-#: share/gpodder/extensions/video_converter.py:111
-#: share/gpodder/extensions/audio_converter.py:111
+#: share/gpodder/extensions/video_converter.py:115
+#: share/gpodder/extensions/audio_converter.py:130
 msgid "File converted"
 msgstr "파일 변환됨"
 
-#: share/gpodder/extensions/mpris-listener.py:33
+#: share/gpodder/extensions/mpris-listener.py:36
 msgid "MPRIS Listener"
 msgstr "MPRIS Listener"
 
-#: share/gpodder/extensions/mpris-listener.py:34
+#: share/gpodder/extensions/mpris-listener.py:37
 msgid "Convert MPRIS notifications to gPodder Media Player D-Bus API"
 msgstr "MPRIS 알림을 gPodder 미디어 플레이어 D-Bus API로 변환"
 
-#: share/gpodder/extensions/ubuntu_appindicator.py:10
+#: share/gpodder/extensions/ubuntu_appindicator.py:15
 msgid "Ubuntu App Indicator"
 msgstr "우분투 앱 인디케이터"
 
-#: share/gpodder/extensions/ubuntu_appindicator.py:11
+#: share/gpodder/extensions/ubuntu_appindicator.py:16
 msgid "Show a status indicator in the top bar."
 msgstr "탑바에 상태 인디케이터 표시"
 
@@ -1468,65 +1590,84 @@ msgstr "탑바에 상태 인디케이터 표시"
 msgid "Show main window"
 msgstr "메인윈도우 표시"
 
-#: share/gpodder/extensions/ubuntu_appindicator.py:57
-#: share/gpodder/ui/gtk/gpodder.ui.h:6
+#: share/gpodder/extensions/ubuntu_appindicator.py:58
+#: share/gpodder/ui/gtk/gpodder.ui.h:4 share/gpodder/ui/gtk/menus.ui.h:6
 msgid "Quit"
 msgstr "종료"
 
-#: share/gpodder/extensions/taskbar_progress.py:28
+#: share/gpodder/extensions/rockbox_coverart.py:18
+msgid "Rockbox Cover Art Sync"
+msgstr ""
+
+#: share/gpodder/extensions/rockbox_coverart.py:19
+msgid "Copy Cover Art To Rockboxed Media Player"
+msgstr ""
+
+#: share/gpodder/extensions/taskbar_progress.py:35
 msgid "Show download progress on the taskbar"
 msgstr "태스크바에 다운로드 진행상황 표시"
 
-#: share/gpodder/extensions/taskbar_progress.py:29
+#: share/gpodder/extensions/taskbar_progress.py:36
 msgid "Displays the progress on the Windows taskbar."
 msgstr "윈도우 태스바에 진행상황 표시"
 
-#: share/gpodder/extensions/rename_download.py:16
+#: share/gpodder/extensions/rename_download.py:17
 msgid "Rename episodes after download"
 msgstr "다운로드한뒤 에피소드 이름 변경"
 
-#: share/gpodder/extensions/rename_download.py:17
+#: share/gpodder/extensions/rename_download.py:18
 msgid "Rename episodes to \"<Episode Title>.<ext>\" on download"
 msgstr "다운로드후에 에피소드 이름을 \"<Episode Title>.<ext>\"로 변경"
 
-#: share/gpodder/extensions/video_converter.py:22
+#: share/gpodder/extensions/command_on_download.py:18
+msgid "Run a Command on Download"
+msgstr ""
+
+#: share/gpodder/extensions/command_on_download.py:19
+msgid "Run a predefined external command upon download completion."
+msgstr ""
+
+#: share/gpodder/extensions/video_converter.py:20
 msgid "Convert video files"
 msgstr "비디오 파일 변환"
 
-#: share/gpodder/extensions/video_converter.py:23
+#: share/gpodder/extensions/video_converter.py:21
 msgid "Transcode video files to avi/mp4/m4v"
 msgstr "비디오 파일을 avi/mp4/m4v로 변환"
 
-#: share/gpodder/extensions/video_converter.py:86
-#: share/gpodder/extensions/audio_converter.py:84
+#: share/gpodder/extensions/video_converter.py:84
+#: share/gpodder/extensions/audio_converter.py:98
 #, python-format
 msgid "Convert to %(format)s"
 msgstr "%(format)s으로 변환"
 
-#: share/gpodder/extensions/video_converter.py:114
-#: share/gpodder/extensions/audio_converter.py:114
+#: share/gpodder/extensions/video_converter.py:118
+#: share/gpodder/extensions/audio_converter.py:133
 msgid "Conversion failed"
 msgstr "변환 실패"
 
-#: share/gpodder/extensions/rm_ogg_cover.py:37
+#: share/gpodder/extensions/rm_ogg_cover.py:38
 msgid "Remove cover art from OGG files"
 msgstr "OGG 파일에서 커버아트 삭제"
 
-#: share/gpodder/extensions/rm_ogg_cover.py:38
+#: share/gpodder/extensions/rm_ogg_cover.py:39
 msgid "removes coverart from all downloaded ogg files"
 msgstr "다운로드한 모든 ogg 파일에서 커버아트를 모두 삭제"
 
-#: share/gpodder/extensions/rm_ogg_cover.py:66
+#: share/gpodder/extensions/rm_ogg_cover.py:68
 msgid "Remove cover art"
 msgstr "커버아트 삭제"
 
 #: share/gpodder/extensions/enqueue_in_mediaplayer.py:16
-msgid "Enqueue in media players"
+#, fuzzy
+msgid "Enqueue/Resume in media players"
 msgstr "미디어 플레이어의 대기열에 추가함"
 
 #: share/gpodder/extensions/enqueue_in_mediaplayer.py:17
+#, fuzzy
 msgid ""
-"Add a context menu item for enqueueing episodes in installed media players"
+"Add a context menu item for enqueueing/resuming playback of episodes in "
+"installed media players"
 msgstr ""
 "미디어 플레이어의 대기열에 에피소드를 추가하기 위한 컨텍스트 메뉴 아이템 추가"
 
@@ -1534,11 +1675,24 @@ msgstr ""
 msgid "Enqueue in"
 msgstr "대기열에 추가"
 
-#: share/gpodder/extensions/update_feeds_on_startup.py:14
+#: share/gpodder/extensions/enqueue_in_mediaplayer.py:96
+#, fuzzy
+msgid "Resume in"
+msgstr "모두 다시 시작"
+
+#: share/gpodder/extensions/notification-win32.py:55
+msgid "Notification Bubbles for Windows"
+msgstr ""
+
+#: share/gpodder/extensions/notification-win32.py:56
+msgid "Display notification bubbles for different events."
+msgstr ""
+
+#: share/gpodder/extensions/update_feeds_on_startup.py:15
 msgid "Search for new episodes on startup"
 msgstr "실행할 때 마다, 새로운 에피소드 확인"
 
-#: share/gpodder/extensions/update_feeds_on_startup.py:15
+#: share/gpodder/extensions/update_feeds_on_startup.py:16
 msgid "Starts the search for new episodes on startup"
 msgstr "실행할 때 마다, 새로운 에피소드 확인"
 
@@ -1550,20 +1704,20 @@ msgstr "재 인코딩을 해서 볼륨을 재조정함"
 msgid "Normalize the volume of audio files with normalize-audio"
 msgstr "재조정된 오디오로를 사용해서, 오디오 파일의 볼륨을 재조정함"
 
-#: share/gpodder/extensions/normalize_audio.py:99
+#: share/gpodder/extensions/normalize_audio.py:105
 msgid "File normalized"
 msgstr "파일 볼륨 재조정됨"
 
-#: share/gpodder/extensions/gtk_statusicon.py:14
+#: share/gpodder/extensions/gtk_statusicon.py:19
 msgid "Gtk Status Icon"
 msgstr "Gtk 상태 아이콘"
 
-#: share/gpodder/extensions/gtk_statusicon.py:15
+#: share/gpodder/extensions/gtk_statusicon.py:20
 msgid "Show a status icon for Gtk-based Desktops."
 msgstr " Gtk 기반의 데스크탑을 위해서, 상태메뉴 보이기"
 
 #: share/gpodder/extensions/concatenate_videos.py:20
-#: share/gpodder/extensions/concatenate_videos.py:100
+#: share/gpodder/extensions/concatenate_videos.py:102
 msgid "Concatenate videos"
 msgstr "관련있는 비디오"
 
@@ -1571,32 +1725,32 @@ msgstr "관련있는 비디오"
 msgid "Add a context menu item for concatenating multiple videos"
 msgstr "여러개의 비디오를 연결하기 위한, 컨텍스트 메뉴 아이템 추가"
 
-#: share/gpodder/extensions/concatenate_videos.py:37
+#: share/gpodder/extensions/concatenate_videos.py:38
 msgid "Save video"
 msgstr "비디오 저장"
 
-#: share/gpodder/extensions/concatenate_videos.py:66
+#: share/gpodder/extensions/concatenate_videos.py:67
 msgid "Concatenating video files"
 msgstr "연결된 비디오 파일"
 
-#: share/gpodder/extensions/concatenate_videos.py:67
+#: share/gpodder/extensions/concatenate_videos.py:68
 #, python-format
 msgid "Writing %(filename)s"
 msgstr "%(filename)s 저장중"
 
-#: share/gpodder/extensions/concatenate_videos.py:78
+#: share/gpodder/extensions/concatenate_videos.py:80
 msgid "Videos successfully converted"
 msgstr "비디오 파일을 변환했습니다"
 
-#: share/gpodder/extensions/concatenate_videos.py:79
+#: share/gpodder/extensions/concatenate_videos.py:81
 msgid "Error converting videos"
 msgstr "비디오 변환 에러"
 
-#: share/gpodder/extensions/concatenate_videos.py:80
+#: share/gpodder/extensions/concatenate_videos.py:82
 msgid "Concatenation result"
 msgstr "연결 결과"
 
-#: share/gpodder/extensions/sonos.py:19 share/gpodder/extensions/sonos.py:78
+#: share/gpodder/extensions/sonos.py:19 share/gpodder/extensions/sonos.py:81
 msgid "Stream to Sonos"
 msgstr "Sonos에서 재생"
 
@@ -1620,41 +1774,37 @@ msgstr "오디오 파일 변환"
 msgid "Transcode audio files to mp3/ogg"
 msgstr "오디오 파일을 mp3/ogg로 변환"
 
-#: share/gpodder/extensions/episode_website_context_menu.py:14
+#: share/gpodder/extensions/episode_website_context_menu.py:15
 msgid "\"Open website\" episode context menu"
 msgstr "에피소드 컨텍스트 메뉴에서 \"웹사이트 열기\""
 
-#: share/gpodder/extensions/episode_website_context_menu.py:15
+#: share/gpodder/extensions/episode_website_context_menu.py:16
 msgid "Add a context menu item for opening the website of an episode"
 msgstr "에피소드의 웹사이트를 열기 위해서, 컨텍스트 메뉴 아이템 추가"
 
-#: share/gpodder/extensions/episode_website_context_menu.py:30
+#: share/gpodder/extensions/episode_website_context_menu.py:31
 msgid "Open website"
 msgstr "웹사이트 열기"
 
-#: share/gpodder/extensions/tagging.py:45
+#: share/gpodder/extensions/tagging.py:50
 msgid "Tag downloaded files using Mutagen"
 msgstr "Mutagen으로 다운로드 파일 태그함"
 
-#: share/gpodder/extensions/tagging.py:46
+#: share/gpodder/extensions/tagging.py:51
 msgid "Add episode and podcast titles to MP3/OGG tags"
 msgstr "에피소드와 팟캐스트 제목을 MP3/OGG 태그에 추가"
 
-#: share/gpodder/extensions/ubuntu_unity.py:10
+#: share/gpodder/extensions/ubuntu_unity.py:16
 msgid "Ubuntu Unity Integration"
 msgstr "우분투 유니티 통합"
 
-#: share/gpodder/extensions/ubuntu_unity.py:11
+#: share/gpodder/extensions/ubuntu_unity.py:17
 msgid "Show download progress in the Unity Launcher icon."
 msgstr "유니티 런처 아이콘에 다운로드 진행상황 표시"
 
 #: share/gpodder/ui/gtk/gpodderaddpodcast.ui.h:1
 msgid "Add a new podcast"
 msgstr "새로운 팟캐스트 추가"
-
-#: share/gpodder/ui/gtk/gpodderaddpodcast.ui.h:2
-msgid "URL:"
-msgstr "URL:"
 
 #: share/gpodder/ui/gtk/gpodderchannel.ui.h:1
 msgid "gPodder Podcast Editor"
@@ -1686,12 +1836,12 @@ msgid "<b>HTTP/FTP Authentication</b>"
 msgstr "<b>HTTP/FTP 인증</b>"
 
 #: share/gpodder/ui/gtk/gpodderchannel.ui.h:8
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:13
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:14
 msgid "Username:"
 msgstr "사용자 이름:"
 
 #: share/gpodder/ui/gtk/gpodderchannel.ui.h:9
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:14
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:15
 msgid "Password:"
 msgstr "암호:"
 
@@ -1728,144 +1878,32 @@ msgstr "검색:"
 msgid "Show All"
 msgstr "모두 표시"
 
-#: share/gpodder/ui/gtk/gpodder.ui.h:1
-msgid "_Podcasts"
-msgstr "_Podcasts"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:2
-msgid "Check for new episodes"
-msgstr "새 에피소드 확인"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:3
-msgid "Download new episodes"
-msgstr "새 에피소드 다운로드"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:5
+#: share/gpodder/ui/gtk/gpodder.ui.h:3 share/gpodder/ui/gtk/menus.ui.h:1
 #: share/gpodder/ui/gtk/gpodderpreferences.ui.h:1
 msgid "Preferences"
 msgstr "환경설정"
 
-#: share/gpodder/ui/gtk/gpodder.ui.h:7
-msgid "_Subscriptions"
-msgstr "_Subscriptions"
+#: share/gpodder/ui/gtk/gpodder.ui.h:5 share/gpodder/ui/gtk/menus.ui.h:8
+msgid "Check for new episodes"
+msgstr "새 에피소드 확인"
 
-#: share/gpodder/ui/gtk/gpodder.ui.h:8
-msgid "Discover new podcasts"
-msgstr "새 에피소드 찾기"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:9
-msgid "Add podcast via URL"
-msgstr "팟캐스트의 URL 추가"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:11
-msgid "Unsubscribe"
-msgstr "구독 중지"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:14
-msgid "Import from OPML file"
-msgstr "OPML파일에서 불러오기"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:15
-msgid "Export to OPML file"
-msgstr "OPML파일로 내보내기"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:16
-msgid "Go to gpodder.net"
-msgstr "gpodder.net 열기"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:17
-msgid "_Episodes"
-msgstr "_Episodes"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:18
-msgid "Play"
-msgstr "재생"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:19
-msgid "Open"
-msgstr "열기"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:22
-msgid "Delete"
-msgstr "삭제"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:23
-msgid "Toggle new status"
-msgstr "새 상태 토글"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:24
-msgid "Change delete lock"
-msgstr "삭제 잠금 변경"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:26
-msgid "E_xtras"
-msgstr "E_xtras"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:27
-msgid "Sync to device"
-msgstr "디바이스와 동기화"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:28
-msgid "Update YouTube subscriptions"
-msgstr "유튜브 구독목록 업데이트"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:29
-msgid "_View"
-msgstr "_View"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:30
-msgid "Toolbar"
-msgstr "툴바"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:31
-msgid "Episode descriptions"
-msgstr "에피소드 설명"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:33
-msgid "Hide deleted episodes"
-msgstr "삭제한 에피소드 숨김"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:34
-msgid "Downloaded episodes"
-msgstr "다운로드한 에피소드"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:35
-msgid "Unplayed episodes"
-msgstr "재생되지 않은 에피소드"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:36
-msgid "Hide podcasts without episodes"
-msgstr "팟캐스트만 숨김 (에피소드는 숨기지 않음)"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:37
-msgid "_Help"
-msgstr "_Help"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:38
-msgid "User manual"
-msgstr "사용자 매뉴얼"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:39
-msgid "Software updates"
-msgstr "소프트웨어 업데이트"
-
-#: share/gpodder/ui/gtk/gpodder.ui.h:40
+#: share/gpodder/ui/gtk/gpodder.ui.h:6
 msgid "Filter:"
 msgstr "필터:"
 
-#: share/gpodder/ui/gtk/gpodder.ui.h:41
+#: share/gpodder/ui/gtk/gpodder.ui.h:7
 msgid "Podcasts"
 msgstr "팟캐스트"
 
-#: share/gpodder/ui/gtk/gpodder.ui.h:42
+#: share/gpodder/ui/gtk/gpodder.ui.h:8
 msgid "Limit rate to"
 msgstr "제한 비율"
 
-#: share/gpodder/ui/gtk/gpodder.ui.h:43
+#: share/gpodder/ui/gtk/gpodder.ui.h:9
 msgid "KiB/s"
 msgstr "KiB/s"
 
-#: share/gpodder/ui/gtk/gpodder.ui.h:44
+#: share/gpodder/ui/gtk/gpodder.ui.h:10
 msgid "Limit downloads to"
 msgstr "다운로드 제한함"
 
@@ -1892,6 +1930,106 @@ msgstr "URL로 팟캐스트 추가"
 #: share/gpodder/ui/gtk/gpodderwelcome.ui.h:6
 msgid "Restore my subscriptions from gpodder.net"
 msgstr "gpodder.net에 있는 구독목록으로 복원함"
+
+#: share/gpodder/ui/gtk/menus.ui.h:2
+msgid "Go to gpodder.net"
+msgstr "gpodder.net 열기"
+
+#: share/gpodder/ui/gtk/menus.ui.h:3
+msgid "Software updates"
+msgstr "소프트웨어 업데이트"
+
+#: share/gpodder/ui/gtk/menus.ui.h:4
+#, fuzzy
+msgid "Help"
+msgstr "_Help"
+
+#: share/gpodder/ui/gtk/menus.ui.h:5
+msgid "About"
+msgstr ""
+
+#: share/gpodder/ui/gtk/menus.ui.h:7
+#, fuzzy
+msgid "_Podcasts"
+msgstr "팟캐스트"
+
+#: share/gpodder/ui/gtk/menus.ui.h:9
+msgid "Download new episodes"
+msgstr "새 에피소드 다운로드"
+
+#: share/gpodder/ui/gtk/menus.ui.h:11
+#, fuzzy
+msgid "_Subscriptions"
+msgstr "설명이 없습니다"
+
+#: share/gpodder/ui/gtk/menus.ui.h:12
+msgid "Discover new podcasts"
+msgstr "새 에피소드 찾기"
+
+#: share/gpodder/ui/gtk/menus.ui.h:13
+msgid "Add podcast via URL"
+msgstr "팟캐스트의 URL 추가"
+
+#: share/gpodder/ui/gtk/menus.ui.h:17
+msgid "Import from OPML file"
+msgstr "OPML파일에서 불러오기"
+
+#: share/gpodder/ui/gtk/menus.ui.h:18
+msgid "Export to OPML file"
+msgstr "OPML파일로 내보내기"
+
+#: share/gpodder/ui/gtk/menus.ui.h:19
+#, fuzzy
+msgid "_Episodes"
+msgstr "에피소드"
+
+#: share/gpodder/ui/gtk/menus.ui.h:25
+msgid "Toggle new status"
+msgstr "새 상태 토글"
+
+#: share/gpodder/ui/gtk/menus.ui.h:26
+msgid "Change delete lock"
+msgstr "삭제 잠금 변경"
+
+#: share/gpodder/ui/gtk/menus.ui.h:29
+msgid "Sync to device"
+msgstr "디바이스와 동기화"
+
+#: share/gpodder/ui/gtk/menus.ui.h:30
+msgid "Update YouTube subscriptions"
+msgstr "유튜브 구독목록 업데이트"
+
+#: share/gpodder/ui/gtk/menus.ui.h:31
+msgid "_View"
+msgstr ""
+
+#: share/gpodder/ui/gtk/menus.ui.h:32
+msgid "Toolbar"
+msgstr "툴바"
+
+#: share/gpodder/ui/gtk/menus.ui.h:33
+msgid "Episode descriptions"
+msgstr "에피소드 설명"
+
+#: share/gpodder/ui/gtk/menus.ui.h:35
+msgid "Hide deleted episodes"
+msgstr "삭제한 에피소드 숨김"
+
+#: share/gpodder/ui/gtk/menus.ui.h:36
+msgid "Downloaded episodes"
+msgstr "다운로드한 에피소드"
+
+#: share/gpodder/ui/gtk/menus.ui.h:37
+msgid "Unplayed episodes"
+msgstr "재생되지 않은 에피소드"
+
+#: share/gpodder/ui/gtk/menus.ui.h:38
+msgid "Hide podcasts without episodes"
+msgstr "팟캐스트만 숨김 (에피소드는 숨기지 않음)"
+
+#: share/gpodder/ui/gtk/menus.ui.h:39
+msgid "Visible columns"
+msgstr "보이는 컬럼"
 
 #: share/gpodder/ui/gtk/gpodderpreferences.ui.h:2
 msgid "Audio player:"
@@ -1921,91 +2059,91 @@ msgstr "YouTube API 키 (v3):"
 msgid "Preferred Vimeo format:"
 msgstr "기본 Vimeo 포맷:"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:11
-msgid "Extensions"
-msgstr "확장기능"
-
 #: share/gpodder/ui/gtk/gpodderpreferences.ui.h:12
 msgid "Synchronize subscriptions and episode actions"
 msgstr "구독목록/에피소드의 액션을 동기화"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:15
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:13
+msgid "Server:"
+msgstr ""
+
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:16
 msgid "Replace list on server with local subscriptions"
 msgstr "서버에 있는 구독목록을 현재 구독목록으로 고체합니다"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:16
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:17
 msgid "Device name:"
 msgstr "디바이스 이름:"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:17
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:18
 msgid "gpodder.net"
 msgstr "gpodder.net"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:18
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:19
 msgid "Update interval:"
 msgstr "엡데이트 간격:"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:19
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:20
 msgid "Maximum number of episodes per podcast:"
 msgstr "팟캐스트 하나당 최대 에피소드 갯수:"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:20
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:21
 msgid "When new episodes are found:"
 msgstr "새 에피소드가 확인되면:"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:21
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:22
 msgid "Updating"
 msgstr "업데이트"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:22
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:23
 msgid "Delete played episodes:"
 msgstr "재생한 에피소드 삭제"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:23
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:24
 msgid "Remove played episodes even if unfinished"
 msgstr "끝까지 다 보지 않은 에피소드 삭제"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:24
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:25
 msgid "Also remove unplayed episodes"
 msgstr "재생하지 않은 에피소드도 삭제"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:25
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:26
 msgid "Clean-up"
 msgstr "청소"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:26
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:27
 msgid "Device type:"
 msgstr "디바이스 종류:"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:27
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:28
 msgid "Mountpoint:"
 msgstr "마운트포인트:"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:28
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:29
 msgid "After syncing an episode:"
 msgstr "에피소드 동기화 후:"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:29
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:30
 msgid "Create playlists on device"
 msgstr "디바이스에 플레이 리스트 만들기"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:30
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:31
 msgid "Playlists Folder:"
 msgstr "플레이리스트 폴더:"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:31
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:32
 msgid "Remove episodes deleted on device from gPodder"
 msgstr "디바이스에서 삭제한 에피소드가 gPodder에 있다면 삭제함"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:32
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:33
 msgid "Only sync unplayed episodes"
 msgstr "재생하지 않은 에피소드만 동기화"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:33
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:34
 msgid "Devices"
 msgstr "디바이스"
 
-#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:34
+#: share/gpodder/ui/gtk/gpodderpreferences.ui.h:35
 msgid "Edit config"
 msgstr "설정파일 수정"
 
@@ -2029,145 +2167,170 @@ msgstr "라벨"
 msgid "..."
 msgstr "..."
 
-#: bin/gpo:266
+#: bin/gpo:233
 msgid "Podcast update requested by extensions."
 msgstr "확장기능에서 팟캐스트 업데이트 함"
 
 # extensions이 확장기능이 맞는지 좀 헷갈리네요
-#: bin/gpo:270
+#: bin/gpo:237
 msgid "Episode download requested by extensions."
 msgstr "확장기능에서 에피소드 다운로드 함"
 
-#: bin/gpo:323
+#: bin/gpo:290
 #, python-format
 msgid "Invalid url: %s"
 msgstr "잘못된 url: %s"
 
-#: bin/gpo:340 bin/gpo:416 bin/gpo:450 bin/gpo:582 bin/gpo:597 bin/gpo:717
+#: bin/gpo:307 bin/gpo:383 bin/gpo:421 bin/gpo:572 bin/gpo:594 bin/gpo:609
+#: bin/gpo:729
 #, python-format
 msgid "You are not subscribed to %s."
 msgstr "%s를 구독하고 있지 않습니다"
 
-#: bin/gpo:346
+#: bin/gpo:313
 #, python-format
 msgid "Already subscribed to %s."
 msgstr "%s는 이미 구독중"
 
-#: bin/gpo:352
+#: bin/gpo:319
 #, python-format
 msgid "Cannot subscribe to %s."
 msgstr "%s를 구독할 수 없습"
 
-#: bin/gpo:368
+#: bin/gpo:335
 #, python-format
 msgid "Successfully added %s."
 msgstr "%s 이 추가됨"
 
-#: bin/gpo:386
+#: bin/gpo:353
 msgid "This configuration option does not exist."
 msgstr "설정 옵션이 없습니다"
 
-#: bin/gpo:390
+#: bin/gpo:357
 msgid "Can only set leaf configuration nodes."
 msgstr "가장 끝 설정 노드에만 지정가능함"
 
-#: bin/gpo:404
+#: bin/gpo:371
 #, python-format
 msgid "Renamed %(old_title)s to %(new_title)s."
 msgstr "이르을 %(old_title)s 에서 %(new_title)s 변경합니다."
 
-#: bin/gpo:420
+#: bin/gpo:387
 #, python-format
 msgid "Unsubscribed from %s."
 msgstr "%s 에서 구독 중지"
 
-#: bin/gpo:494
+#: bin/gpo:453
+#, fuzzy
+msgid "Invalid command."
+msgstr "잘 못 된 값"
+
+#: bin/gpo:458
+#, fuzzy, python-format
+msgid "Invalid option: %s."
+msgstr "잘못된 url: %s"
+
+#: bin/gpo:483
 msgid "Updates disabled"
 msgstr "금지된 항목들 업데이트"
 
-#: bin/gpo:505
+#: bin/gpo:494
 #, python-format
 msgid "%(count)d new episode"
 msgid_plural "%(count)d new episodes"
 msgstr[0] "새로운 에피소드 %(count)d 개"
 
-#: bin/gpo:511
+#: bin/gpo:500
 msgid "Checking for new episodes"
 msgstr "새 에피소드 확인"
 
-#: bin/gpo:520
+#: bin/gpo:509
 #, python-format
 msgid "Skipping %(podcast)s"
 msgstr "%(podcast)s 를 건너뜀"
 
-#: bin/gpo:588
+#: bin/gpo:579
+msgid "No episode with the specified GUID found."
+msgstr ""
+
+#: bin/gpo:583
+#, fuzzy, python-format
+msgid "Deleted episode \"%s\"."
+msgstr "에피소드 삭제"
+
+#: bin/gpo:585
+#, fuzzy
+msgid "Episode has already been deleted."
+msgstr "디바에스에 있는 에피소드를 삭제했습니다"
+
+#: bin/gpo:600
 #, python-format
 msgid "Disabling feed update from %s."
 msgstr "%s에서 피드 업데이트 금지"
 
-#: bin/gpo:603
+#: bin/gpo:615
 #, python-format
 msgid "Enabling feed update from %s."
 msgstr "%s에서 피드 업데이트 허용"
 
-#: bin/gpo:616
+#: bin/gpo:628
 #, python-format
 msgid "Please register a YouTube API key and set it using %(command)s."
 msgstr "유튜브 API키를 등록하고 %(command)s 에 사용하세요"
 
-#: bin/gpo:643
+#: bin/gpo:655
 #, python-format
 msgid "Changing: %(old_url)s => %(new_url)s"
 msgstr "변경함: %(old_url)s => %(new_url)s"
 
-#: bin/gpo:653
+#: bin/gpo:665
 msgid "Nothing to fix"
 msgstr "수정할 것이 없음"
 
-#: bin/gpo:672
+#: bin/gpo:684
 msgid "No podcasts found."
 msgstr "에피소드가 없습니다"
 
-#: bin/gpo:686
+#: bin/gpo:698
 msgid "Enter index to subscribe, ? for list"
 msgstr "? 의 순번을 입력하세요, 리스트에 사용됩니다"
 
-#: bin/gpo:700 bin/gpo:704
+#: bin/gpo:712 bin/gpo:716
 msgid "Invalid value."
 msgstr "잘 못 된 값"
 
-#: bin/gpo:721
+#: bin/gpo:733
 #, python-format
 msgid "Invalid URL: %s"
 msgstr "잘못된 URL: %s"
 
-#: bin/gpo:724
+#: bin/gpo:736
 #, python-format
 msgid "Changed URL from %(old_url)s to %(new_url)s."
 msgstr "%(old_url)s 을 %(new_url)s 로 변경함"
 
-#: bin/gpo:782
+#: bin/gpo:792
 #, python-format
 msgid "Syntax error: %(error)s"
 msgstr "Syntax 에러: %(error)s"
 
-#: bin/gpo:876
+#: bin/gpo:884
 msgid "Ambiguous command. Did you mean.."
 msgstr "불분명한 명령어입니다"
 
-#: bin/gpo:880
+#: bin/gpo:888
 msgid "The requested function is not available."
 msgstr "해당 기능을 사용할 수 없습니다"
 
-#: bin/gpodder:105
+#: bin/gpodder:100
 msgid "print logging output on the console"
 msgstr "콘솔에 로그를 축력합니다"
 
-#: bin/gpodder:108
+#: bin/gpodder:103
 msgid "subscribe to the feed at URL"
 msgstr "URL에 있는 피드를 구독합니다"
 
-#: bin/gpodder:113
+#: bin/gpodder:108
 msgid "Mac OS X application process number"
 msgstr "맥 OS X 어플리케이션 프로세스 번호"
 

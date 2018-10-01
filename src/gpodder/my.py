@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,31 +24,34 @@
 #  Thomas Perl <thp@gpodder.org>; 2010-01-19
 #
 
-import gpodder
-_ = gpodder.gettext
-
 import atexit
-import datetime
 import calendar
+import datetime
+import logging
 import os
 import sys
 import time
 
-import logging
-logger = logging.getLogger(__name__)
-
-from gpodder import util
-from gpodder import minidb
-
+import gpodder
 # Append gPodder's user agent to mygpoclient's user agent
 import mygpoclient
+from gpodder import minidb, util
+from mygpoclient import api, public
+from mygpoclient import util as mygpoutil
+
+_ = gpodder.gettext
+
+
+logger = logging.getLogger(__name__)
+
+
 mygpoclient.user_agent += ' ' + gpodder.user_agent
 
 # 2013-02-08: We should update this to 1.7 once we use the new features
 MYGPOCLIENT_REQUIRED = '1.4'
 
-if not hasattr(mygpoclient, 'require_version') or \
-        not mygpoclient.require_version(MYGPOCLIENT_REQUIRED):
+if (not hasattr(mygpoclient, 'require_version')
+        or not mygpoclient.require_version(MYGPOCLIENT_REQUIRED)):
     print("""
     Please upgrade your mygpoclient library.
     See http://thp.io/2010/mygpoclient/
@@ -67,12 +70,8 @@ except ImportError:
     MissingCredentials = object()
 
 
-from mygpoclient import api
-from mygpoclient import public
+EPISODE_ACTIONS_BATCH_SIZE = 100
 
-from mygpoclient import util as mygpoutil
-
-EPISODE_ACTIONS_BATCH_SIZE=100
 
 # Database model classes
 class SinceValue(object):
@@ -86,6 +85,7 @@ class SinceValue(object):
         self.device_id = device_id
         self.category = category
         self.since = since
+
 
 class SubscribeAction(object):
     __slots__ = {'action_type': int, 'url': str}
@@ -122,8 +122,10 @@ class SubscribeAction(object):
 
         raise ValueError('Cannot undo action: %r' % action)
 
+
 # New entity name for "received" actions
 class ReceivedSubscribeAction(SubscribeAction): pass
+
 
 class UpdateDeviceAction(object):
     __slots__ = {'device_id': str, 'caption': str, 'device_type': str}
@@ -133,12 +135,13 @@ class UpdateDeviceAction(object):
         self.caption = caption
         self.device_type = device_type
 
+
 class EpisodeAction(object):
     __slots__ = {'podcast_url': str, 'episode_url': str, 'device_id': str,
                  'action': str, 'timestamp': int,
                  'started': int, 'position': int, 'total': int}
 
-    def __init__(self, podcast_url, episode_url, device_id, \
+    def __init__(self, podcast_url, episode_url, device_id,
             action, timestamp, started, position, total):
         self.podcast_url = podcast_url
         self.episode_url = episode_url
@@ -149,8 +152,10 @@ class EpisodeAction(object):
         self.position = position
         self.total = total
 
+
 # New entity name for "received" actions
 class ReceivedEpisodeAction(EpisodeAction): pass
+
 
 class RewrittenUrl(object):
     __slots__ = {'old_url': str, 'new_url': str}
@@ -159,7 +164,6 @@ class RewrittenUrl(object):
         self.old_url = old_url
         self.new_url = new_url
 # End Database model classes
-
 
 
 # Helper class for displaying changes in the UI
@@ -206,8 +210,8 @@ class MygPoClient(object):
         self._store.remove(self._store.load(UpdateDeviceAction))
 
         # Insert our new update action
-        action = UpdateDeviceAction(self.device_id, \
-                self._config.mygpo.device.caption, \
+        action = UpdateDeviceAction(self.device_id,
+                self._config.mygpo.device.caption,
                 self._config.mygpo.device.type)
         self._store.save(action)
 
@@ -337,13 +341,13 @@ class MygPoClient(object):
             raise Exception('Webservice access not enabled')
 
     def _convert_played_episode(self, episode, start, end, total):
-        return EpisodeAction(episode.channel.url, \
-                episode.url, self.device_id, 'play', \
+        return EpisodeAction(episode.channel.url,
+                episode.url, self.device_id, 'play',
                 int(time.time()), start, end, total)
 
     def _convert_episode(self, episode, action):
-        return EpisodeAction(episode.channel.url, \
-                episode.url, self.device_id, action, \
+        return EpisodeAction(episode.channel.url,
+                episode.url, self.device_id, action,
                 int(time.time()), None, None, None)
 
     def on_delete(self, episodes):
@@ -468,24 +472,24 @@ class MygPoClient(object):
         def convert_to_api(action):
             dt = datetime.datetime.utcfromtimestamp(action.timestamp)
             action_ts = mygpoutil.datetime_to_iso8601(dt)
-            return api.EpisodeAction(action.podcast_url, \
-                    action.episode_url, action.action, \
-                    action.device_id, action_ts, \
+            return api.EpisodeAction(action.podcast_url,
+                    action.episode_url, action.action,
+                    action.device_id, action_ts,
                     action.started, action.position, action.total)
 
         def convert_from_api(action):
             dt = mygpoutil.iso8601_to_datetime(action.timestamp)
             action_ts = calendar.timegm(dt.timetuple())
-            return ReceivedEpisodeAction(action.podcast, \
-                    action.episode, action.device, \
-                    action.action, action_ts, \
+            return ReceivedEpisodeAction(action.podcast,
+                    action.episode, action.device,
+                    action.action, action_ts,
                     action.started, action.position, action.total)
 
         try:
             # Load the "since" value from the database
-            since_o = self._store.get(SinceValue, host=self.host, \
-                                                  device_id=self.device_id, \
-                                                  category=SinceValue.EPISODES)
+            since_o = self._store.get(SinceValue, host=self.host,
+                                      device_id=self.device_id,
+                                      category=SinceValue.EPISODES)
 
             # Use a default since object for the first-time case
             if since_o is None:
@@ -514,7 +518,7 @@ class MygPoClient(object):
             # Uploads are done in batches; uploading can resume if only parts
             # be uploaded; avoids empty uploads as well
             for lower in range(0, len(actions), EPISODE_ACTIONS_BATCH_SIZE):
-                batch = actions[lower:lower+EPISODE_ACTIONS_BATCH_SIZE]
+                batch = actions[lower:(lower + EPISODE_ACTIONS_BATCH_SIZE)]
 
                 # Convert actions to the mygpoclient format for uploading
                 episode_actions = [convert_to_api(a) for a in batch]
@@ -541,9 +545,9 @@ class MygPoClient(object):
         logger.debug('Starting subscription sync.')
         try:
             # Load the "since" value from the database
-            since_o = self._store.get(SinceValue, host=self.host, \
-                                                  device_id=self.device_id, \
-                                                  category=SinceValue.PODCASTS)
+            since_o = self._store.get(SinceValue, host=self.host,
+                                      device_id=self.device_id,
+                                      category=SinceValue.PODCASTS)
 
             # Use a default since object for the first-time case
             if since_o is None:
@@ -605,7 +609,7 @@ class MygPoClient(object):
     def update_device(self, action):
         try:
             logger.debug('Uploading device settings...')
-            self._client.update_device_settings(action.device_id, \
+            self._client.update_device_settings(action.device_id,
                     action.caption, action.device_type)
             logger.debug('Device settings uploaded.')
             return True
@@ -640,10 +644,11 @@ class MygPoClient(object):
 
     def get_download_user_subscriptions_url(self):
         OPML_URL = self._client.locator.subscriptions_uri()
-        url = util.url_add_authentication(OPML_URL, \
-                self._config.mygpo.username, \
+        url = util.url_add_authentication(OPML_URL,
+                self._config.mygpo.username,
                 self._config.mygpo.password)
         return url
+
 
 class Directory(object):
     def __init__(self):
@@ -658,4 +663,3 @@ class Directory(object):
         return [(p.title or p.url, p.url)
                 for p in self.client.search_podcasts(query)
                 if p.url]
-

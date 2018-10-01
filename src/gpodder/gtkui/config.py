@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,15 +23,13 @@
 #
 
 
-from gi.repository import Gtk
-from gi.repository import Gdk
-from gi.repository import Pango
+from gi.repository import Gdk, Gtk, Pango
 
 import gpodder
-from gpodder import util
-from gpodder import config
+from gpodder import config, util
 
 _ = gpodder.gettext
+
 
 class ConfigModel(Gtk.ListStore):
     C_NAME, C_TYPE_TEXT, C_VALUE_TEXT, C_TYPE, C_EDITABLE, C_FONT_STYLE, \
@@ -66,10 +64,10 @@ class ConfigModel(Gtk.ListStore):
             fieldtype = type(value)
 
             style = Pango.Style.NORMAL
-            #if value == default:
-            #    style = Pango.Style.NORMAL
-            #else:
-            #    style = Pango.Style.ITALIC
+            # if value == default:
+            #     style = Pango.Style.NORMAL
+            # else:
+            #     style = Pango.Style.ITALIC
 
             self.append((key, self._type_as_string(fieldtype),
                     config.config_value_to_string(value),
@@ -80,12 +78,12 @@ class ConfigModel(Gtk.ListStore):
         for row in self:
             if row[self.C_NAME] == name:
                 style = Pango.Style.NORMAL
-                #if new_value == self._config.Settings[name]:
-                #    style = Pango.Style.NORMAL
-                #else:
-                #    style = Pango.Style.ITALIC
+                # if new_value == self._config.Settings[name]:
+                #     style = Pango.Style.NORMAL
+                # else:
+                #     style = Pango.Style.ITALIC
                 new_value_text = config.config_value_to_string(new_value)
-                self.set(row.iter, \
+                self.set(row.iter,
                         self.C_VALUE_TEXT, new_value_text,
                         self.C_BOOLEAN_VALUE, bool(new_value),
                         self.C_FONT_STYLE, style)
@@ -93,6 +91,7 @@ class ConfigModel(Gtk.ListStore):
 
     def stop_observing(self):
         self._config.remove_observer(self._on_update)
+
 
 class UIConfig(config.Config):
     def __init__(self, filename='gpodder.conf'):
@@ -107,10 +106,24 @@ class UIConfig(config.Config):
             setattr(self, name, editable.get_chars(0, -1))
         editable.connect('changed', _editable_changed)
 
-    def connect_gtk_spinbutton(self, name, spinbutton):
+    def connect_gtk_spinbutton(self, name, spinbutton, forced_upper=None):
+        """
+        bind a Gtk.SpinButton to a configuration entry.
+
+        It's now possible to specify an upper value (forced_upper).
+        It's not done automatically (always look for name + '_max') because it's
+        used only once. If it becomes commonplace, better make it automatic.
+
+        :param str name: configuration key (e.g. 'max_downloads' or 'limit.downloads.concurrent')
+        :param Gtk.SpinButton spinbutton: button to bind to config
+        :param float forced_upper: forced upper limit on spinbutton.
+                                   Overrides value in .ui to be consistent with code
+        """
         current_value = getattr(self, name)
 
         adjustment = spinbutton.get_adjustment()
+        if forced_upper is not None:
+            adjustment.set_upper(forced_upper)
         if current_value > adjustment.get_upper():
             adjustment.set_upper(current_value)
 
@@ -139,7 +152,7 @@ class UIConfig(config.Config):
         cfg = getattr(self.ui.gtk.state, config_prefix)
 
         if gpodder.ui.win32:
-            window.set_gravity(Gdk.GRAVITY_STATIC)
+            window.set_gravity(Gdk.Gravity.STATIC)
 
         window.resize(cfg.width, cfg.height)
         if cfg.x == -1 or cfg.y == -1:
@@ -164,8 +177,8 @@ class UIConfig(config.Config):
 
         def _receive_window_state(widget, event):
             # ELL: why is it commented out?
-            #new_value = bool(event.new_window_state & Gdk.WindowState.MAXIMIZED)
-            #cfg.maximized = new_value
+            # new_value = bool(event.new_window_state & Gdk.WindowState.MAXIMIZED)
+            # cfg.maximized = new_value
             pass
 
         window.connect('window-state-event', _receive_window_state)
@@ -179,4 +192,3 @@ class UIConfig(config.Config):
             window.show()
         if cfg.maximized:
             window.maximize()
-

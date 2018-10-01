@@ -9,23 +9,26 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import collections
-import dbus
-import dbus.service
-import gpodder
 import logging
 import time
-import urllib.request, urllib.parse, urllib.error
+import urllib.error
 import urllib.parse
+import urllib.request
+
+import dbus
+import dbus.service
+
+import gpodder
 
 logger = logging.getLogger(__name__)
 _ = gpodder.gettext
@@ -42,9 +45,11 @@ USECS_IN_SEC = 1000000
 TrackInfo = collections.namedtuple('TrackInfo',
                         ['uri', 'length', 'status', 'pos', 'rate'])
 
+
 def subsecond_difference(usec1, usec2):
     return usec1 is not None and usec2 is not None and abs(usec1 - usec2) < USECS_IN_SEC
-    
+
+
 class CurrentTrackTracker(object):
     '''An instance of this class is responsible for tracking the state of the
     currently playing track -- it's playback status, playing position, etc.
@@ -77,7 +82,7 @@ class CurrentTrackTracker(object):
             self.pos = self.pos + self.rate * (now - self._last_time) * USECS_IN_SEC
         finally:
             self._last_time = now
-        
+
     def update_needed(self, current, updated):
         for field in updated:
             if field == 'pos':
@@ -100,7 +105,7 @@ class CurrentTrackTracker(object):
 
         uri = kwargs.pop('uri', None)
         if uri is not None:
-            length = kwargs.pop('length') # don't know how to handle uri with no length
+            length = kwargs.pop('length')  # don't know how to handle uri with no length
             if uri != cur['uri']:
                 # if this is a new uri, and the previous state was 'Playing',
                 # notify that the previous track has stopped before updating to
@@ -116,30 +121,28 @@ class CurrentTrackTracker(object):
             # If the position is being updated, and the current status was Playing
             # If the status *is* playing, and *was* playing, but the position
             # has changed discontinuously, notify a stop for the old position
-            if (    cur['status'] == 'Playing'
-                and ('status' not in kwargs or kwargs['status'] == 'Playing')
-                and not subsecond_difference(cur['pos'], kwargs['pos'])
-            ):
-                logger.debug('notify Stopped: playback discontinuity:' + 
-                              'calc: %f observed: %f', cur['pos'], kwargs['pos'])
+            if (cur['status'] == 'Playing' and
+                    ('status' not in kwargs or kwargs['status'] == 'Playing') and not
+                    subsecond_difference(cur['pos'], kwargs['pos'])):
+                logger.debug('notify Stopped: playback discontinuity:' +
+                             'calc: %f observed: %f', cur['pos'], kwargs['pos'])
                 self.notify_stop()
 
-            if (    (kwargs['pos']) == 0
-                and self.pos is not None
-                and self.pos > (self.length - USECS_IN_SEC)
-                and self.pos < (self.length + 2 * USECS_IN_SEC)
-            ):
+            if ((kwargs['pos']) == 0 and
+                    self.pos is not None and
+                    (self.length - USECS_IN_SEC) >
+                    self.pos < (self.length + 2 * USECS_IN_SEC)):
                 logger.debug('fixing for position 0 (calculated pos: %f/%f [%f])',
                              self.pos / USECS_IN_SEC, self.length / USECS_IN_SEC,
-                             (self.pos/USECS_IN_SEC)-(self.length/USECS_IN_SEC))
+                             (self.pos / USECS_IN_SEC) - (self.length / USECS_IN_SEC))
                 self.pos = self.length
-                kwargs.pop('pos') # remove 'pos' even though we're not using it
+                kwargs.pop('pos')  # remove 'pos' even though we're not using it
             else:
                 if self.pos is not None:
                     logger.debug("%r %r", self.pos, self.length)
                     logger.debug('not fixing for position 0 (calculated pos: %f/%f [%f])',
                                  self.pos / USECS_IN_SEC, self.length / USECS_IN_SEC,
-                                 (self.pos/USECS_IN_SEC)-(self.length/USECS_IN_SEC))
+                                 (self.pos / USECS_IN_SEC) - (self.length / USECS_IN_SEC))
                 self.pos = kwargs.pop('pos')
 
         if 'status' in kwargs:
@@ -169,17 +172,16 @@ class CurrentTrackTracker(object):
         self.notify('Playing')
 
     def notify(self, status):
-        if (   self.uri is None
-            or self.pos is None
-            or self.status is None
-            or self.length is None
-            or self.length <= 0
-        ):
+        if (self.uri is None or
+                self.pos is None or
+                self.status is None or
+                self.length is None or
+                self.length <= 0):
             return
         pos = self.pos // USECS_IN_SEC
         file_uri = urllib.request.url2pathname(urllib.parse.urlparse(self.uri).path).encode('utf-8')
         total_time = self.length // USECS_IN_SEC
-        
+
         if status == 'Stopped':
             end_position = pos
             start_position = self._notifier.start_position
@@ -204,7 +206,8 @@ class CurrentTrackTracker(object):
             (self.pos or 0) // USECS_IN_SEC,
             (self.length or 0) // USECS_IN_SEC,
             self.rate or 0)
-            
+
+
 class MPRISDBusReceiver(object):
     INTERFACE_PROPS = 'org.freedesktop.DBus.Properties'
     SIGNAL_PROP_CHANGE = 'PropertiesChanged'
@@ -212,10 +215,9 @@ class MPRISDBusReceiver(object):
     INTERFACE_MPRIS = 'org.mpris.MediaPlayer2.Player'
     SIGNAL_SEEKED = 'Seeked'
     OBJECT_VLC = 'org.mpris.MediaPlayer2.vlc'
-    OTHER_MPRIS_INTERFACES = [ 'org.mpris.MediaPlayer2',
-                               'org.mpris.MediaPlayer2.TrackList',
-                               'org.mpris.MediaPlayer2.Playlists'
-    ]
+    OTHER_MPRIS_INTERFACES = ['org.mpris.MediaPlayer2',
+                              'org.mpris.MediaPlayer2.TrackList',
+                              'org.mpris.MediaPlayer2.Playlists']
 
     def __init__(self, bus, notifier):
         self.bus = bus
@@ -249,7 +251,7 @@ class MPRISDBusReceiver(object):
             if interface_name not in self.OTHER_MPRIS_INTERFACES:
                 logger.warn('unexpected interface: %s, props=%r', interface_name, list(changed_properties.keys()))
             return
-        
+
         collected_info = {}
 
         if 'PlaybackStatus' in changed_properties:
@@ -274,14 +276,15 @@ class MPRISDBusReceiver(object):
         self.cur.update(pos=position)
 
     def query_position(self):
-        proxy = self.bus.get_object(self.OBJECT_VLC,self.PATH_MPRIS)
+        proxy = self.bus.get_object(self.OBJECT_VLC, self.PATH_MPRIS)
         props = dbus.Interface(proxy, self.INTERFACE_PROPS)
         return props.Get(self.INTERFACE_MPRIS, 'Position')
 
     def query_status(self):
-        proxy = self.bus.get_object(self.OBJECT_VLC,self.PATH_MPRIS)
+        proxy = self.bus.get_object(self.OBJECT_VLC, self.PATH_MPRIS)
         props = dbus.Interface(proxy, self.INTERFACE_PROPS)
         return props.Get(self.INTERFACE_MPRIS, 'PlaybackStatus')
+
 
 class gPodderNotifier(dbus.service.Object):
     def __init__(self, bus, path):
@@ -296,20 +299,27 @@ class gPodderNotifier(dbus.service.Object):
     def PlaybackStopped(self, start_position, end_position, total_time, file_uri):
         logger.info('PlaybackStopped: %s: %d--%d/%d',
             file_uri, start_position, end_position, total_time)
-         
+
+
 # Finally, this is the extension, which just pulls this all together
 class gPodderExtension:
 
     def __init__(self, container):
         self.container = container
         self.path = '/org/gpodder/player/notifier'
+        self.notifier = None
+        self.rcvr = None
 
     def on_load(self):
-        self.session_bus = gpodder.dbus_session_bus
-        self.notifier = gPodderNotifier(self.session_bus, self.path)
-        self.rcvr = MPRISDBusReceiver(self.session_bus, self.notifier)
+        if gpodder.dbus_session_bus is None:
+            logger.debug("dbus session bus not available, not loading")
+        else:
+            self.session_bus = gpodder.dbus_session_bus
+            self.notifier = gPodderNotifier(self.session_bus, self.path)
+            self.rcvr = MPRISDBusReceiver(self.session_bus, self.notifier)
 
     def on_unload(self):
-        self.notifier.remove_from_connection(self.session_bus, self.path)
-        self.rcvr.stop_receiving()
-
+        if self.notifier is not None:
+            self.notifier.remove_from_connection(self.session_bus, self.path)
+        if self.rcvr is not None:
+            self.rcvr.stop_receiving()

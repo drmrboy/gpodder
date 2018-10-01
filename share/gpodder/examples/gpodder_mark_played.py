@@ -12,8 +12,12 @@
 #
 # Thomas Perl <thp@gpodder.org>; 2009-09-09
 
-import sys
 import os
+import sys
+
+import dbus
+
+import gpodder
 
 if len(sys.argv) != 2:
     print("""
@@ -23,15 +27,12 @@ if len(sys.argv) != 2:
 
 filename = os.path.abspath(sys.argv[1])
 
-import dbus
-import gpodder
 
 session_bus = dbus.SessionBus()
-proxy = session_bus.get_object(gpodder.dbus_bus_name, \
+proxy = session_bus.get_object(gpodder.dbus_bus_name,
                                gpodder.dbus_gui_object_path)
 interface = dbus.Interface(proxy, gpodder.dbus_interface)
 
 if not interface.mark_episode_played(filename):
     print('Warning: Could not mark episode as played.', file=sys.stderr)
     sys.exit(2)
-

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,13 +18,13 @@
 #
 
 # This metadata block gets parsed by setup.py - use single quotes only
-__tagline__   = 'Media aggregator and podcast client'
-__author__    = 'Thomas Perl <thp@gpodder.org>'
-__version__   = '3.10.0'
-__date__      = '2016-12-29'
-__copyright__ = '© 2005-2017 Thomas Perl and the gPodder Team'
-__license__   = 'GNU General Public License, version 3 or later'
-__url__       = 'http://gpodder.org/'
+__tagline__ = 'Media aggregator and podcast client'
+__author__ = 'Thomas Perl <thp@gpodder.org>'
+__version__ = '3.10.5'
+__date__ = '2018-09-15'
+__copyright__ = '© 2005-2018 The gPodder Team'
+__license__ = 'GNU General Public License, version 3 or later'
+__url__ = 'http://gpodder.org/'
 
 __version_info__ = tuple(int(x) for x in __version__.split('.'))
 
@@ -33,6 +33,8 @@ import sys
 import platform
 import gettext
 import locale
+
+from gpodder.build_info import BUILD_TYPE
 
 # Check if real hard dependencies are available
 try:
@@ -82,6 +84,7 @@ del sqlite3
 # The User-Agent string for downloads
 user_agent = 'gPodder/%s (+%s) %s/%s' % (__version__, __url__, platform.system(), platform.release())
 
+
 # Are we running in GUI or console mode?
 class UI(object):
     def __init__(self):
@@ -110,16 +113,16 @@ ui.freedesktop = not ui.win32 and not ui.osx
 # Use   _ = gpodder.gettext   in modules to enable string translations
 textdomain = 'gpodder'
 locale_dir = gettext.bindtextdomain(textdomain)
+
+if ui.win32:
+    # this must be done prior to gettext.translation to set the locale (see #484)
+    from gpodder.utilwin32locale import install
+    install(textdomain, locale_dir)
+
 t = gettext.translation(textdomain, locale_dir, fallback=True)
 
-try:
-    # Python 2
-    gettext = t.ugettext
-    ngettext = t.ungettext
-except AttributeError:
-    # Python 3
-    gettext = t.gettext
-    ngettext = t.ngettext
+gettext = t.gettext
+ngettext = t.ngettext
 
 del t
 
@@ -154,6 +157,7 @@ prefix = None
 
 ENV_HOME, ENV_DOWNLOADS = 'GPODDER_HOME', 'GPODDER_DOWNLOAD_DIR'
 
+
 # Function to set a new gPodder home folder
 def set_home(new_home):
     global home, config_file, database_file, downloads
@@ -164,10 +168,33 @@ def set_home(new_home):
     if ENV_DOWNLOADS not in os.environ:
         downloads = os.path.join(home, 'Downloads')
 
+
 def fixup_home(old_home):
-    if ui.osx:
-        new_home = os.path.expanduser(os.path.join('~', 'Library',
-            'Application Support', 'gPodder'))
+    if ui.osx or ui.win32:
+        if ui.osx:
+            new_home = os.path.expanduser(os.path.join('~', 'Library',
+                'Application Support', 'gPodder'))
+        elif BUILD_TYPE == 'windows-portable':
+            new_home = os.path.normpath(os.path.join(os.path.dirname(sys.executable), "..", "..", "config"))
+            old_home = new_home  # force to config directory
+            print("D: windows-portable build; forcing home to config directory %s" % new_home, file=sys.stderr)
+        else:  # ui.win32, not portable build
+            from gpodder.utilwin32ctypes import get_documents_folder, get_reg_current_user_string_value
+            try:
+                # from old launcher, see
+                # https://github.com/gpodder/gpodder/blob/old/gtk2/tools/win32-launcher/folderselector.c
+                new_home = get_reg_current_user_string_value("Software\\gpodder.org\\gPodder", "GPODDER_HOME")
+                print("D: windows build; registry home = %s" % new_home, file=sys.stderr)
+            except Exception as e:
+                print("E: can't get GPODDER_HOME from registry: %s" % e, file=sys.stderr)
+                new_home = None
+            if new_home is None:
+                try:
+                    new_home = os.path.join(get_documents_folder(), "gPodder")
+                    print("D: windows build; documents home = %s" % new_home, file=sys.stderr)
+                except Exception as e:
+                    print("E: can't get user's Documents folder: %s" % e, file=sys.stderr)
+                    new_home = old_home
 
         # Users who do not have the old home directory, or who have it but also
         # have the new home directory (to cater to situations where the user
@@ -177,6 +204,7 @@ def fixup_home(old_home):
             return new_home
 
     return old_home
+
 
 # Default locations for configuration and data files
 default_home = os.path.expanduser(os.path.join('~', 'gPodder'))
@@ -196,6 +224,7 @@ if ENV_DOWNLOADS in os.environ:
 DEFAULT_PLUGINS = [
     'gpodder.plugins.soundcloud',
 ]
+
 
 def load_plugins():
     """Load (non-essential) plugin modules

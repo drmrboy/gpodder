@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,18 +22,19 @@
 # Based on a patch by Iwan van der Kleijn <iwanvanderkleyn@gmail.com>
 # See also: http://gpodder.org/bug/699
 
-import gpodder
-
-from gpodder import util
-
 import dbus
 import dbus.service
+
+import gpodder
+from gpodder import util
+
 
 def safe_str(txt):
     if txt:
         return txt.encode()
     else:
         return ''
+
 
 def safe_first_line(txt):
     txt = safe_str(txt)
@@ -43,6 +44,7 @@ def safe_first_line(txt):
     else:
         return lines[0]
 
+
 class DBusPodcastsProxy(dbus.service.Object):
     """ Implements API accessible through D-Bus
 
@@ -51,18 +53,18 @@ class DBusPodcastsProxy(dbus.service.Object):
     for parameter and return values.
     """
 
-    #DBusPodcastsProxy(lambda: self.channels, self.on_itemUpdate_activate(), self.playback_episodes, self.download_episode_list, bus_name)
-    def __init__(self, get_podcast_list, \
-            check_for_updates, playback_episodes, \
-            download_episodes, episode_from_uri, \
+    # DBusPodcastsProxy(lambda: self.channels, self.on_itemUpdate_activate(), self.playback_episodes, self.download_episode_list, bus_name)
+    def __init__(self, get_podcast_list,
+            check_for_updates, playback_episodes,
+            download_episodes, episode_from_uri,
             bus_name):
         self._get_podcasts = get_podcast_list
         self._on_check_for_updates = check_for_updates
         self._playback_episodes = playback_episodes
         self._download_episodes = download_episodes
         self._episode_from_uri = episode_from_uri
-        dbus.service.Object.__init__(self, \
-                object_path=gpodder.dbus_podcasts_object_path, \
+        dbus.service.Object.__init__(self,
+                object_path=gpodder.dbus_podcasts_object_path,
                 bus_name=bus_name)
 
     def _get_episode_refs(self, urls):
@@ -144,4 +146,3 @@ class DBusPodcastsProxy(dbus.service.Object):
     def check_for_updates(self):
         """Check for new episodes or offer subscriptions"""
         self._on_check_for_updates()
-

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,9 +24,8 @@
 #
 
 import copy
-from functools import reduce
-
 import json
+from functools import reduce
 
 
 class JsonConfigSubtree(object):
@@ -160,7 +159,7 @@ class JsonConfig(object):
                 elif isinstance(value, dict):
                     # Recurse into sub-dictionaries
                     work_queue.append((data[key], value))
-                elif type(value) != type(data[key]):
+                elif type(value) != type(data[key]):  # noqa
                     # Type mismatch of current value and default
                     if type(value) == int and type(data[key]) == float:
                         # Convert float to int if default value is int
@@ -225,4 +224,3 @@ class JsonConfig(object):
             if target is None or not isinstance(target, dict):
                 target_dict[attr] = target = {}
             target_dict = target
-

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,15 +24,14 @@
 #
 
 
-import gpodder
-from gpodder import util
-from gpodder import jsonconfig
-
 import atexit
+import logging
 import os
 import shutil
 import time
-import logging
+
+import gpodder
+from gpodder import jsonconfig, util
 
 _ = gpodder.gettext
 
@@ -60,25 +59,26 @@ defaults = {
     'limit': {
         'bandwidth': {
             'enabled': False,
-            'kbps': 500.0, # maximum kB/s per download
+            'kbps': 500.0,  # maximum kB/s per download
         },
         'downloads': {
             'enabled': True,
             'concurrent': 1,
+            'concurrent_max': 16,
         },
-        'episodes': 200, # max episodes per feed
+        'episodes': 200,  # max episodes per feed
     },
 
     # Behavior of downloads
     'downloads': {
-        'chronological_order': True, # download older episodes first
+        'chronological_order': True,  # download older episodes first
     },
 
     # Automatic feed updates, download removal and retry on download timeout
     'auto': {
         'update': {
             'enabled': False,
-            'frequency': 20, # minutes
+            'frequency': 20,  # minutes
         },
 
         'cleanup': {
@@ -88,14 +88,14 @@ defaults = {
             'unfinished': True,
         },
 
-        'retries': 3, # number of retries when downloads time out
+        'retries': 3,  # number of retries when downloads time out
     },
 
     # Software updates from gpodder.org
     'software_update': {
-        'check_on_startup': True, # check for updates on start
-        'last_check': 0, # unix timestamp of last update check
-        'interval': 5, # interval (in days) to check for updates
+        'check_on_startup': True,  # check for updates on start
+        'last_check': 0,  # unix timestamp of last update check
+        'interval': 5,  # interval (in days) to check for updates
     },
 
     'ui': {
@@ -128,7 +128,7 @@ defaults = {
             },
 
             'toolbar': False,
-            'new_episodes': 'show', # ignore, show, queue, download
+            'new_episodes': 'show',  # ignore, show, queue, download
             'live_search_delay': 200,
 
             'podcast_list': {
@@ -141,7 +141,7 @@ defaults = {
             'episode_list': {
                 'descriptions': True,
                 'view_mode': 1,
-                'columns': int('110', 2), # bitfield of visible columns
+                'columns': int('110', 2),  # bitfield of visible columns
             },
 
             'download_list': {
@@ -154,14 +154,14 @@ defaults = {
 
     # Synchronization with portable devices (MP3 players, etc..)
     'device_sync': {
-        'device_type': 'none', # Possible values: 'none', 'filesystem', 'ipod'
-        'device_folder': '/media',        
+        'device_type': 'none',  # Possible values: 'none', 'filesystem', 'ipod'
+        'device_folder': '/media',
 
         'one_folder_per_podcast': True,
         'skip_played_episodes': True,
         'delete_played_episodes': False,
 
-        'max_filename_length': 999,
+        'max_filename_length': 120,
 
         'custom_sync_name': '{episode.sortdate}_{episode.title}',
         'custom_sync_name_enabled': False,
@@ -181,13 +181,13 @@ defaults = {
     },
 
     'youtube': {
-        'preferred_fmt_id': 18, # default fmt_id (see fallbacks in youtube.py)
-        'preferred_fmt_ids': [], # for advanced uses (custom fallback sequence)
-        'api_key_v3': '', # API key, register for one at https://developers.google.com/youtube/v3/
+        'preferred_fmt_id': 18,  # default fmt_id (see fallbacks in youtube.py)
+        'preferred_fmt_ids': [],  # for advanced uses (custom fallback sequence)
+        'api_key_v3': '',  # API key, register for one at https://developers.google.com/youtube/v3/
     },
 
     'vimeo': {
-        'fileformat': '720p', # preferred file format (see vimeo.py)
+        'fileformat': '720p',  # preferred file format (see vimeo.py)
     },
 
     'extensions': {
@@ -235,6 +235,7 @@ def config_value_to_string(config_value):
     else:
         return str(config_value)
 
+
 def string_to_config_value(new_value, old_value):
     config_type = type(old_value)
 
@@ -258,6 +259,7 @@ class Config(object):
         self.__observers = []
 
         self.load()
+        self.migrate_defaults()
 
         # If there is no configuration file, we create one here (bug 1511)
         if not os.path.exists(self.__filename):
@@ -323,13 +325,13 @@ class Config(object):
         logger.info('Flushing settings to disk')
 
         try:
-            fp = open(filename+'.tmp', 'wt')
+            fp = open(filename + '.tmp', 'wt')
             fp.write(repr(self.__json_config))
             fp.close()
-            util.atomic_rename(filename+'.tmp', filename)
+            util.atomic_rename(filename + '.tmp', filename)
         except:
             logger.error('Cannot write settings to %s', filename)
-            util.delete_file(filename+'.tmp')
+            util.delete_file(filename + '.tmp')
             raise
 
         self.__save_thread = None
@@ -390,3 +392,9 @@ class Config(object):
 
         setattr(self.__json_config, name, value)
 
+    def migrate_defaults(self):
+        """ change default values in config """
+        if self.device_sync.max_filename_length == 999:
+            logger.debug("setting config.device_sync.max_filename_length=120"
+                         " (999 is bad for NTFS and ext{2-4})")
+            self.device_sync.max_filename_length = 120

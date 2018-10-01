@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 # Copyright (c) 2011 Neal H. Walfield
 #
 # gPodder is free software; you can redistribute it and/or modify
@@ -25,48 +25,45 @@
 
 """Miscellaneous helper functions for gPodder
 
-This module provides helper and utility functions for gPodder that 
+This module provides helper and utility functions for gPodder that
 are not tied to any specific part of gPodder.
 
 """
+import collections
+import datetime
+import glob
+import gzip
+import http.client
+import io
+import itertools
 import json
-
-import gpodder
-
+import locale
 import logging
-logger = logging.getLogger(__name__)
-
+import mimetypes
 import os
 import os.path
 import platform
-import glob
-import stat
+import re
 import shlex
 import shutil
 import socket
-import sys
+import stat
 import string
-
-import re
 import subprocess
-from html.entities import entitydefs
-import time
-import gzip
-import datetime
+import sys
 import threading
-
+import time
+import urllib.error
 import urllib.parse
-import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
-import http.client
+import urllib.request
 import webbrowser
-import mimetypes
-import itertools
-
-import io
 import xml.dom.minidom
+from html.entities import entitydefs
 
-import collections
+import gpodder
+
+logger = logging.getLogger(__name__)
+
 
 if sys.hexversion < 0x03000000:
     from html.parser import HTMLParser
@@ -83,16 +80,15 @@ except ImportError:
 
 if gpodder.ui.win32:
     try:
-        import win32file
+        import gpodder.utilwin32ctypes as win32file
     except ImportError:
-        logger.warn('Running on Win32 but win32api/win32file not installed.')
+        logger.warn('Running on Win32 but utilwin32ctypes can\'t be loaded.')
         win32file = None
 
 _ = gpodder.gettext
 N_ = gpodder.ngettext
 
 
-import locale
 try:
     locale.setlocale(locale.LC_ALL, '')
 except Exception as e:
@@ -127,6 +123,7 @@ def _sanitize_char(c):
 
     return c.encode('utf-8')
 
+
 SANITIZATION_TABLE = b''.join(map(_sanitize_char, list(map(chr, list(range(256))))))
 del _sanitize_char
 
@@ -158,17 +155,17 @@ _MIME_TYPES = dict((k, v) for v, k in _MIME_TYPE_LIST)
 _MIME_TYPES_EXT = dict(_MIME_TYPE_LIST)
 
 
-def make_directory( path):
+def make_directory(path):
     """
     Tries to create a directory if it does not exist already.
-    Returns True if the directory exists after the function 
+    Returns True if the directory exists after the function
     call, False otherwise.
     """
-    if os.path.isdir( path):
+    if os.path.isdir(path):
         return True
 
     try:
-        os.makedirs( path)
+        os.makedirs(path)
     except:
         logger.warn('Could not create directory: %s', path)
         return False
@@ -178,7 +175,7 @@ def make_directory( path):
 
 def normalize_feed_url(url):
     """
-    Converts any URL to http:// or ftp:// so that it can be 
+    Converts any URL to http:// or ftp:// so that it can be
     used with "wget". If the URL cannot be converted (invalid
     or unknown scheme), "None" is returned.
 
@@ -238,7 +235,7 @@ def normalize_feed_url(url):
             break
 
     # Assume HTTP for URLs without scheme
-    if not '://' in url:
+    if '://' not in url:
         url = 'http://' + url
 
     scheme, netloc, path, query, fragment = urllib.parse.urlsplit(url)
@@ -337,6 +334,7 @@ def username_password_from_url(url):
 
     return (username, password)
 
+
 def directory_is_writable(path):
     """
     Returns True if the specified directory exists and is writable
@@ -345,24 +343,24 @@ def directory_is_writable(path):
     return os.path.isdir(path) and os.access(path, os.W_OK)
 
 
-def calculate_size( path):
+def calculate_size(path):
     """
-    Tries to calculate the size of a directory, including any 
-    subdirectories found. The returned value might not be 
-    correct if the user doesn't have appropriate permissions 
+    Tries to calculate the size of a directory, including any
+    subdirectories found. The returned value might not be
+    correct if the user doesn't have appropriate permissions
     to list all subdirectories of the given path.
     """
     if path is None:
         return 0
 
-    if os.path.dirname( path) == '/':
+    if os.path.dirname(path) == '/':
         return 0
 
-    if os.path.isfile( path):
-        return os.path.getsize( path)
+    if os.path.isfile(path):
+        return os.path.getsize(path)
 
-    if os.path.isdir( path) and not os.path.islink( path):
-        sum = os.path.getsize( path)
+    if os.path.isdir(path) and not os.path.islink(path):
+        sum = os.path.getsize(path)
 
         try:
             for item in os.listdir(path):
@@ -408,7 +406,8 @@ def file_age_in_days(filename):
     if dt is None:
         return 0
     else:
-        return (datetime.datetime.now()-dt).days
+        return (datetime.datetime.now() - dt).days
+
 
 def file_modification_timestamp(filename):
     """
@@ -440,7 +439,7 @@ def file_age_to_string(days):
     if days < 1:
         return ''
     else:
-        return N_('%(count)d day ago', '%(count)d days ago', days) % {'count':days}
+        return N_('%(count)d day ago', '%(count)d days ago', days) % {'count': days}
 
 
 def is_system_file(filename):
@@ -449,9 +448,9 @@ def is_system_file(filename):
     """
     if gpodder.ui.win32 and win32file is not None:
         result = win32file.GetFileAttributes(filename)
-        #-1 is returned by GetFileAttributes when an error occurs
-        #0x4 is the FILE_ATTRIBUTE_SYSTEM constant
-        return result != -1 and result & 0x4 != 0
+        # -1 / 0xffffffff is returned by GetFileAttributes when an error occurs
+        # 0x4 is the FILE_ATTRIBUTE_SYSTEM constant
+        return result != -1 and result != 0xffffffff and result & 0x4 != 0
     else:
         return False
 
@@ -505,7 +504,7 @@ def format_date(timestamp):
     if timestamp is None:
         return None
 
-    seconds_in_a_day = 60*60*24
+    seconds_in_a_day = 60 * 60 * 24
 
     today = time.localtime()[:3]
     yesterday = time.localtime(time.time() - seconds_in_a_day)[:3]
@@ -519,12 +518,12 @@ def format_date(timestamp):
         return None
 
     if timestamp_date == today:
-       return _('Today')
+        return _('Today')
     elif timestamp_date == yesterday:
-       return _('Yesterday')
-   
+        return _('Yesterday')
+
     try:
-        diff = int( (time.time() - timestamp)/seconds_in_a_day )
+        diff = int((time.time() - timestamp) / seconds_in_a_day)
     except:
         logger.warn('Cannot convert "%s" to date.', timestamp, exc_info=True)
         return None
@@ -544,25 +543,25 @@ def format_date(timestamp):
 
 def format_filesize(bytesize, use_si_units=False, digits=2):
     """
-    Formats the given size in bytes to be human-readable, 
+    Formats the given size in bytes to be human-readable,
 
     Returns a localized "(unknown)" string when the bytesize
     has a negative value.
     """
     si_units = (
-            ( 'kB', 10**3 ),
-            ( 'MB', 10**6 ),
-            ( 'GB', 10**9 ),
+            ('kB', 10**3),
+            ('MB', 10**6),
+            ('GB', 10**9),
     )
 
     binary_units = (
-            ( 'KiB', 2**10 ),
-            ( 'MiB', 2**20 ),
-            ( 'GiB', 2**30 ),
+            ('KiB', 2**10),
+            ('MiB', 2**20),
+            ('GiB', 2**30),
     )
 
     try:
-        bytesize = float( bytesize)
+        bytesize = float(bytesize)
     except:
         return _('(unknown)')
 
@@ -574,14 +573,14 @@ def format_filesize(bytesize, use_si_units=False, digits=2):
     else:
         units = binary_units
 
-    ( used_unit, used_value ) = ( 'B', bytesize )
+    (used_unit, used_value) = ('B', bytesize)
 
-    for ( unit, value ) in units:
+    for (unit, value) in units:
         if bytesize >= value:
             used_value = bytesize / float(value)
             used_unit = unit
 
-    return ('%.'+str(digits)+'f %s') % (used_value, used_unit)
+    return ('%.' + str(digits) + 'f %s') % (used_value, used_unit)
 
 
 def delete_file(filename):
@@ -612,7 +611,7 @@ def is_html(text):
 def remove_html_tags(html):
     """
     Remove HTML tags from a string and replace numeric and
-    named entities with the corresponding character, so the 
+    named entities with the corresponding character, so the
     HTML text can be displayed in a simple text view.
     """
     if html is None:
@@ -626,7 +625,7 @@ def remove_html_tags(html):
     re_listing_tags = re.compile('<li[^>]*>', re.I)
 
     result = html
-    
+
     # Convert common HTML elements to their text equivalent
     result = re_newline_tags.sub('\n', result)
     result = re_listing_tags.sub('\n * ', result)
@@ -639,8 +638,8 @@ def remove_html_tags(html):
     result = re_unicode_entities.sub(lambda x: chr(int(x.group(1))), result)
 
     # Convert named HTML entities to their unicode character
-    result = re_html_entities.sub(lambda x: entitydefs.get(x.group(1),''), result)
-    
+    result = re_html_entities.sub(lambda x: entitydefs.get(x.group(1), ''), result)
+
     # Convert more than two newlines to two newlines
     result = re.sub('([\r\n]{2})([\r\n])+', '\\1', result)
 
@@ -881,7 +880,7 @@ def mimetype_from_extension(extension):
         return _MIME_TYPES_EXT[extension]
 
     # Need to prepend something to the extension, so guess_type works
-    type, encoding = mimetypes.guess_type('file'+extension)
+    type, encoding = mimetypes.guess_type('file' + extension)
 
     return type or ''
 
@@ -909,7 +908,7 @@ def extension_correct_for_mimetype(extension, mimetype):
       ...
     ValueError: "audio mpeg" is not a mimetype (missing /)
     """
-    if not '/' in mimetype:
+    if '/' not in mimetype:
         raise ValueError('"%s" is not a mimetype (missing /)' % mimetype)
     if not extension.startswith('.'):
         raise ValueError('"%s" is not an extension (missing .)' % extension)
@@ -919,9 +918,9 @@ def extension_correct_for_mimetype(extension, mimetype):
 
     # Create a "default" extension from the mimetype, e.g. "application/ogg"
     # becomes ".ogg", "audio/mpeg" becomes ".mpeg", etc...
-    default = ['.'+mimetype.split('/')[-1]]
+    default = ['.' + mimetype.split('/')[-1]]
 
-    return extension in default+mimetypes.guess_all_extensions(mimetype)
+    return extension in default + mimetypes.guess_all_extensions(mimetype)
 
 
 def filename_from_url(url):
@@ -930,10 +929,10 @@ def filename_from_url(url):
     from a URL, e.g. http://server.com/file.MP3?download=yes
     will result in the string ("file", ".mp3") being returned.
 
-    This function will also try to best-guess the "real" 
+    This function will also try to best-guess the "real"
     extension for a media file (audio, video) by
     trying to match an extension to these types and recurse
-    into the query string to find better matches, if the 
+    into the query string to find better matches, if the
     original extension does not resolve to a known type.
 
     http://my.net/redirect.php?my.net/file.ogg => ("file", ".ogg")
@@ -941,13 +940,14 @@ def filename_from_url(url):
     http://s/redirect.mp4?http://serv2/test.mp4 => ("test", ".mp4")
     """
     (scheme, netloc, path, para, query, fragid) = urllib.parse.urlparse(url)
-    (filename, extension) = os.path.splitext(os.path.basename( urllib.parse.unquote(path)))
+    (filename, extension) = os.path.splitext(
+        os.path.basename(urllib.parse.unquote(path)))
 
     if file_type_by_extension(extension) is not None and not \
-        query.startswith(scheme+'://'):
+            query.startswith(scheme + '://'):
         # We have found a valid extension (audio, video)
         # and the query string doesn't look like a URL
-        return ( filename, extension.lower() )
+        return (filename, extension.lower())
 
     # If the query string looks like a possible URL, try that first
     if len(query.strip()) > 0 and query.find('/') != -1:
@@ -958,13 +958,13 @@ def filename_from_url(url):
             return os.path.splitext(os.path.basename(query_url))
 
     # No exact match found, simply return the original filename & extension
-    return ( filename, extension.lower() )
+    return (filename, extension.lower())
 
 
 def file_type_by_extension(extension):
     """
-    Tries to guess the file type by looking up the filename 
-    extension from a table of known file types. Will return 
+    Tries to guess the file type by looking up the filename
+    extension from a table of known file types. Will return
     "audio", "video" or None.
 
     >>> file_type_by_extension('.aif')
@@ -994,17 +994,17 @@ def file_type_by_extension(extension):
         return _MIME_TYPES_EXT[extension].split('/')[0]
 
     # Need to prepend something to the extension, so guess_type works
-    type, encoding = mimetypes.guess_type('file'+extension)
+    type, encoding = mimetypes.guess_type('file' + extension)
 
     if type is not None and '/' in type:
         filetype, rest = type.split('/', 1)
         if filetype in ('audio', 'video', 'image'):
             return filetype
-    
+
     return None
 
 
-def get_first_line( s):
+def get_first_line(s):
     """
     Returns only the first line of a string, stripped so
     that it doesn't have whitespace before or after.
@@ -1079,7 +1079,7 @@ def format_desktop_command(command, filenames, start_position=None):
     for fieldcode in ('%U', '%F', '%u', '%f'):
         if fieldcode in command:
             command_before = command[:command.index(fieldcode)]
-            command_after = command[command.index(fieldcode)+1:]
+            command_after = command[command.index(fieldcode) + 1:]
             multiple_arguments = fieldcode in ('%U', '%F')
             break
 
@@ -1088,9 +1088,10 @@ def format_desktop_command(command, filenames, start_position=None):
 
     commands = []
     for filename in filenames:
-        commands.append(command_before+[filename]+command_after)
+        commands.append(command_before + [filename] + command_after)
 
     return commands
+
 
 def url_strip_authentication(url):
     """
@@ -1201,6 +1202,7 @@ def urlopen(url, headers=None, data=None, timeout=None):
     else:
         return opener.open(request, timeout=timeout)
 
+
 def get_real_url(url):
     """
     Gets the real URL of a file and resolves all redirects.
@@ -1285,7 +1287,7 @@ def bluetooth_send_file(filename):
 
     if command_line is not None:
         command_line.append(filename)
-        return (subprocess.Popen(command_line).wait() == 0)
+        return (Popen(command_line, close_fds=True).wait() == 0)
     else:
         logger.error('Cannot send file. Please install "bluetooth-sendto" or "gnome-obex-send".')
         return False
@@ -1308,6 +1310,7 @@ def format_time(value):
         return dt.strftime('%M:%S')
     else:
         return dt.strftime('%H:%M:%S')
+
 
 def parse_time(value):
     """Parse a time string into seconds
@@ -1366,31 +1369,36 @@ def format_seconds_to_hour_min_sec(seconds):
     """
 
     if seconds < 1:
-        return N_('%(count)d second', '%(count)d seconds', seconds) % {'count':seconds}
+        return N_('%(count)d second', '%(count)d seconds',
+                  seconds) % {'count': seconds}
 
     result = []
 
     seconds = int(seconds)
 
-    hours = seconds//3600
-    seconds = seconds%3600
+    hours = seconds // 3600
+    seconds = seconds % 3600
 
-    minutes = seconds//60
-    seconds = seconds%60
+    minutes = seconds // 60
+    seconds = seconds % 60
 
     if hours:
-        result.append(N_('%(count)d hour', '%(count)d hours', hours) % {'count':hours})
+        result.append(N_('%(count)d hour', '%(count)d hours',
+                         hours) % {'count': hours})
 
     if minutes:
-        result.append(N_('%(count)d minute', '%(count)d minutes', minutes) % {'count':minutes})
+        result.append(N_('%(count)d minute', '%(count)d minutes',
+                         minutes) % {'count': minutes})
 
     if seconds:
-        result.append(N_('%(count)d second', '%(count)d seconds', seconds) % {'count':seconds})
+        result.append(N_('%(count)d second', '%(count)d seconds',
+                         seconds) % {'count': seconds})
 
     if len(result) > 1:
-        return (' '+_('and')+' ').join((', '.join(result[:-1]), result[-1]))
+        return (' ' + _('and') + ' ').join((', '.join(result[:-1]), result[-1]))
     else:
         return result[0]
+
 
 def http_request(url, method='HEAD'):
     (scheme, netloc, path, parms, qry, fragid) = urllib.parse.urlparse(url)
@@ -1412,9 +1420,9 @@ def gui_open(filename):
         if gpodder.ui.win32:
             os.startfile(filename)
         elif gpodder.ui.osx:
-            subprocess.Popen(['open', filename])
+            Popen(['open', filename], close_fds=True)
         else:
-            subprocess.Popen(['xdg-open', filename])
+            Popen(['xdg-open', filename], close_fds=True)
         return True
     except:
         logger.error('Cannot open file/folder: "%s"', filename, exc_info=True)
@@ -1428,6 +1436,7 @@ def open_website(url):
     make sure your system is set up correctly.
     """
     run_in_background(lambda: webbrowser.open(url))
+
 
 def convert_bytes(d):
     """
@@ -1459,16 +1468,16 @@ def convert_bytes(d):
     return d
 
 
-def sanitize_filename(filename, max_length=0):
+def sanitize_filename(filename, max_length):
     """
     Generate a sanitized version of a filename; trim filename
     if greater than max_length (0 = no limit).
 
-    >>> sanitize_filename('https://www.host.name/feed')
+    >>> sanitize_filename('https://www.host.name/feed', 0)
     'https___www.host.name_feed'
-    >>> sanitize_filename('Binärgewitter')
+    >>> sanitize_filename('Binärgewitter', 0)
     'Binärgewitter'
-    >>> sanitize_filename('Cool feed (ogg)')
+    >>> sanitize_filename('Cool feed (ogg)', 0)
     'Cool feed (ogg)'
     >>> sanitize_filename('Cool feed (ogg)', 1)
     'C'
@@ -1574,6 +1583,7 @@ def find_mount_point(directory):
 # matches http:// and ftp:// and mailto://
 protocolPattern = re.compile(r'^\w+://')
 
+
 def isabs(string):
     """
     @return true if string is an absolute path or protocoladdress
@@ -1593,19 +1603,21 @@ def commonpath(l1, l2, common=[]):
     if len(l1) < 1: return (common, l1, l2)
     if len(l2) < 1: return (common, l1, l2)
     if l1[0] != l2[0]: return (common, l1, l2)
-    return commonpath(l1[1:], l2[1:], common+[l1[0]])
+    return commonpath(l1[1:], l2[1:], common + [l1[0]])
+
 
 def relpath(p1, p2):
     """
     Finds relative path from p1 to p2
     Source: http://code.activestate.com/recipes/208993/
     """
-    pathsplit = lambda s: s.split(os.path.sep)
+    def pathsplit(s):
+        return s.split(os.path.sep)
 
-    (common,l1,l2) = commonpath(pathsplit(p1), pathsplit(p2))
+    (common, l1, l2) = commonpath(pathsplit(p1), pathsplit(p2))
     p = []
     if len(l1) > 0:
-        p = [ ('..'+os.sep) * len(l1) ]
+        p = [('..' + os.sep) * len(l1)]
     p = p + l2
     if len(p) is 0:
         return "."
@@ -1626,6 +1638,7 @@ def get_hostname():
 
     # Fallback - but can this give us "localhost"?
     return socket.gethostname()
+
 
 def detect_device_type():
     """Device type detection for gpodder.net
@@ -1664,7 +1677,7 @@ def write_m3u_playlist(m3u_filename, episodes, extm3u=True):
     for episode in episodes:
         if not extm3u:
             # Episode objects are strings that contain file names
-            f.write(episode+'\n')
+            f.write(episode + '\n')
             continue
 
         if episode.was_downloaded(and_exists=True):
@@ -1672,9 +1685,9 @@ def write_m3u_playlist(m3u_filename, episodes, extm3u=True):
             assert filename is not None
 
             if os.path.dirname(filename).startswith(os.path.dirname(m3u_filename)):
-                filename = filename[len(os.path.dirname(m3u_filename)+os.sep):]
-            f.write('#EXTINF:0,'+episode.playlist_title()+'\n')
-            f.write(filename+'\n')
+                filename = filename[len(os.path.dirname(m3u_filename) + os.sep):]
+            f.write('#EXTINF:0,' + episode.playlist_title() + '\n')
+            f.write(filename + '\n')
 
     f.close()
 
@@ -1683,7 +1696,7 @@ def generate_names(filename):
     basename, ext = os.path.splitext(filename)
     for i in itertools.count():
         if i:
-            yield '%s (%d)%s' % (basename, i+1, ext)
+            yield '%s (%d)%s' % (basename, i + 1, ext)
         else:
             yield filename
 
@@ -1762,13 +1775,15 @@ def get_update_info():
     data = urlopen(url).read().decode('utf-8')
     info = json.loads(data)
 
-    latest_version = info.get('tag_name','').replace('gpodder-','')
+    latest_version = info.get('tag_name', '').replace('gpodder-', '')
     release_date = info['published_at']
 
     release_parsed = datetime.datetime.strptime(release_date, '%Y-%m-%dT%H:%M:%SZ')
     days_since_release = (datetime.datetime.today() - release_parsed).days
 
-    convert = lambda s: tuple(int(x) for x in s.split('.'))
+    def convert(s):
+        return tuple(int(x) for x in s.split('.'))
+
     up_to_date = (convert(gpodder.__version__) >= convert(latest_version))
 
     return up_to_date, latest_version, release_date, days_since_release
@@ -1789,7 +1804,7 @@ def linux_get_active_interfaces():
     empty list if the device is offline. The loopback
     interface is not included.
     """
-    process = subprocess.Popen(['ip', 'link'], stdout=subprocess.PIPE)
+    process = Popen(['ip', 'link'], close_fds=True, stdout=subprocess.PIPE)
     data, _ = process.communicate()
     for interface, _ in re.findall(r'\d+: ([^:]+):.*state (UP|UNKNOWN)', data.decode(locale.getpreferredencoding())):
         if interface != 'lo':
@@ -1803,12 +1818,13 @@ def osx_get_active_interfaces():
     empty list if the device is offline. The loopback
     interface is not included.
     """
-    process = subprocess.Popen(['ifconfig'], stdout=subprocess.PIPE)
+    process = Popen(['ifconfig'], close_fds=True, stdout=subprocess.PIPE)
     stdout, _ = process.communicate()
     for i in re.split('\n(?!\t)', stdout.decode('utf-8'), re.MULTILINE):
         b = re.match('(\\w+):.*status: (active|associated)$', i, re.MULTILINE | re.DOTALL)
         if b:
             yield b.group(1)
+
 
 def unix_get_active_interfaces():
     """Get active network interfaces using 'ifconfig'
@@ -1817,7 +1833,7 @@ def unix_get_active_interfaces():
     empty list if the device is offline. The loopback
     interface is not included.
     """
-    process = subprocess.Popen(['ifconfig'], stdout=subprocess.PIPE)
+    process = Popen(['ifconfig'], close_fds=True, stdout=subprocess.PIPE)
     stdout, _ = process.communicate()
     for i in re.split('\n(?!\t)', stdout.decode(locale.getpreferredencoding()), re.MULTILINE):
         b = re.match('(\\w+):.*status: (active|associated)$', i, re.MULTILINE | re.DOTALL)
@@ -1880,6 +1896,7 @@ def website_reachable(url):
 
     return (False, None)
 
+
 def delete_empty_folders(top):
     for root, dirs, files in os.walk(top, topdown=False):
         for name in dirs:
@@ -1887,3 +1904,152 @@ def delete_empty_folders(top):
             if not os.listdir(dirname):
                 os.rmdir(dirname)
 
+
+def guess_encoding(filename):
+    """
+    read filename encoding as defined in PEP 263
+    - BOM marker => utf-8
+    - coding: xxx comment in first 2 lines
+    - else return None
+    >>> guess_encoding("not.there")
+    >>> guess_encoding("setup.py")
+    >>> guess_encoding("share/gpodder/extensions/mpris-listener.py")
+    'utf-8'
+    """
+    def re_encoding(line):
+        m = re.match(b"""^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)""", line)
+        if m:
+            return m.group(1).decode()
+        else:
+            return None
+
+    if not filename or not os.path.exists(filename):
+        return None
+
+    with open(filename, "rb") as f:
+        fst = f.readline()
+        if fst[:3] == b"\xef\xbb\xbf":
+            return "utf-8"
+        encoding = re_encoding(fst)
+        if not encoding:
+            snd = f.readline()
+            encoding = re_encoding(snd)
+    return encoding
+
+
+def iri_to_url(url):
+    """
+    Properly escapes Unicode characters in the URL path section
+    TODO: Explore if this should also handle the domain
+    Based on: http://stackoverflow.com/a/18269491/1072626
+    In response to issue: https://github.com/gpodder/gpodder/issues/232
+
+    >>> iri_to_url('http://www.valpskott.se/Valpcast/MP3/Valpcast%20-%20Existentiella%20frÃ¥gor.mp3')
+    'http://www.valpskott.se/Valpcast/MP3/Valpcast%20-%20Existentiella%20fr%C3%83%C2%A5gor.mp3'
+
+    See https://github.com/gpodder/gpodder/issues/399
+    >>> iri_to_url('//dts.podtrac.com/redirect.mp3/http://myhost/myepisode.mp3')
+    '//dts.podtrac.com/redirect.mp3/http://myhost/myepisode.mp3'
+    """
+    url = urllib.parse.urlsplit(url)
+    url = list(url)
+    # First unquote to avoid escaping quoted content
+    url[2] = urllib.parse.unquote(url[2])
+    # extend safe with all allowed chars in path segment of URL, cf pchar rule
+    # in https://tools.ietf.org/html/rfc3986#appendix-A
+    url[2] = urllib.parse.quote(url[2], safe="/-._~!$&'()*+,;=:@")
+    url = urllib.parse.urlunsplit(url)
+    return url
+
+
+class Popen(subprocess.Popen):
+
+    """A Popen process that tries not to leak file descriptors.
+
+    This is a drop-in replacement for subprocess.Popen(), which takes the same
+    arguments.
+
+    'close_fds' will default to True, if omitted. This stops the process from
+    inheriting ALL of gPodder's file descriptors, which would keep them
+    'in-use'. That is of particular concern whenever the download queue is
+    active and interacting with the filesystem in the background.
+
+    On Windows however, redirection cannot coexist with 'close_fds=True'.
+    Specifying both will raise a ValueError. A message will appear in the log.
+
+    For communication with short-lived Windows commands, setting 'close_fds'
+    to False may be a tolerable risk. Otherwise as a last resort, sending
+    output to temp files to read afterward might work (probably involving
+    'shell=True').
+
+    See https://github.com/gpodder/gpodder/issues/420
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.__logged_returncode = False
+
+        if 'close_fds' not in kwargs:
+            kwargs['close_fds'] = True
+
+        try:
+            super(Popen, self).__init__(*args, **kwargs)  # Python 2 syntax
+
+        except (ValueError) as e:
+            if gpodder.ui.win32 and kwargs['close_fds']:
+                if [(k, v) for (k, v) in kwargs.items() if k in ('stdin', 'stdout', 'stderr') and v]:
+                    logger = logging.getLogger(__name__)
+                    logger.error('util.Popen(close_fds=True) is incompatible with'
+                                 ' stream redirection on Windows.')
+                    logger.error('With close_fds=False, the process keeps all '
+                                 'currently open files locked. It might be tolerable '
+                                 'for short-lived commands. Or use temp files.')
+
+            raise e
+
+    @classmethod
+    def testPopen():
+        # Problematic commands (write to stderr or read from stdin).
+        if gpodder.ui.win32:
+            cmd = ['findstr.exe', '/!']
+            cmd_pipe = ['findstr', 'hello']
+        else:
+            cmd = ['cat', '--helpp']
+            cmd_pipe = ['grep', 'hello']
+
+        logger.info('Test #1: Implicit close_fds=True, with no redirection')
+        logger.info('No race condition.')
+        logger.info('Streams left in the console.')
+        logger.info('Typical spawn and forget. Might as well wait().')
+        p = Popen(cmd)
+        out, err = p.communicate()
+        print("- - stderr - -\n{}\n- - -    - - -\n".format(err))
+
+        logger.info('Test #2: Explicit close_fds=False, with redirection.')
+        logger.info('This has a race condition, but communicate() always returns streams.')
+        p = Popen(cmd, close_fds=False, stderr=subprocess.PIPE, universal_newlines=True)
+        out, err = p.communicate()
+        print("- - stderr - -\n{}\n- - -    - - -\n".format(err))
+
+        try:
+            logger.info('Test #3: Implicit close_fds=True, with attempted redirection.')
+            logger.info('No race condition.')
+            logger.info('On Windows, this will raise ValueError.')
+            logger.info('Other platforms will have readable streams returned.')
+            p = Popen(cmd, stderr=subprocess.PIPE, universal_newlines=True)
+            out, err = p.communicate()
+            print("- - stderr - -\n{}\n- - -    - - -\n".format(err))
+
+        except (ValueError) as e:
+            print("- - Caught - -\n{}: {}\n- - -    - - -\n".format(e.__class__.__name__, e))
+
+        try:
+            logger.info('Test #4: Implicit close_fds=True, given input.')
+            p = Popen(cmd_pipe, stdin=subprocess.PIPE)
+            out, err = p.communicate(input=b'hello world')
+            print("NEVER REACHED ON WINDOWS")
+            print("- - stderr - -\n{}\n- - -    - - -\n".format(err))
+
+        except (ValueError) as e:
+            print("- - Caught - -\n{}: {}\n- - -    - - -\n".format(e.__class__.__name__, e))
+
+        logger.info('Log spam only occurs if returncode is non-zero or if explaining the Windows redirection error.')

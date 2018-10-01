@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,10 +25,9 @@
 #
 
 import gpodder
+from gpodder import util
 
 _ = gpodder.gettext
-
-from gpodder import util
 
 
 class ObservableService(object):
@@ -39,7 +38,7 @@ class ObservableService(object):
 
     def register(self, signal_name, observer):
         if signal_name in self.observers:
-            if not observer in self.observers[signal_name]:
+            if observer not in self.observers[signal_name]:
                 self.observers[signal_name].append(observer)
                 return True
 
@@ -61,5 +60,3 @@ class ObservableService(object):
             return True
 
         return False
-
-

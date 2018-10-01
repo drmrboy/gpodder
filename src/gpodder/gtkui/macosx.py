@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import struct
 import sys
 
 from gpodder import util
+
 
 def aeKeyword(fourCharCode):
     """transform four character code into a long"""
@@ -72,16 +73,16 @@ try:
             urls = []
             filelist = event.paramDescriptorForKeyword_(aeKeyword(keyDirectObject))
             numberOfItems = filelist.numberOfItems()
-            for i in range(1,numberOfItems+1):
+            for i in range(1, numberOfItems + 1):
                 fileAliasDesc = filelist.descriptorAtIndex_(i)
                 fileURLDesc = fileAliasDesc.coerceToDescriptorType_(aeKeyword(typeFileURL))
                 fileURLData = fileURLDesc.data()
-                url = buffer(fileURLData.bytes(),0,fileURLData.length())
+                url = memoryview(fileURLData.bytes(), 0, fileURLData.length())
                 url = str(url)
-                util.idle_add(self.gp.on_item_import_from_file_activate, None,url)
+                util.idle_add(self.gp.on_item_import_from_file_activate, None, url)
                 urls.append(str(url))
 
-            print(("open Files :",urls), file=sys.stderr)
+            print(("open Files :", urls), file=sys.stderr)
             result = NSAppleEventDescriptor.descriptorWithInt32_(42)
             reply.setParamDescriptor_forKeyword_(result, aeKeyword('----'))
 
@@ -89,9 +90,9 @@ try:
             """ handles a 'Subscribe to...' event"""
             filelist = event.paramDescriptorForKeyword_(aeKeyword(keyDirectObject))
             fileURLData = filelist.data()
-            url = buffer(fileURLData.bytes(),0,fileURLData.length())
+            url = memoryview(fileURLData.bytes(), 0, fileURLData.length())
             url = str(url)
-            print(("Subscribe to :"+url), file=sys.stderr)
+            print(("Subscribe to :" + url), file=sys.stderr)
             util.idle_add(self.gp.subscribe_to_url, url)
 
             result = NSAppleEventDescriptor.descriptorWithInt32_(42)
@@ -105,8 +106,8 @@ except ImportError:
     """, file=sys.stderr)
     handler = None
 
+
 def register_handlers(gp):
     """ register the events handlers (and keep a reference to gPodder's instance)"""
     if handler is not None:
         handler.register(gp)
-

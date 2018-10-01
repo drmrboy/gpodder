@@ -2,7 +2,7 @@
 
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,19 +22,26 @@ import glob
 import os
 import re
 import sys
-
 from distutils.core import setup
 
 installing = ('install' in sys.argv and '--help' not in sys.argv)
 
+# distutils depends on setup.py beeing executed from the same dir.
+# Most of our custom commands work either way, but this makes
+# it work in all cases.
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+
 # Read the metadata from gPodder's __init__ module (doesn't need importing)
-main_module = open('src/gpodder/__init__.py').read()
-metadata = dict(re.findall("__([a-z_]+)__\s*=\s*'([^']+)'", main_module))
+main_module = open('src/gpodder/__init__.py', 'r', encoding='utf-8').read()
+metadata = dict(re.findall("__([a-z_]+)__\\s*=\\s*'([^']+)'", main_module))
 
 author, email = re.match(r'^(.*) <(.*)>$', metadata['author']).groups()
 
 
-class MissingFile(BaseException): pass
+class MissingFile(BaseException):
+    pass
+
 
 def info(message, item=None):
     print('=>', message, item if item is not None else '')
@@ -187,23 +194,22 @@ except MissingFile as mf:
 
     If you want to install, use "make install" instead of using
     setup.py directly. See the README file for more information.
-    """ % mf.message, file=sys.stderr)
+    """ % mf, file=sys.stderr)
     sys.exit(1)
 
 
 setup(
-    name         = 'gpodder',
-    version      = metadata['version'],
-    description  = metadata['tagline'],
-    license      = metadata['license'],
-    url          = metadata['url'],
+    name='gpodder',
+    version=metadata['version'],
+    description=metadata['tagline'],
+    license=metadata['license'],
+    url=metadata['url'],
 
-    author       = author,
-    author_email = email,
+    author=author,
+    author_email=email,
 
-    package_dir  = {'': 'src'},
-    packages     = packages,
-    scripts      = scripts,
-    data_files   = data_files,
+    package_dir={'': 'src'},
+    packages=packages,
+    scripts=scripts,
+    data_files=data_files,
 )
-

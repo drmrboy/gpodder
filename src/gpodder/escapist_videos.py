@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,17 +23,18 @@
 #
 
 
-import gpodder
+import json
+import logging
+import re
+import urllib.error
+import urllib.parse
+import urllib.request
 
+import gpodder
 from gpodder import util
 
-import logging
 logger = logging.getLogger(__name__)
 
-import json
-
-import re
-import urllib.request, urllib.parse, urllib.error
 
 # This matches the more reliable URL
 ESCAPIST_NUMBER_RE = re.compile(r'http://www.escapistmagazine.com/videos/view/(\d+)', re.IGNORECASE)
@@ -46,7 +47,9 @@ DATA_CONFIG_RE = re.compile(r'imsVideo\.play\((.*)\)\;\<\/script\>', re.IGNORECA
 # This matches the cover art for an RSS. We shouldn't parse XML with regex.
 DATA_COVERART_RE = re.compile(r'<url>(http:.+\.jpg)</url>')
 
+
 class EscapistError(BaseException): pass
+
 
 def get_real_download_url(url):
     video_id = get_escapist_id(url)
@@ -66,7 +69,7 @@ def get_real_download_url(url):
 
     data_config_data = util.urlopen(data_config_url).read().decode('utf-8')
 
-    #TODO: This second argument should get a real name
+    # TODO: This second argument should get a real name
     real_url = get_escapist_real_url(data_config_data, data_config_frag.group(1))
 
     if real_url is None:
@@ -75,6 +78,7 @@ def get_real_download_url(url):
         raise EscapistError('Oops, seems The Escapist blocked this IP. Wait a few days/weeks to get it unblocked')
     else:
         return real_url
+
 
 def get_escapist_id(url):
     result = ESCAPIST_NUMBER_RE.match(url)
@@ -87,8 +91,10 @@ def get_escapist_id(url):
 
     return None
 
+
 def is_video_link(url):
     return (get_escapist_id(url) is not None)
+
 
 def get_real_channel_url(url):
     video_id = get_escapist_id(url)
@@ -101,6 +107,7 @@ def get_real_channel_url(url):
     if data_config_frag is None:
         raise EscapistError('Cannot get RSS URL from The Escapist')
     return data_config_frag.group(0)
+
 
 def get_real_cover(url):
     rss_url = get_real_channel_url(url)
@@ -116,6 +123,7 @@ def get_real_cover(url):
 
     return rss_data_frag.group(1)
 
+
 def get_escapist_web(video_id):
     if video_id is None:
         return None
@@ -123,6 +131,7 @@ def get_escapist_web(video_id):
     # FIXME: must check if it's utf-8
     web_url = 'http://www.escapistmagazine.com/videos/view/%s' % video_id
     return util.urlopen(web_url).read()
+
 
 def get_escapist_config_url(data):
     if data is None:
@@ -132,6 +141,7 @@ def get_escapist_config_url(data):
 
     return 'http://www.escapistmagazine.com/videos/vidconfig.php?%s' % query_string
 
+
 def get_escapist_real_url(data, config_json):
     if data is None:
         return None
@@ -140,23 +150,23 @@ def get_escapist_real_url(data, config_json):
     if config_data is None:
         return None
 
-    ## The data is scrambled, unscramble
-    ## Direct port from 'imsVideos.prototype.processRequest' from the file 'ims_videos.min.js'
+    # The data is scrambled, unscramble
+    # Direct port from 'imsVideos.prototype.processRequest' from the file 'ims_videos.min.js'
 
     one_hash = config_data["hash"]
     # Turn the string into numbers
-    hash_n = [ ord(x) for x in one_hash ]
+    hash_n = [ord(x) for x in one_hash]
     # Split the data into 2char strings
-    hex_hashes = [ data[x:x+2] for x in range(0,len(data),2) ]
+    hex_hashes = [data[x:(x + 2)] for x in range(0, len(data), 2)]
     # Turn the strings into numbers, considering the hex value
-    num_hashes = [ int(h, 16) for h in hex_hashes ]
+    num_hashes = [int(h, 16) for h in hex_hashes]
     # Characters again, from the value
     # str_hashes = [ unichr(n) for n in num_hashes ]
 
     # Bitwise XOR num_hashes and the hash
     result_num = []
-    for idx in range(0,len(num_hashes)):
-        result_num.append(num_hashes[idx]^hash_n[idx % len(hash_n)])
+    for idx in range(0, len(num_hashes)):
+        result_num.append(num_hashes[idx] ^ hash_n[idx % len(hash_n)])
 
     # At last, Numbers back into characters
     result = ''.join([chr(x) for x in result_num])
@@ -165,5 +175,5 @@ def get_escapist_real_url(data, config_json):
     escapist_cfg = json.loads(result)
     # It's super effective!
 
-    #TODO: There's a way to choose different video types, for now just pick MP4@480p
+    # TODO: There's a way to choose different video types, for now just pick MP4@480p
     return escapist_cfg["files"]["videos"][2]["src"]

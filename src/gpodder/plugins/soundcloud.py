@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,22 +21,20 @@
 # Soundcloud.com API client module for gPodder
 # Thomas Perl <thp@gpodder.org>; 2009-11-03
 
-import gpodder
-
-_ = gpodder.gettext
-
-from gpodder import model
-from gpodder import util
-
+import email
 import json
-
 import logging
 import os
-import time
-
 import re
-import email
-import urllib.request, urllib.parse, urllib.error
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+
+import gpodder
+from gpodder import model, util
+
+_ = gpodder.gettext
 
 
 # gPodder's consumer key for the Soundcloud API
@@ -53,7 +51,8 @@ def soundcloud_parsedate(s):
     parsed with this function (2009/11/03 13:37:00).
     """
     m = re.match(r'(\d{4})/(\d{2})/(\d{2}) (\d{2}):(\d{2}):(\d{2})', s)
-    return time.mktime(tuple([int(x) for x in m.groups()]+[0, 0, -1]))
+    return time.mktime(tuple([int(x) for x in m.groups()] + [0, 0, -1]))
+
 
 def get_param(s, param='filename', header='content-disposition'):
     """Get a parameter from a string of headers
@@ -76,6 +75,7 @@ def get_param(s, param='filename', header='content-disposition'):
 
     return None
 
+
 def get_metadata(url):
     """Get file download metadata
 
@@ -87,7 +87,7 @@ def get_metadata(url):
     headers = track_fp.info()
     filesize = headers['content-length'] or '0'
     filetype = headers['content-type'] or 'application/octet-stream'
-    headers_s = '\n'.join('%s:%s'%(k,v) for k, v in list(headers.items()))
+    headers_s = '\n'.join('%s:%s' % (k, v) for k, v in list(headers.items()))
     filename = get_param(headers_s) or os.path.basename(os.path.dirname(url))
     track_fp.close()
     return filesize, filetype, filename
@@ -131,7 +131,6 @@ class SoundcloudUser(object):
         user_info = self.get_user_info()
         return user_info.get('id', None)
 
-
     def get_tracks(self, feed):
         """Get a generator of tracks from a SC user
 
@@ -139,14 +138,18 @@ class SoundcloudUser(object):
         track it can find for its user."""
         global CONSUMER_KEY
         try:
-            json_url = 'https://api.soundcloud.com/users/%(user)s/%(feed)s.json?filter=downloadable&consumer_key=%(consumer_key)s&limit=200' \
-                    % { "user":self.get_user_id(), "feed":feed, "consumer_key": CONSUMER_KEY }
+            json_url = ('https://api.soundcloud.com/users/%(user)s/%(feed)s.'
+                        'json?filter=downloadable&consumer_key=%'
+                        '(consumer_key)s&limit=200'
+                        % {"user": self.get_user_id(),
+                           "feed": feed,
+                           "consumer_key": CONSUMER_KEY})
             logger.debug("loading %s", json_url)
 
             json_tracks = json.loads(util.urlopen(json_url).read().decode('utf-8'))
             tracks = [track for track in json_tracks if track['downloadable']]
             total_count = len(tracks) + len([track for track in json_tracks
-                                              if not track['downloadable']])
+                                             if not track['downloadable']])
 
             if len(tracks) == 0 and total_count > 0:
                 logger.warn("Download of all %i %s of user %s is disabled" %
@@ -159,7 +162,7 @@ class SoundcloudUser(object):
                 # Prefer stream URL (MP3), fallback to download URL
                 url = track.get('stream_url', track['download_url']) + \
                     '?consumer_key=%(consumer_key)s' \
-                    % { 'consumer_key': CONSUMER_KEY }
+                    % {'consumer_key': CONSUMER_KEY}
                 if url not in self.cache:
                     try:
                         self.cache[url] = get_metadata(url)
@@ -169,7 +172,7 @@ class SoundcloudUser(object):
 
                 yield {
                     'title': track.get('title', track.get('permalink')) or _('Unknown track'),
-                    'link': track.get('permalink_url') or 'https://soundcloud.com/'+self.username,
+                    'link': track.get('permalink_url') or 'https://soundcloud.com/' + self.username,
                     'description': track.get('description') or _('No description available'),
                     'url': url,
                     'file_size': int(filesize),
@@ -179,6 +182,7 @@ class SoundcloudUser(object):
                 }
         finally:
             self.commit_cache()
+
 
 class SoundcloudFeed(object):
     URL_REGEX = re.compile('https?://([a-z]+\.)?soundcloud\.com/([^/]+)$', re.I)
@@ -223,12 +227,12 @@ class SoundcloudFeed(object):
 
         return episodes, seen_guids
 
+
 class SoundcloudFavFeed(SoundcloudFeed):
     URL_REGEX = re.compile('https?://([a-z]+\.)?soundcloud\.com/([^/]+)/favorites', re.I)
 
-
     def __init__(self, username):
-        super(SoundcloudFavFeed,self).__init__(username)
+        super(SoundcloudFavFeed, self).__init__(username)
 
     def get_title(self):
         return _('%s\'s favorites on Soundcloud') % self.username
@@ -242,9 +246,11 @@ class SoundcloudFavFeed(SoundcloudFeed):
     def get_new_episodes(self, channel, existing_guids):
         return self._get_new_episodes(channel, existing_guids, 'favorites')
 
+
 # Register our URL handlers
 model.register_custom_handler(SoundcloudFeed)
 model.register_custom_handler(SoundcloudFavFeed)
+
 
 def search_for_user(query):
     json_url = 'https://api.soundcloud.com/users.json?q=%s&consumer_key=%s' % (urllib.parse.quote(query), CONSUMER_KEY)

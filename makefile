@@ -1,6 +1,6 @@
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 ##########################################################################
 
 BINFILE = bin/gpodder
-MANPAGE = share/man/man1/gpodder.1
+MANPAGES = share/man/man1/gpodder.1 share/man/man1/gpo.1
 
 GPODDER_SERVICE_FILE=share/dbus-1/services/org.gpodder.service
 GPODDER_SERVICE_FILE_IN=$(addsuffix .in,$(GPODDER_SERVICE_FILE))
@@ -63,6 +63,12 @@ help:
 unittest:
 	LC_ALL=C PYTHONPATH=src/ $(PYTHON) -m gpodder.unittests
 
+ISORTOPTS := -rc -c share src/gpodder tools bin/* *.py
+lint:
+	pycodestyle share src/gpodder tools bin/* *.py
+	isort -q $(ISORTOPTS) || isort -vb $(ISORTOPTS)
+
+
 release: distclean
 	$(PYTHON) setup.py sdist
 
@@ -84,12 +90,29 @@ $(GPODDER_SERVICE_FILE): $(GPODDER_SERVICE_FILE_IN)
 install: messages $(GPODDER_SERVICE_FILE) $(DESKTOP_FILES)
 	$(PYTHON) setup.py install --root=$(DESTDIR) --prefix=$(PREFIX) --optimize=1
 
+install-win: messages $(GPODDER_SERVICE_FILE) $(DESKTOP_FILES)
+	$(PYTHON) setup.py install
+
+##########################################################################
+ifdef VERSION
+revbump:
+	LC_ALL=C sed -i "s/\(__version__\s*=\s*'\).*'/\1$(VERSION)'/" src/gpodder/__init__.py
+	LC_ALL=C sed -i "s/\(__date__\s*=\s*'\).*'/\1$(shell date "+%Y-%m-%d")'/" src/gpodder/__init__.py
+	LC_ALL=C sed -i "s/\(__copyright__\s*=.*2005-\)[0-9]*\(.*\)/\1$(shell date "+%Y")\2/" src/gpodder/__init__.py
+	$(MAKE) messages manpages
+else
+revbump:
+	@echo "Usage: make revbump VERSION=x.y.z"
+endif
 ##########################################################################
 
-manpage: $(MANPAGE)
+manpages: $(MANPAGES)
 
-$(MANPAGE): src/gpodder/__init__.py $(BINFILE)
-	LC_ALL=C $(HELP2MAN) --name="$(shell $(PYTHON) setup.py --description)" -N $(BINFILE) >$(MANPAGE)
+share/man/man1/gpodder.1: src/gpodder/__init__.py $(BINFILE)
+	LC_ALL=C $(HELP2MAN) --name="$(shell $(PYTHON) setup.py --description)" -N $(BINFILE) >$@
+
+share/man/man1/gpo.1: src/gpodder/__init__.py
+	sed -i 's/^\.TH.*/.TH GPO "1" "$(shell LANG=en date "+%B %Y")" "gpodder $(shell $(PYTHON) setup.py --version)" "User Commands"/' $@
 
 ##########################################################################
 
@@ -137,7 +160,7 @@ distclean: clean
 
 ##########################################################################
 
-.PHONY: help unittest release releasetest install manpage clean distclean messages headlink
+.PHONY: help unittest release releasetest install manpages clean distclean messages headlink lint revbump
 
 ##########################################################################
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 #
 # gPodder is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,12 +22,7 @@
 
 
 import gpodder
-
-from gpodder import util
-from gpodder import config
-from gpodder import dbsqlite
-from gpodder import extensions
-from gpodder import model
+from gpodder import config, dbsqlite, extensions, model, util
 
 
 class Core(object):
@@ -58,4 +53,3 @@ class Core(object):
 
         # Close the database and store outstanding changes
         self.db.close()
-

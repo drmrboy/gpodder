@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2017 Thomas Perl and the gPodder Team
+# Copyright (c) 2005-2018 The gPodder Team
 # Copyright (c) 2011 Neal H. Walfield
 #
 # gPodder is free software; you can redistribute it and/or modify
@@ -24,34 +24,29 @@
 #  Based on libpodcasts.py (thp, 2005-10-29)
 #
 
-import gpodder
-from gpodder import util
-from gpodder import feedcore
-from gpodder import youtube
-from gpodder import vimeo
-from gpodder import escapist_videos
-from gpodder import schema
-from gpodder import coverart
-
+import collections
+import datetime
+import glob
+import hashlib
 import logging
-logger = logging.getLogger(__name__)
-
 import os
 import re
-import glob
 import shutil
-import time
-import datetime
-
-import hashlib
-import podcastparser
-import collections
 import string
+import time
+
+import gpodder
+import podcastparser
+from gpodder import (coverart, escapist_videos, feedcore, schema, util, vimeo,
+                     youtube)
+
+logger = logging.getLogger(__name__)
 
 _ = gpodder.gettext
 
 
 class CustomFeed(feedcore.ExceptionWithData): pass
+
 
 class gPodderFetcher(feedcore.Fetcher):
     """
@@ -80,6 +75,7 @@ class gPodderFetcher(feedcore.Fetcher):
     @classmethod
     def register(cls, handler):
         cls.custom_handlers.append(handler)
+
 
 # The "register" method is exposed here for external usage
 register_custom_handler = gPodderFetcher.register
@@ -117,6 +113,7 @@ class PodcastModelObject(object):
 
         return o
 
+
 class PodcastEpisode(PodcastModelObject):
     """holds data for one object in a channel"""
     # In theory, Linux can have 255 bytes (not characters!) in a filename, but
@@ -135,7 +132,7 @@ class PodcastEpisode(PodcastModelObject):
     is_locked = property(fget=_deprecated, fset=_deprecated)
 
     def has_website_link(self):
-        return bool(self.link) and (self.link != self.url or \
+        return bool(self.link) and (self.link != self.url or
                 youtube.is_video_link(self.link))
 
     @classmethod
@@ -248,7 +245,7 @@ class PodcastEpisode(PodcastModelObject):
         for postfix in (' - ', ': '):
             prefix = self.parent.title + postfix
             if (self.title.startswith(prefix) and
-                    len(self.title)-len(prefix) > LEFTOVER_MIN):
+                    len(self.title) - len(prefix) > LEFTOVER_MIN):
                 return self.title[len(prefix):]
 
         regex_patterns = [
@@ -266,13 +263,15 @@ class PodcastEpisode(PodcastModelObject):
                     return title
 
         # "#001: Title" -> "001: Title"
-        if (not self.parent._common_prefix and re.match('^#\d+: ',
-            self.title) and len(self.title)-1 > LEFTOVER_MIN):
+        if (
+                not self.parent._common_prefix and
+                re.match('^#\d+: ', self.title) and
+                len(self.title) - 1 > LEFTOVER_MIN):
             return self.title[1:]
 
         if (self.parent._common_prefix is not None and
                 self.title.startswith(self.parent._common_prefix) and
-                len(self.title)-len(self.parent._common_prefix) > LEFTOVER_MIN):
+                len(self.title) - len(self.parent._common_prefix) > LEFTOVER_MIN):
             return self.title[len(self.parent._common_prefix):]
 
         return self.title
@@ -331,7 +330,7 @@ class PodcastEpisode(PodcastModelObject):
         self.save()
 
     def age_in_days(self):
-        return util.file_age_in_days(self.local_filename(create=False, \
+        return util.file_age_in_days(self.local_filename(create=False,
                 check_only=True))
 
     age_int_prop = property(fget=age_in_days)
@@ -340,7 +339,6 @@ class PodcastEpisode(PodcastModelObject):
         return util.file_age_to_string(self.age_in_days())
 
     age_prop = property(fget=get_age_string)
-
 
     def one_line_description(self):
         MAX_LINE_LENGTH = 120
@@ -471,7 +469,7 @@ class PodcastEpisode(PodcastModelObject):
             if not fn_template or fn_template.startswith('redirect.'):
                 logger.error('Report this feed: Podcast %s, episode %s',
                         self.channel.url, self.url)
-                fn_template = hashlib.md5(self.url).hexdigest()
+                fn_template = hashlib.md5(self.url.encode('utf-8')).hexdigest()
 
             # Find a unique filename for this episode
             wanted_filename = self.find_unique_file_name(fn_template, ext)
@@ -550,8 +548,8 @@ class PodcastEpisode(PodcastModelObject):
         return util.file_type_by_extension(self.extension())
 
     @property
-    def basename( self):
-        return os.path.splitext( os.path.basename( self.url))[0]
+    def basename(self):
+        return os.path.splitext(os.path.basename(self.url))[0]
 
     @property
     def pubtime(self):
@@ -572,8 +570,8 @@ class PodcastEpisode(PodcastModelObject):
         value is the canonical representation of this episode
         in playlists (for example, M3U playlists).
         """
-        return '%s - %s (%s)' % (self.channel.title, \
-                self.title, \
+        return '%s - %s (%s)' % (self.channel.title,
+                self.title,
                 self.cute_pubdate())
 
     def cute_pubdate(self):
@@ -612,9 +610,9 @@ class PodcastEpisode(PodcastModelObject):
         current position is greater than 99 percent of the
         total time or inside the last 10 seconds of a track.
         """
-        return self.current_position > 0 and self.total_time > 0 and \
-                (self.current_position + 10 >= self.total_time or \
-                 self.current_position >= self.total_time*.99)
+        return (self.current_position > 0 and self.total_time > 0 and
+                (self.current_position + 10 >= self.total_time or
+                 self.current_position >= self.total_time * .99))
 
     def get_play_info_string(self, duration_only=False):
         duration = util.format_time(self.total_time)
@@ -651,7 +649,8 @@ class PodcastChannel(PodcastModelObject):
     ]
 
     MAX_FOLDERNAME_LENGTH = 60
-    SECONDS_PER_WEEK = 7*24*60*60
+    SECONDS_PER_DAY = 24 * 60 * 60
+    SECONDS_PER_WEEK = 7 * 24 * 60 * 60
     EpisodeClass = PodcastEpisode
 
     feed_fetcher = gPodderFetcher()
@@ -748,11 +747,11 @@ class PodcastChannel(PodcastModelObject):
 
                 known_files.add(filename)
 
-        existing_files = set(filename for filename in \
-                glob.glob(os.path.join(self.save_dir, '*')) \
+        existing_files = set(filename for filename in
+                glob.glob(os.path.join(self.save_dir, '*'))
                 if not filename.endswith('.partial'))
 
-        ignore_files = ['folder'+ext for ext in
+        ignore_files = ['folder' + ext for ext in
                 coverart.CoverDownloader.EXTENSIONS]
 
         external_files = existing_files.difference(list(known_files) +
@@ -775,7 +774,7 @@ class PodcastChannel(PodcastModelObject):
                 continue
 
             for episode in all_episodes:
-                wanted_filename = episode.local_filename(create=True, \
+                wanted_filename = episode.local_filename(create=True,
                         return_wanted_filename=True)
                 if basename == wanted_filename:
                     logger.info('Importing external download: %s', filename)
@@ -938,6 +937,12 @@ class PodcastChannel(PodcastModelObject):
 
         # Get most recent published of all episodes
         last_published = self.db.get_last_published(self) or 0
+        # fix for #516 an episode was marked published one month in the future (typo in month number)
+        # causing every new episode to be marked old
+        tomorrow = datetime.datetime.now().timestamp() + self.SECONDS_PER_DAY
+        if last_published > tomorrow:
+            logger.debug('Episode published in the future for podcast %s', self.title)
+            last_published = tomorrow
 
         # Keep track of episode GUIDs currently seen in the feed
         seen_guids = set()
@@ -1003,7 +1008,7 @@ class PodcastChannel(PodcastModelObject):
         # max_episodes_per_feed items added to the feed between updates.
         # The benefit is that it prevents old episodes from apearing as new
         # in certain situations (see bug #340).
-        self.db.purge(max_episodes, self.id) # TODO: Remove from self.children!
+        self.db.purge(max_episodes, self.id)  # TODO: Remove from self.children!
 
         # Sort episodes by pubdate, descending
         self.children.sort(key=lambda e: e.published, reverse=True)
@@ -1030,18 +1035,18 @@ class PodcastChannel(PodcastModelObject):
 
             self.save()
         except Exception as e:
-            # "Not really" errors
-            #feedcore.AuthenticationRequired
-            # Temporary errors
-            #feedcore.Offline
-            #feedcore.BadRequest
-            #feedcore.InternalServerError
-            #feedcore.WifiLogin
-            # Permanent errors
-            #feedcore.Unsubscribe
-            #feedcore.NotFound
-            #feedcore.InvalidFeed
-            #feedcore.UnknownStatusCode
+            #  "Not really" errors
+            # feedcore.AuthenticationRequired
+            #  Temporary errors
+            # feedcore.Offline
+            # feedcore.BadRequest
+            # feedcore.InternalServerError
+            # feedcore.WifiLogin
+            #  Permanent errors
+            # feedcore.Unsubscribe
+            # feedcore.NotFound
+            # feedcore.InvalidFeed
+            # feedcore.UnknownStatusCode
             gpodder.user_extensions.on_podcast_update_failed(self, e)
             raise
 
@@ -1140,7 +1145,7 @@ class PodcastChannel(PodcastModelObject):
         # The common prefix must end with a space - otherwise it's not
         # on a word boundary, and we might end up chopping off too much
         if prefix and prefix[-1] != ' ':
-            prefix = prefix[:prefix.rfind(' ')+1]
+            prefix = prefix[:prefix.rfind(' ') + 1]
 
         self._common_prefix = prefix
 
@@ -1259,3 +1264,14 @@ class Model(object):
         """
         return sorted(episodes, key=cls.episode_sort_key, reverse=reverse)
 
+
+def check_root_folder_path():
+    root = gpodder.home
+    if gpodder.ui.win32:
+        longest = len(root) \
+            + 1 + PodcastChannel.MAX_FOLDERNAME_LENGTH \
+            + 1 + PodcastEpisode.MAX_FILENAME_LENGTH + 5  # eg. .opus
+        if longest > 260:
+            return _("Warning: path to gPodder home (%(root)s) is very long and can result in failure to download files.\n" % {"root": root}) \
+                + _("You're advised to set it to a shorter path.")
+    return None
